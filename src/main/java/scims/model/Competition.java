@@ -1,4 +1,4 @@
 package scims.model;
 
-public class Competition {
+public interface Competition {
 }

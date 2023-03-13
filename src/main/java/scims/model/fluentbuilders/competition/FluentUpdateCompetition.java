@@ -1,13 +1,13 @@
 package scims.model.fluentbuilders.competition;
 
-import scims.model.WeightClass;
+import scims.model.WeightClassGroup;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface FluentUpdateCompetition extends FluentCompetitionBuilder {
-    FluentFromExistingCompetition withUpdatedName(String name);
-    FluentFromExistingCompetition withUpdatedDateTime(ZonedDateTime name);
-    FluentFromExistingCompetition withIsSameNumberOfEventsForAllWeightClasses(boolean isSameNumberOfEventsForAllWeightClasses);
-    FluentFromExistingCompetition withUpdatedWeightClasses(List<WeightClass> weightClasses);
+    FluentUpdateCompetition withUpdatedName(String name);
+    FluentUpdateCompetition withUpdatedDateTime(ZonedDateTime name);
+    FluentUpdateCompetition withIsSameNumberOfEventsForAllWeightClasses(boolean isSameNumberOfEventsForAllWeightClasses);
+    FluentUpdateCompetition withUpdatedWeightClasses(List<WeightClassGroup> weightClassGroups);
 }

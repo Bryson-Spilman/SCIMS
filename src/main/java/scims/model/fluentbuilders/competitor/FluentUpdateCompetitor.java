@@ -1,7 +1,7 @@
 package scims.model.fluentbuilders.competitor;
 
 public interface FluentUpdateCompetitor extends FluentCompetitorBuilder {
-    FluentFromExistingCompetitor withUpdatedName(String name);
-    FluentFromExistingCompetitor withUpdatedAge(int age);
-    FluentFromExistingCompetitor withUpdatedWeight(double weight);
+    FluentUpdateCompetitor withUpdatedName(String name);
+    FluentUpdateCompetitor withUpdatedAge(int age);
+    FluentUpdateCompetitor withUpdatedWeight(double weight);
 }

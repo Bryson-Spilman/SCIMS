@@ -1,31 +1,40 @@
 package scims.model;
 
-import scims.model.fluentbuilders.competition.FluentCompetitionBuilder;
 import scims.model.fluentbuilders.competitor.*;
 
 public class StrengthCompetitorBuilder implements FluentWithCompetitorName, FluentFromExistingCompetitor {
 
+    private String _name;
+    private int _age;
+    private double _weight;
+
     @Override
     public FluentWithCompetitorAge withCompetitorName(String name) {
-        return null;
+        _name = name;
+        return new WithCompetitorAge();
     }
 
     @Override
     public FluentUpdateCompetitor fromExistingCompetitor(Competitor competitor) {
-        return null;
+        _name = competitor.getName();
+        _age = competitor.getAge();
+        _weight = competitor.getWeight();
+        return new UpdateCompetitor();
     }
 
     private class WithCompetitorAge implements FluentWithCompetitorAge {
         @Override
         public FluentWithCompetitorWeight withCompetitorAge(int age) {
-            return null;
+            _age = age;
+            return new WithCompetitorWeight();
         }
     }
 
     private class WithCompetitorWeight implements FluentWithCompetitorWeight {
         @Override
         public FluentCompetitorBuilder withCompetitorWeight(double weight) {
-            return null;
+            _weight = weight;
+            return new CompetitorBuilder();
         }
     }
 
@@ -33,25 +42,28 @@ public class StrengthCompetitorBuilder implements FluentWithCompetitorName, Flue
 
         @Override
         public StrengthCompetitor build() {
-            return null;
+            return new StrengthCompetitor(_name, _age, _weight);
         }
     }
 
     private class UpdateCompetitor extends CompetitorBuilder implements FluentUpdateCompetitor {
 
         @Override
-        public FluentFromExistingCompetitor withUpdatedName(String name) {
-            return null;
+        public FluentUpdateCompetitor withUpdatedName(String name) {
+            _name = name;
+            return this;
         }
 
         @Override
-        public FluentFromExistingCompetitor withUpdatedAge(int age) {
-            return null;
+        public FluentUpdateCompetitor withUpdatedAge(int age) {
+            _age = age;
+            return this;
         }
 
         @Override
-        public FluentFromExistingCompetitor withUpdatedWeight(double weight) {
-            return null;
+        public FluentUpdateCompetitor withUpdatedWeight(double weight) {
+            _weight = weight;
+            return this;
         }
     }
 }

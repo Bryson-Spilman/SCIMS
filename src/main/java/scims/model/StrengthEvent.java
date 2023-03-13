@@ -1,13 +1,21 @@
 package scims.model;
 
 public class StrengthEvent implements Event {
-    @Override
-    public String getEventName() {
-        return null;
+    private final String _name;
+    private final EventScoreType _scoreType;
+
+    StrengthEvent(String name, EventScoreType scoreType) {
+        _name = name;
+        _scoreType = scoreType;
     }
 
     @Override
-    public EventScoreType getEventScoreType() {
-        return null;
+    public String getName() {
+        return _name;
+    }
+
+    @Override
+    public EventScoreType getScoreType() {
+        return _scoreType;
     }
 }

@@ -6,21 +6,34 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFromExistingCompetition {
+    private String _name;
+    private ZonedDateTime _dateTime;
+    private UnitSystem _unitSystem;
+    private List<WeightClassGroup> _weightClasses;
+    private boolean _isSameNumberOfEventsForAllWeightClasses;
+
     @Override
     public FluentUpdateCompetition fromExistingCompetition(Competition competition) {
-        return null;
+        _name = competition.getName();
+        _dateTime = competition.getDateTime();
+        _unitSystem = competition.getUnitSystem();
+        _weightClasses = competition.getWeightClasses();
+        _isSameNumberOfEventsForAllWeightClasses = competition.isSameNumberOfEventsForAllWeightClasses();
+        return new UpdateCompetition();
     }
 
     @Override
     public FluentWithCompetitionDateTime withName(String name) {
-        return null;
+        _name = name;
+        return new WithCompetitionDateTime();
     }
 
     private class WithCompetitionDateTime implements FluentWithCompetitionDateTime {
 
         @Override
         public FluentWithIsSameNumberOfEventsForAllWeightClasses withDateTime(ZonedDateTime dateTime) {
-            return null;
+            _dateTime = dateTime;
+            return new WithIsSameNumberOfEventsForAllWeightClasses();
         }
     }
 
@@ -28,15 +41,17 @@ class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFro
 
         @Override
         public FluentWithWeightClasses withIsSameNumberOfEventsForAllWeightClasses(boolean isSameNumberOfEventsForAllWeightClasses) {
-            return null;
+            _isSameNumberOfEventsForAllWeightClasses = isSameNumberOfEventsForAllWeightClasses;
+            return new WithWeightClasses();
         }
     }
 
     private class WithWeightClasses implements FluentWithWeightClasses {
 
         @Override
-        public FluentCompetitionBuilder withWeightClasses(List<WeightClass> weightClasses) {
-            return null;
+        public FluentCompetitionBuilder withWeightClasses(List<WeightClassGroup> weightClassGroups) {
+            _weightClasses = weightClassGroups;
+            return new CompetitionBuilder();
         }
     }
 
@@ -44,30 +59,34 @@ class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFro
 
         @Override
         public StrengthCompetition build() {
-            return null;
+            return new StrengthCompetition(_name, _dateTime, _weightClasses, _unitSystem, _isSameNumberOfEventsForAllWeightClasses);
         }
     }
 
     private class UpdateCompetition extends CompetitionBuilder implements FluentUpdateCompetition {
 
         @Override
-        public FluentFromExistingCompetition withUpdatedName(String name) {
-            return null;
+        public FluentUpdateCompetition withUpdatedName(String name) {
+            _name = name;
+            return this;
         }
 
         @Override
-        public FluentFromExistingCompetition withUpdatedDateTime(ZonedDateTime name) {
-            return null;
+        public FluentUpdateCompetition withUpdatedDateTime(ZonedDateTime dateTime) {
+            _dateTime = dateTime;
+            return this;
         }
 
         @Override
-        public FluentFromExistingCompetition withIsSameNumberOfEventsForAllWeightClasses(boolean isSameNumberOfEventsForAllWeightClasses) {
-            return null;
+        public FluentUpdateCompetition withIsSameNumberOfEventsForAllWeightClasses(boolean isSameNumberOfEventsForAllWeightClasses) {
+            _isSameNumberOfEventsForAllWeightClasses = isSameNumberOfEventsForAllWeightClasses;
+            return this;
         }
 
         @Override
-        public FluentFromExistingCompetition withUpdatedWeightClasses(List<WeightClass> weightClasses) {
-            return null;
+        public FluentUpdateCompetition withUpdatedWeightClasses(List<WeightClassGroup> weightClassGroups) {
+            _weightClasses = weightClassGroups;
+            return this;
         }
     }
 }

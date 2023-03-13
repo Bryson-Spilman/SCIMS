@@ -8,6 +8,6 @@ public interface Competition {
     String getName();
     ZonedDateTime getDateTime();
     boolean isSameNumberOfEventsForAllWeightClasses();
-    List<WeightClass> getWeightClasses();
+    List<WeightClassGroup> getWeightClasses();
     UnitSystem getUnitSystem();
 }

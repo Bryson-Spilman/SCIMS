@@ -4,11 +4,11 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.Pane;
-import scims.model.WeightClass;
+import scims.model.WeightClassGroup;
 
 class CompetitionTreeView extends Pane {
 
-    private TreeTableView<WeightClass> _treeTableView;
+    private TreeTableView<WeightClassGroup> _treeTableView;
 
     public CompetitionTreeView() {
         _treeTableView = new TreeTableView<>();
@@ -17,14 +17,14 @@ class CompetitionTreeView extends Pane {
     }
 
     private void setupTableColumns() {
-        TreeTableColumn<WeightClass, String> weightClassColumn = new TreeTableColumn<>("Weight Class");
+        TreeTableColumn<WeightClassGroup, String> weightClassColumn = new TreeTableColumn<>("Weight Class");
         weightClassColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 
         // Create columns for each event
-        TreeTableColumn<WeightClass, Integer> deadliftColumn = new TreeTableColumn<>("Deadlift");
+        TreeTableColumn<WeightClassGroup, Integer> deadliftColumn = new TreeTableColumn<>("Deadlift");
         deadliftColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("deadliftScore"));
 
-        TreeTableColumn<WeightClass, Integer> overheadPressColumn = new TreeTableColumn<>("Overhead Press");
+        TreeTableColumn<WeightClassGroup, Integer> overheadPressColumn = new TreeTableColumn<>("Overhead Press");
         overheadPressColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("overheadPressScore"));
 
         // Add columns to the table

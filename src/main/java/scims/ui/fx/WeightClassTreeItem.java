@@ -1,16 +1,14 @@
 package scims.ui.fx;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 import scims.model.Competitor;
-import scims.model.WeightClass;
+import scims.model.WeightClassGroup;
 
-class WeightClassTreeItem extends TreeItem<WeightClass> {
+class WeightClassTreeItem extends TreeItem<WeightClassGroup> {
 
-    WeightClassTreeItem(WeightClass weightClass)
+    WeightClassTreeItem(WeightClassGroup weightClassGroup)
     {
-        super(weightClass);
+        super(weightClassGroup);
     }
 
     public void addCompetitor(Competitor competitor) {

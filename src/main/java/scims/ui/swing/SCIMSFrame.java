@@ -1,4 +1,4 @@
-package scims.ui;
+package scims.ui.swing;
 
 import javax.swing.*;
 

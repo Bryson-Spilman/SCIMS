@@ -1,0 +1,5 @@
+package scims.model.fluentbuilders.competition;
+
+public interface FluentWithIsSameNumberOfEventsForAllWeightClasses {
+    FluentWithWeightClasses withIsSameNumberOfEventsForAllWeightClasses(boolean isSameNumberOfEventsForAllWeightClasses);
+}

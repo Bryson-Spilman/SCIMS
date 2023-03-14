@@ -2,7 +2,7 @@ package scims.model.data;
 
 import java.util.Objects;
 
-class StrengthCompetitor implements Competitor {
+public class StrengthCompetitor implements Competitor {
 
     private final String _name;
     private final int _age;

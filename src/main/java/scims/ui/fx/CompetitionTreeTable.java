@@ -1,7 +1,6 @@
 package scims.ui.fx;
 
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import scims.model.data.*;
 import scims.model.enums.EventScoreType;
@@ -18,13 +17,14 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                 .withName("Event 1")
                 .withScoreType(EventScoreType.REPS)
                 .build());
-        List<TreeTableColumn<Object, String>> eventColumns = new ArrayList<>();
-
         //add columns
         getColumns().add(new CompetitorsColumn());
+        List<EventColumn> eventColumns = new ArrayList<>();
         for(Event event : eventsInOrder)
         {
-            getColumns().add(new EventColumn(event));
+            EventColumn eventColumn = new EventColumn(event);
+            eventColumns.add(eventColumn);
+            getColumns().add(eventColumn);
         }
 
         // Set the root item of the table
@@ -43,6 +43,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                 .build();
         testWeightClass.addCompetitor(competitor);
         TreeItem<Object> welterweightItem = new TreeItem<>(new WeightClassRow(testWeightClass));
+        welterweightItem.getChildren().add(new TreeItem<>(new CompetitorRow(competitor, eventColumns)));
         root.getChildren().add(welterweightItem);
     }
 }

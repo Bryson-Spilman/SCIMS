@@ -1,8 +1,9 @@
-package scims.model;
+package scims.model.data;
 
+import scims.model.enums.EventScoreType;
 import scims.model.fluentbuilders.event.*;
 
-class StrengthEventBuilder implements FluentWithEventName, FluentFromExistingEvent {
+public class StrengthEventBuilder implements FluentWithEventName, FluentFromExistingEvent {
     private String _name;
     private EventScoreType _scoreType;
 

@@ -1,9 +1,9 @@
 package scims.model.fluentbuilders.competition;
 
-import scims.model.WeightClassGroup;
+import scims.model.data.WeightClass;
 
 import java.util.List;
 
 public interface FluentWithWeightClasses {
-    FluentCompetitionBuilder withWeightClasses(List<WeightClassGroup> weightClassGroups);
+    FluentCompetitionBuilder withWeightClasses(List<WeightClass> weightClasses);
 }

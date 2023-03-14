@@ -1,4 +1,4 @@
-package scims.model;
+package scims.model.enums;
 
 public enum UnitSystem {
     POUNDS("Pounds"),

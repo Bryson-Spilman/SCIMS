@@ -1,4 +1,4 @@
-package scims.model;
+package scims.model.data;
 
 import scims.model.fluentbuilders.competitor.*;
 

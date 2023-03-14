@@ -1,4 +1,6 @@
-package scims.model;
+package scims.model.data;
+
+import scims.model.enums.EventScoreType;
 
 public class StrengthEvent implements Event {
     private final String _name;

@@ -1,8 +1,8 @@
 package scims.model.fluentbuilders.weightclass;
 
-import scims.model.StrengthWeightClassGroup;
+import scims.model.data.StrengthWeightClass;
 
 public interface FluentWeightClassBuilder {
     FluentWeightClassBuilder withMaxNumberOfCompetitors(int maxNumberOfCompetitors);
-    StrengthWeightClassGroup build();
+    StrengthWeightClass build();
 }

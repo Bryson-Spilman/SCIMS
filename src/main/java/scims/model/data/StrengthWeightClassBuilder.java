@@ -1,21 +1,21 @@
-package scims.model;
+package scims.model.data;
 
 import scims.model.fluentbuilders.weightclass.*;
 
 import java.util.List;
 
-class StrengthWeightClassGroupBuilder implements FluentWithWeightClassName, FluentFromExistingWeightClass {
+public class StrengthWeightClassBuilder implements FluentWithWeightClassName, FluentFromExistingWeightClass {
     private String _name;
     private double _maxCompetitorWeight;
     private int _maxNumberOfCompetitors;
     private List<Event> _eventsInOrder;
 
     @Override
-    public FluentUpdateWeightClass fromExistingWeightClass(WeightClassGroup weightClassGroup) {
-        _name = weightClassGroup.getName();
-        _maxCompetitorWeight = weightClassGroup.getMaxCompetitorWeight();
-        _maxNumberOfCompetitors = weightClassGroup.getMaxNumberOfCompetitors();
-        _eventsInOrder = weightClassGroup.getEventsInOrder();
+    public FluentUpdateWeightClass fromExistingWeightClass(WeightClass weightClass) {
+        _name = weightClass.getName();
+        _maxCompetitorWeight = weightClass.getMaxCompetitorWeight();
+        _maxNumberOfCompetitors = weightClass.getMaxNumberOfCompetitors();
+        _eventsInOrder = weightClass.getEventsInOrder();
         return new UpdateWeightClass();
     }
 
@@ -52,8 +52,8 @@ class StrengthWeightClassGroupBuilder implements FluentWithWeightClassName, Flue
         }
 
         @Override
-        public StrengthWeightClassGroup build() {
-            return new StrengthWeightClassGroup(_name, _maxCompetitorWeight, _maxNumberOfCompetitors, _eventsInOrder);
+        public StrengthWeightClass build() {
+            return new StrengthWeightClass(_name, _maxCompetitorWeight, _maxNumberOfCompetitors, _eventsInOrder);
         }
     }
 

@@ -1,6 +1,6 @@
 package scims.model.fluentbuilders.weightclass;
 
-import scims.model.Event;
+import scims.model.data.Event;
 import java.util.List;
 
 public interface FluentWithWeightClassEvents {

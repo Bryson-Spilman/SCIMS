@@ -1,4 +1,4 @@
-package scims.model;
+package scims.model.enums;
 
 public enum KnownWeightClasses {
     SC_MEN_UNDER_175("Strongman Corporation MEN U175", 175.4),

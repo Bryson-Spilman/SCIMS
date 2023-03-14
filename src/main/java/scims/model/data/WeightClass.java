@@ -1,8 +1,8 @@
-package scims.model;
+package scims.model.data;
 
 import java.util.List;
 
-public interface WeightClassGroup {
+public interface WeightClass {
     void addCompetitor(Competitor competitor);
     void removeCompetitor(Competitor competitor);
     List<Event> getEventsInOrder();
@@ -12,4 +12,5 @@ public interface WeightClassGroup {
     double getCompetitorsTotalPoints(Competitor competitor);
     double getMaxCompetitorWeight();
     String getName();
+    List<Competitor> getCompetitors();
 }

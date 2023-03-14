@@ -1,6 +1,6 @@
 package scims.model.fluentbuilders.event;
 
-import scims.model.Event;
+import scims.model.data.Event;
 
 public interface FluentFromExistingEvent {
     FluentUpdateEvent fromExistingEvent(Event event);

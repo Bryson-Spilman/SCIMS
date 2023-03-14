@@ -1,7 +1,7 @@
 package scims.model.fluentbuilders.weightclass;
 
-import scims.model.WeightClassGroup;
+import scims.model.data.WeightClass;
 
 public interface FluentFromExistingWeightClass {
-    FluentUpdateWeightClass fromExistingWeightClass(WeightClassGroup weightClassGroup);
+    FluentUpdateWeightClass fromExistingWeightClass(WeightClass weightClass);
 }

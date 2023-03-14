@@ -1,15 +1,16 @@
-package scims.model;
+package scims.model.data;
 
+import scims.model.enums.UnitSystem;
 import scims.model.fluentbuilders.competition.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
-class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFromExistingCompetition {
+public class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFromExistingCompetition {
     private String _name;
     private ZonedDateTime _dateTime;
     private UnitSystem _unitSystem;
-    private List<WeightClassGroup> _weightClasses;
+    private List<WeightClass> _weightClasses;
     private boolean _isSameNumberOfEventsForAllWeightClasses;
 
     @Override
@@ -49,8 +50,8 @@ class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFro
     private class WithWeightClasses implements FluentWithWeightClasses {
 
         @Override
-        public FluentCompetitionBuilder withWeightClasses(List<WeightClassGroup> weightClassGroups) {
-            _weightClasses = weightClassGroups;
+        public FluentCompetitionBuilder withWeightClasses(List<WeightClass> weightClasses) {
+            _weightClasses = weightClasses;
             return new CompetitionBuilder();
         }
     }
@@ -84,8 +85,8 @@ class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFro
         }
 
         @Override
-        public FluentUpdateCompetition withUpdatedWeightClasses(List<WeightClassGroup> weightClassGroups) {
-            _weightClasses = weightClassGroups;
+        public FluentUpdateCompetition withUpdatedWeightClasses(List<WeightClass> weightClasses) {
+            _weightClasses = weightClasses;
             return this;
         }
     }

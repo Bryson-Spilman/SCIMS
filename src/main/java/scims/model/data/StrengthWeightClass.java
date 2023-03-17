@@ -70,4 +70,9 @@ public class StrengthWeightClass implements WeightClass {
     public List<Competitor> getCompetitors() {
         return new ArrayList<>(_competitors);
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

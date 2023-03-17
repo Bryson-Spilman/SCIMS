@@ -2,8 +2,10 @@ package scims.ui.fx;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.TreeTableColumn;
+import javafx.event.EventHandler;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.util.converter.IntegerStringConverter;
 import scims.model.data.Event;
 
 public class EventColumn extends TreeTableColumn<Object, String> {
@@ -12,6 +14,7 @@ public class EventColumn extends TreeTableColumn<Object, String> {
 
     public EventColumn(Event event) {
         super(event.getName());
+        setEditable(true);
         _event = event;
         setCellValueFactory(param -> {
             Object value = param.getValue().getValue();

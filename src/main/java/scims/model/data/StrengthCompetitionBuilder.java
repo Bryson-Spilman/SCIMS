@@ -50,8 +50,17 @@ public class StrengthCompetitionBuilder implements FluentWithCompetitionName, Fl
     private class WithWeightClasses implements FluentWithWeightClasses {
 
         @Override
-        public FluentCompetitionBuilder withWeightClasses(List<WeightClass> weightClasses) {
+        public FluentWithUnitSystem withWeightClasses(List<WeightClass> weightClasses) {
             _weightClasses = weightClasses;
+            return new WithUnitSystem();
+        }
+    }
+
+    private class WithUnitSystem implements FluentWithUnitSystem {
+
+        @Override
+        public FluentCompetitionBuilder withUnitSystem(UnitSystem unitSystem) {
+            _unitSystem = unitSystem;
             return new CompetitionBuilder();
         }
     }
@@ -87,6 +96,12 @@ public class StrengthCompetitionBuilder implements FluentWithCompetitionName, Fl
         @Override
         public FluentUpdateCompetition withUpdatedWeightClasses(List<WeightClass> weightClasses) {
             _weightClasses = weightClasses;
+            return this;
+        }
+
+        @Override
+        public FluentUpdateCompetition withUpdatedUnitSystem(UnitSystem unitSystem) {
+            _unitSystem = unitSystem;
             return this;
         }
     }

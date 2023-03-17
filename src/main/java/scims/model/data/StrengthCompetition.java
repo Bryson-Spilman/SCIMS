@@ -44,4 +44,9 @@ public class StrengthCompetition implements Competition {
     public UnitSystem getUnitSystem() {
         return _unitSystem;
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

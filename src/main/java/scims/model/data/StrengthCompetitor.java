@@ -41,4 +41,9 @@ public class StrengthCompetitor implements Competitor {
     public int hashCode() {
         return Objects.hash(_name, _age);
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

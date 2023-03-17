@@ -5,5 +5,5 @@ import scims.model.data.WeightClass;
 import java.util.List;
 
 public interface FluentWithWeightClasses {
-    FluentCompetitionBuilder withWeightClasses(List<WeightClass> weightClasses);
+    FluentWithUnitSystem withWeightClasses(List<WeightClass> weightClasses);
 }

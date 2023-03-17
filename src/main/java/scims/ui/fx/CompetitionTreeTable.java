@@ -1,49 +1,73 @@
 package scims.ui.fx;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import scims.model.data.*;
-import scims.model.enums.EventScoreType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CompetitionTreeTable extends TreeTableView<Object> {
 
+    private Competition _competition;
+    TreeItem<Object> _root;
+
     public CompetitionTreeTable() {
-        // Create the columns
-        List<Event> eventsInOrder = new ArrayList<>();
-        eventsInOrder.add(new StrengthEventBuilder()
-                .withName("Event 1")
-                .withScoreType(EventScoreType.REPS)
-                .build());
+        setRoot(new TreeItem<>());
+        TreeItem<Object> root = getRoot();
+        root.setExpanded(true);
+        setShowRoot(false);
+        setEditable(true);
+    }
+
+    public void refresh(Competition competition) {
+        _competition = competition;
+        List<WeightClass> weightClasses = competition.getWeightClasses();
         //add columns
         getColumns().add(new CompetitorsColumn());
         List<EventColumn> eventColumns = new ArrayList<>();
-        for(Event event : eventsInOrder)
+        for(WeightClass weightClass : weightClasses)
         {
-            EventColumn eventColumn = new EventColumn(event);
-            eventColumns.add(eventColumn);
-            getColumns().add(eventColumn);
+            for(Event event : weightClass.getEventsInOrder())
+            {
+                if(eventColumns.stream().noneMatch(ec -> ec.getEvent().getName().equalsIgnoreCase(event.getName())))
+                {
+                    EventColumn eventColumn = new EventColumn(event);
+                    eventColumns.add(eventColumn);
+                    getColumns().add(eventColumn);
+                    eventColumn.setOnEditCommit(event1 -> {
+                        TreeItem<Object> treeItem = getTreeItem(event1.getTreeTablePosition().getRow());
+                        if(treeItem.getValue() instanceof CompetitorRow)
+                        {
+                            CompetitorRow competitorRow = (CompetitorRow) treeItem.getValue();
+                            SimpleStringProperty obsValue = (SimpleStringProperty) competitorRow.getObservableValue((EventColumn) event1.getTableColumn());
+                            obsValue.setValue(event1.getNewValue());
+                        }
+                    });
+                }
+            }
+        }
+        for(WeightClass weightClass : weightClasses)
+        {
+            TreeItem<Object> weightClassRow = new TreeItem<>(new WeightClassRow(weightClass));
+            for(Competitor competitor : weightClass.getCompetitors())
+            {
+                weightClassRow.getChildren().add(new TreeItem<>(new CompetitorRow(competitor, eventColumns)));
+            }
+            getRoot().getChildren().add(weightClassRow);
         }
 
-        // Set the root item of the table
-        setRoot(new TreeItem<>());
+    }
 
-        TreeItem<Object> root = getRoot();
-        WeightClass testWeightClass = new StrengthWeightClassBuilder()
-                .withName("LightWeight")
-                .withMaxCompetitorWeight(200.4)
-                .withEventsInOrder(eventsInOrder)
-                .build();
-        Competitor competitor = new StrengthCompetitorBuilder()
-                .withCompetitorName("Bryson Spilman")
-                .withCompetitorAge(27)
-                .withCompetitorWeight(199.8)
-                .build();
-        testWeightClass.addCompetitor(competitor);
-        TreeItem<Object> welterweightItem = new TreeItem<>(new WeightClassRow(testWeightClass));
-        welterweightItem.getChildren().add(new TreeItem<>(new CompetitorRow(competitor, eventColumns)));
-        root.getChildren().add(welterweightItem);
+    public boolean isShowingCompetition(Competition competition) {
+        return _competition == competition;
+    }
+
+    public void clear() {
+        if(_root != null)
+        {
+            _root.getChildren().clear();
+        }
     }
 }

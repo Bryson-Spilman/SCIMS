@@ -20,4 +20,9 @@ public class StrengthEvent implements Event {
     public EventScoreType getScoreType() {
         return _scoreType;
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

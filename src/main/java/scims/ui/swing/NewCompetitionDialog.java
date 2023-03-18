@@ -30,6 +30,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     private JRadioButton _prevRadioButton;
     private boolean _ignoreRadioChange;
     private EventsTable _eventsTable;
+    private JCheckBox _sameEventsForAllWeightsClassesCheckbox;
 
     public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
@@ -93,6 +94,20 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
                 _isModified = true;
             }
         });
+        _sameEventsForAllWeightsClassesCheckbox.addActionListener(e -> useSameEventsForAllCheckBoxClicked());
+    }
+
+    private void useSameEventsForAllCheckBoxClicked() {
+        _isModified = true;
+        if(_eventsTable.hasOrdersSet()) {
+            int opt = JOptionPane.showConfirmDialog(this, "Selecting this will reset any event orders set in the events table. Continue?",
+                    "Confirm Reset Events Orders", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (opt == JOptionPane.YES_OPTION)
+            {
+                _eventsTable.resetEventOrders();
+            }
+        }
+        ((EventsTableModel)_eventsTable.getModel()).setEventOrderColumnEnabled(_sameEventsForAllWeightsClassesCheckbox.isSelected());
     }
 
     private void radioButtonChanged() {
@@ -205,6 +220,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _radioButtonGroup.add(_ussRadioButton);
         _radioButtonGroup.add(_otherRadioButton);
         _radioButtonGroup.setSelected(_strongmanCorpRadioButton.getModel(), true);
+        _sameEventsForAllWeightsClassesCheckbox = new JCheckBox("Use same events for all weight classes");
         JLabel selectWeightClassesLabel = new JLabel("Select Weight Classes:");
         _weightClassChooserField = new JChooserField<>(this, StrongmanCorpWeightClasses.getValues());
         _createButton = new JButton("Create");
@@ -240,16 +256,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         radioButtonPanel.add(_strongmanCorpRadioButton, BorderLayout.WEST);
         radioButtonPanel.add(_ussRadioButton, BorderLayout.CENTER);
         radioButtonPanel.add(_otherRadioButton, BorderLayout.EAST);
-        gbc = new GridBagConstraints();
-        gbc.gridx     = GridBagConstraints.RELATIVE;
-        gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx   = 0.001;
-        gbc.weighty   = 0.0;
-        gbc.anchor    = GridBagConstraints.NORTHWEST;
-        gbc.fill      = GridBagConstraints.NONE;
-        gbc.insets    = new Insets(5,0,0,5);
-        attributesPanel.add(radioButtonPanel, gbc);
+        addComponent(attributesPanel, radioButtonPanel, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
+
+        addComponent(attributesPanel, _sameEventsForAllWeightsClassesCheckbox, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
 
         JPanel titledEventsPanel = new JPanel(new BorderLayout());
         titledEventsPanel.setBorder(BorderFactory.createTitledBorder("Events"));
@@ -302,6 +311,20 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
 
         add(attributesPanel, BorderLayout.NORTH);
         add(createCancelPanel, BorderLayout.SOUTH);
+    }
+
+    private void addComponent(JComponent parentComponent, JComponent componentToAdd, int gridWidth, int fill)
+    {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = gridWidth;
+        gbc.weightx   = 0.001;
+        gbc.weighty   = 0.0;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = fill;
+        gbc.insets    = new Insets(5,0,0,5);
+        parentComponent.add(componentToAdd, gbc);
     }
 
     @Override

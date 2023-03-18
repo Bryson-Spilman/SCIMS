@@ -6,48 +6,84 @@ import scims.model.data.scoring.EventScoring;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class EventsTable extends JTable {
+class EventsTable extends SCIMSTable {
 
-    private boolean _ignoreSelectionChange;
+    private JComboBox<Object> _eventOrderComboBox;
 
     public EventsTable() {
-        super(new EventsTableModel());
+        setModel(new EventsTableModel());
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        setRenderer();
         initTable();
         addListeners();
-    }
-
-    private void setRenderer() {
-        setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                List<Integer> checkedRows = getCheckedRows();
-                if (checkedRows.contains(row)) {
-                    c.setBackground(Color.YELLOW);
-                } else {
-                    c.setBackground(table.getBackground());
-                }
-                return c;
-            }
-        });
     }
 
     private void addListeners() {
         EventsTableModel tableModel = (EventsTableModel) getModel();
         tableModel.addTableModelListener(e -> {
-            if (e.getColumn() == 0) {
+            if (e.getColumn() == EventsTableModel.CHECK_BOX_COL) {
                 tableModel.fireTableChanged(new TableModelEvent(tableModel));
+                DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) _eventOrderComboBox.getModel();
+                model.removeAllElements();
+                List<Integer> checkedRows = getCheckedRows();
+                for(int i=1; i <= checkedRows.size(); i++) {
+                    model.addElement(i);
+                }
+                Object checked = getModel().getValueAt(e.getFirstRow(), EventsTableModel.CHECK_BOX_COL);
+                boolean isChecked = checked != null && Boolean.parseBoolean(checked.toString());
+                if(!isChecked) {
+                    Object currentOrder = getModel().getValueAt(e.getFirstRow(), EventsTableModel.EVENT_ORDER_COL);
+                    getModel().setValueAt(null, e.getFirstRow(), EventsTableModel.EVENT_ORDER_COL);
+                    if(currentOrder != null && Integer.parseInt(currentOrder.toString()) < getCheckedRows().size() +1) {
+                        decreaseOrders(Integer.parseInt(currentOrder.toString()));
+                    }
+                }
+            }
+            if(e.getColumn() == EventsTableModel.EVENT_ORDER_COL) {
+                tableModel.fireTableChanged(new TableModelEvent(tableModel));
+                DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) _eventOrderComboBox.getModel();
+                model.removeAllElements();
+                List<Integer> checkedRows = getCheckedRows();
+                for(int i=1; i <= checkedRows.size(); i++) {
+                    if(!orderUsedAlready(i)) {
+                        model.addElement(i);
+                    }
+                }
             }
         });
+    }
+
+    private boolean orderUsedAlready(int order) {
+        boolean retVal = false;
+        List<Integer> checkedRows = getCheckedRows();
+        for(Integer row : checkedRows) {
+            Object orderObj = getValueAt(row, EventsTableModel.EVENT_ORDER_COL);
+            if(orderObj != null) {
+                int orderInt = Integer.parseInt(orderObj.toString());
+                if(orderInt == order) {
+                    retVal = true;
+                    break;
+                }
+            }
+        }
+        return retVal;
+    }
+
+    private void decreaseOrders(int orderRemoved) {
+        List<Integer> checkedRows = getCheckedRows();
+        for(Integer row : checkedRows) {
+            Object order = getValueAt(row, EventsTableModel.EVENT_ORDER_COL);
+            if(order != null) {
+                int orderInt = Integer.parseInt(order.toString());
+                if(orderInt > orderRemoved) {
+                    setValueAt(orderInt -1, row, EventsTableModel.EVENT_ORDER_COL);
+                }
+            }
+        }
     }
 
     private List<Integer> getCheckedRows() {
@@ -62,39 +98,40 @@ class EventsTable extends JTable {
     }
 
     private void initTable() {
-        getColumnModel().getColumn(0).setHeaderValue("");
-        getColumnModel().getColumn(0).setMaxWidth(30);
-        getColumnModel().getColumn(1).setHeaderValue("Name");
-        getColumnModel().getColumn(2).setHeaderValue("ScoreType");
+        _eventOrderComboBox = setComboBoxColumn(EventsTableModel.EVENT_ORDER_COL);
+        setCheckBoxColumn(EventsTableModel.CHECK_BOX_COL);
+        DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<>();
+        _eventOrderComboBox.setModel(model);
+        getColumnModel().getColumn(EventsTableModel.CHECK_BOX_COL).setMaxWidth(30);
+    }
+
+    @Override
+    Color getHighlightColor() {
+        return Color.YELLOW;
+    }
+
+    @Override
+    public boolean isRowHighlighted(int row) {
+        List<Integer> checkedRows = getCheckedRows();
+        return checkedRows.contains(row);
     }
 
     @Override
     public Class<?> getColumnClass(int column) {
         Class<?> retVal = super.getColumnClass(column);
-        if (column == EventsTableModel.CHECK_BOX_COL) {
-            retVal = Boolean.class;
-        } else if (column == EventsTableModel.NAME_COL){
-            retVal = String.class;
-        } else if (column == EventsTableModel.SCORE_TYPE_COL) {
-            retVal = String.class;
+        switch(column) {
+            case EventsTableModel.CHECK_BOX_COL:
+                retVal = Boolean.class;
+                break;
+            case EventsTableModel.NAME_COL:
+            case EventsTableModel.SCORE_TYPE_COL:
+                retVal = String.class;
+                break;
+            case EventsTableModel.EVENT_ORDER_COL:
+                retVal = Integer.class;
+                break;
         }
         return retVal;
-    }
-
-    @Override
-    public TableCellRenderer getCellRenderer(int row, int column) {
-        if (column == 0) {
-            return new TableCellRenderer() {
-                final JCheckBox checkbox = new JCheckBox();
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                    checkbox.setSelected(value != null && (boolean) value);
-                    return checkbox;
-                }
-            };
-        } else {
-            return super.getCellRenderer(row, column);
-        }
     }
 
     List<Event> buildSelectedEvents()
@@ -109,4 +146,24 @@ class EventsTable extends JTable {
         return retVal;
     }
 
+    public boolean hasOrdersSet() {
+        boolean retVal = false;
+        List<Integer> checkedRows = getCheckedRows();
+        for(Integer row : checkedRows) {
+            Object order = getValueAt(row, EventsTableModel.EVENT_ORDER_COL);
+            if(order != null) {
+                retVal = true;
+                break;
+            }
+        }
+        return retVal;
+    }
+
+    public void resetEventOrders() {
+        List<Integer> checkedRows = getCheckedRows();
+        for(Integer row : checkedRows) {
+            setValueAt(null, row, EventsTableModel.EVENT_ORDER_COL);
+        }
+        ((EventsTableModel)getModel()).setEventOrderColumnEnabled(false);
+    }
 }

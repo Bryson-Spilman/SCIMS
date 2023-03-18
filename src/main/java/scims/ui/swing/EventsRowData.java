@@ -6,11 +6,13 @@ class EventsRowData {
     private String _name;
     private boolean _checked;
     private EventScoring<?> _eventScoring;
+    private Integer _eventOrder;
 
-    public EventsRowData(boolean checked, String name, EventScoring<?> eventScoring) {
+    public EventsRowData(boolean checked, String name, EventScoring<?> eventScoring, Integer eventOrder) {
         _checked = checked;
         _name = name;
         _eventScoring = eventScoring;
+        _eventOrder = eventOrder;
     }
 
     public String getName() {
@@ -35,5 +37,13 @@ class EventsRowData {
 
     public void setEventScoring(EventScoring<?> eventScoring) {
         _eventScoring = eventScoring;
+    }
+
+    public Integer getEventOrder() {
+        return _eventOrder;
+    }
+
+    public void setEventOrder(Integer order) {
+        _eventOrder = order;
     }
 }

@@ -1,21 +1,24 @@
 package scims.ui.swing;
 
+import scims.ui.Modifiable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class JChooserField<T> extends JPanel {
 
+    private final Window _parent;
     private JTextField _textField;
     private JButton _button;
 
     private final JChooserDialog<T> _chooserDlg;
 
     public JChooserField(Window parent, List<T> objects) {
+        _parent = parent;
         _chooserDlg = new JChooserDialog<>(parent, objects, this::updateField);
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createLoweredBevelBorder());
@@ -24,16 +27,15 @@ class JChooserField<T> extends JPanel {
     }
 
     private void updateField(List<T> objects) {
-        _textField.setText(objects.stream().map(Object::toString).collect(Collectors.joining(",")));
+        _textField.setText(objects.stream().map(Object::toString).collect(Collectors.joining("; ")));
+        if(_parent instanceof Modifiable)
+        {
+            ((Modifiable)_parent).setModified(true);
+        }
     }
 
     private void addListeners() {
         _button.addActionListener(e -> _chooserDlg.setVisible(true));
-    }
-
-    public void addActionListener(ActionListener e)
-    {
-        _button.addActionListener(e);
     }
 
     public void addKeyListener(KeyListener keyListener)
@@ -67,5 +69,22 @@ class JChooserField<T> extends JPanel {
         gbc.insets    = new Insets(0,0,0,0);
         add(_button, gbc);
 
+    }
+
+    public String getText() {
+        return _textField.getText();
+    }
+
+    public void setObjects(List<T> objects) {
+        _chooserDlg.setObjects(objects);
+    }
+
+    public void reset() {
+        _textField.setText("");
+        _chooserDlg.setObjects(new ArrayList<>());
+    }
+
+    public List<T> getObjects() {
+        return _chooserDlg.getObjects();
     }
 }

@@ -71,7 +71,7 @@ public class JChooserDialog<T> extends JDialog {
         }
     }
 
-    private List<T> getObjects() {
+    List<T> getObjects() {
         List<T> retVal = new ArrayList<>();
         for(int i=0; i < _rightModel.getSize(); i++)
         {
@@ -169,4 +169,13 @@ public class JChooserDialog<T> extends JDialog {
 
     }
 
+    public void setObjects(List<T> objects) {
+        _objects.clear();
+        _objects.addAll(objects);
+        _leftModel.clear();
+        _rightModel.clear();
+        for(T object : objects) {
+            _leftModel.addElement(object);
+        }
+    }
 }

@@ -1,14 +1,14 @@
 package scims.model.data;
 
-import scims.model.enums.EventScoreType;
+import scims.model.data.scoring.EventScoring;
 
 public class StrengthEvent implements Event {
     private final String _name;
-    private final EventScoreType _scoreType;
+    private final EventScoring<?> _scoring;
 
-    StrengthEvent(String name, EventScoreType scoreType) {
+    StrengthEvent(String name, EventScoring<?> scoring) {
         _name = name;
-        _scoreType = scoreType;
+        _scoring = scoring;
     }
 
     @Override
@@ -17,8 +17,8 @@ public class StrengthEvent implements Event {
     }
 
     @Override
-    public EventScoreType getScoreType() {
-        return _scoreType;
+    public EventScoring<?> getScoring() {
+        return _scoring;
     }
 
     @Override

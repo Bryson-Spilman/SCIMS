@@ -1,8 +1,9 @@
 package scims.model.data;
 
-import scims.model.enums.EventScoreType;
+import scims.model.data.scoring.EventScoring;
 
 public interface Event {
     String getName();
-    EventScoreType getScoreType();
+    EventScoring<?> getScoring();
+
 }

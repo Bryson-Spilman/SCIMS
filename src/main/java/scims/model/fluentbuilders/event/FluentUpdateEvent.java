@@ -1,8 +1,8 @@
 package scims.model.fluentbuilders.event;
 
-import scims.model.enums.EventScoreType;
+import scims.model.data.scoring.EventScoring;
 
 public interface FluentUpdateEvent extends FluentEventBuilder {
     FluentUpdateEvent withUpdatedEventName(String name);
-    FluentUpdateEvent withUpdatedEventScoreType(EventScoreType scoreType);
+    FluentUpdateEvent withUpdatedEventScoring(EventScoring<?> scoreType);
 }

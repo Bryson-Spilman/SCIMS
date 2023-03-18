@@ -1,30 +1,30 @@
 package scims.model.data;
 
-import scims.model.enums.EventScoreType;
+import scims.model.data.scoring.EventScoring;
 import scims.model.fluentbuilders.event.*;
 
 public class StrengthEventBuilder implements FluentWithEventName, FluentFromExistingEvent {
     private String _name;
-    private EventScoreType _scoreType;
+    private EventScoring<?> _scoring;
 
     @Override
     public FluentUpdateEvent fromExistingEvent(Event event) {
         _name = event.getName();
-        _scoreType = event.getScoreType();
+        _scoring = event.getScoring();
         return new UpdateEvent();
     }
 
     @Override
-    public FluentWithEventScoreType withName(String name) {
+    public FluentWithEventScoring withName(String name) {
         _name = name;
-        return new WithEventScoreType();
+        return new WithEventScoring();
     }
 
-    private class WithEventScoreType implements FluentWithEventScoreType {
+    private class WithEventScoring implements FluentWithEventScoring {
 
         @Override
-        public FluentEventBuilder withScoreType(EventScoreType scoreType) {
-            _scoreType = scoreType;
+        public FluentEventBuilder withScoring(EventScoring<?> scoring) {
+            _scoring = scoring;
             return new EventBuilder();
         }
     }
@@ -32,7 +32,7 @@ public class StrengthEventBuilder implements FluentWithEventName, FluentFromExis
     private class EventBuilder implements FluentEventBuilder {
         @Override
         public StrengthEvent build() {
-            return new StrengthEvent(_name, _scoreType);
+            return new StrengthEvent(_name, _scoring);
         }
     }
 
@@ -45,8 +45,8 @@ public class StrengthEventBuilder implements FluentWithEventName, FluentFromExis
         }
 
         @Override
-        public FluentUpdateEvent withUpdatedEventScoreType(EventScoreType scoreType) {
-            _scoreType = scoreType;
+        public FluentUpdateEvent withUpdatedEventScoring(EventScoring<?> scoring) {
+            _scoring = scoring;
             return this;
         }
     }

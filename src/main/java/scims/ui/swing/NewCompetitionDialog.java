@@ -1,9 +1,10 @@
 package scims.ui.swing;
 
 import scims.model.data.*;
-import scims.model.data.Event;
-import scims.model.enums.EventScoreType;
+import scims.model.enums.StrongmanCorpWeightClasses;
+import scims.model.enums.USSWeightClasses;
 import scims.model.enums.UnitSystem;
+import scims.ui.Modifiable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,18 +13,23 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class NewCompetitionDialog extends JDialog {
+public class NewCompetitionDialog extends JDialog implements Modifiable {
     private final Consumer<Competition> _createAction;
     private JTextField _nameTextField;
     private JButton _createButton;
     private JButton _cancelButton;
     private boolean _isModified = false;
-    private JChooserField _weightClassChooserField;
+    private JChooserField<WeightClass> _weightClassChooserField;
+    private JRadioButton _strongmanCorpRadioButton;
+    private JRadioButton _ussRadioButton;
+    private JRadioButton _otherRadioButton;
+    private ButtonGroup _radioButtonGroup;
+    private JRadioButton _prevRadioButton;
+    private boolean _ignoreRadioChange;
+    private EventsTable _eventsTable;
 
     public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
@@ -38,16 +44,6 @@ public class NewCompetitionDialog extends JDialog {
 
     private Competition buildCompetition()
     {
-        List<Event> eventsInOrder = new ArrayList<>();
-        eventsInOrder.add(new StrengthEventBuilder()
-                .withName("Event 1")
-                .withScoreType(EventScoreType.REPS)
-                .build());
-        WeightClass testWeightClass = new StrengthWeightClassBuilder()
-                .withName("LightWeight")
-                .withMaxCompetitorWeight(200.4)
-                .withEventsInOrder(eventsInOrder)
-                .build();
         Competitor competitor = new StrengthCompetitorBuilder()
                 .withCompetitorName("Bryson Spilman")
                 .withCompetitorAge(27)
@@ -58,13 +54,16 @@ public class NewCompetitionDialog extends JDialog {
                 .withCompetitorAge(25)
                 .withCompetitorWeight(115)
                 .build();
-        testWeightClass.addCompetitor(competitor);
-        testWeightClass.addCompetitor(competitor2);
+        List<WeightClass> weightClasses = _weightClassChooserField.getObjects();
+        for(WeightClass weightClass : weightClasses) {
+            weightClass.addCompetitor(competitor);
+            weightClass.addCompetitor(competitor2);
+        }
         return new StrengthCompetitionBuilder()
                 .withName(_nameTextField.getText())
                 .withDateTime(ZonedDateTime.now())
                 .withIsSameNumberOfEventsForAllWeightClasses(true)
-                .withWeightClasses(Collections.singletonList(testWeightClass))
+                .withWeightClasses(weightClasses)
                 .withUnitSystem(UnitSystem.POUNDS)
                 .build();
     }
@@ -85,9 +84,94 @@ public class NewCompetitionDialog extends JDialog {
                 closeDialogClicked();
             }
         });
+        _strongmanCorpRadioButton.addActionListener(e -> radioButtonChanged());
+        _ussRadioButton.addActionListener(e -> radioButtonChanged());
+        _otherRadioButton.addActionListener(e -> radioButtonChanged());
+        _weightClassChooserField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                _isModified = true;
+            }
+        });
     }
 
-    private void addWeightClasses(List<WeightClass> weightClasses) {
+    private void radioButtonChanged() {
+        if(!_ignoreRadioChange) {
+            _isModified = true;
+            String warningMsg = "Changing this will reset weight classes. Continue?";
+            String warningTitle = "Confirm Weight Classes reset";
+            if(_strongmanCorpRadioButton.isSelected()) {
+                if(!emptyOrOnlyContainsStrongmanCorpWeightClasses()) {
+                    int opt = JOptionPane.showConfirmDialog(this, warningMsg, warningTitle, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if(opt == JOptionPane.YES_OPTION)
+                    {
+                        _weightClassChooserField.reset();
+                        _weightClassChooserField.setObjects(StrongmanCorpWeightClasses.getValues());
+                        _prevRadioButton = _strongmanCorpRadioButton;
+                    } else {
+                        _ignoreRadioChange = true;
+                        _radioButtonGroup.setSelected(_prevRadioButton.getModel(), true);
+                    }
+                } else {
+                    _weightClassChooserField.setObjects(StrongmanCorpWeightClasses.getValues());
+                }
+            } else if (_ussRadioButton.isSelected()) {
+                if(!emptyOrOnlyContainsUssWeightClasses()) {
+                    int opt = JOptionPane.showConfirmDialog(this, warningMsg, warningTitle, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if(opt == JOptionPane.YES_OPTION) {
+                        _weightClassChooserField.reset();
+                        _weightClassChooserField.setObjects(USSWeightClasses.getValues());
+                        _prevRadioButton = _ussRadioButton;
+                    } else {
+                        _ignoreRadioChange = true;
+                        _radioButtonGroup.setSelected(_prevRadioButton.getModel(), true);
+                    }
+                } else {
+                    _weightClassChooserField.setObjects(USSWeightClasses.getValues());
+                }
+            }
+            else {
+                if(_weightClassChooserField.getText().isEmpty()) {
+                    _weightClassChooserField.reset();
+                }
+                _prevRadioButton = _otherRadioButton;
+            }
+            _ignoreRadioChange = false;
+        }
+    }
+
+    private boolean emptyOrOnlyContainsStrongmanCorpWeightClasses() {
+        boolean retVal = true;
+        if(!_weightClassChooserField.getText().isEmpty())
+        {
+            List<WeightClass> weightClasses = _weightClassChooserField.getObjects();
+            for(WeightClass wc : weightClasses)
+            {
+                if(!StrongmanCorpWeightClasses.getValues().contains(wc))
+                {
+                    retVal = false;
+                    break;
+                }
+            }
+        }
+        return retVal;
+    }
+
+    private boolean emptyOrOnlyContainsUssWeightClasses() {
+        boolean retVal = true;
+        if(!_weightClassChooserField.getText().isEmpty())
+        {
+            List<WeightClass> weightClasses = _weightClassChooserField.getObjects();
+            for(WeightClass wc : weightClasses)
+            {
+                if(!USSWeightClasses.getValues().contains(wc))
+                {
+                    retVal = false;
+                    break;
+                }
+            }
+        }
+        return retVal;
     }
 
     private void createCompetitionClicked() {
@@ -113,14 +197,19 @@ public class NewCompetitionDialog extends JDialog {
     {
         JLabel nameLabel = new JLabel("Competition Name:");
         _nameTextField = new JTextField();
+        _radioButtonGroup = new ButtonGroup();
+        _strongmanCorpRadioButton = new JRadioButton("Strongman Corporation");
+        _ussRadioButton = new JRadioButton("USS");
+        _otherRadioButton = new JRadioButton("Other");
+        _radioButtonGroup.add(_strongmanCorpRadioButton);
+        _radioButtonGroup.add(_ussRadioButton);
+        _radioButtonGroup.add(_otherRadioButton);
+        _radioButtonGroup.setSelected(_strongmanCorpRadioButton.getModel(), true);
         JLabel selectWeightClassesLabel = new JLabel("Select Weight Classes:");
-        List<WeightClass> weightClasses = new ArrayList<>();
-        weightClasses.add(new StrengthWeightClassBuilder().withName("Light Weight Men").withMaxCompetitorWeight(200.4).withEventsInOrder(new ArrayList<>()).build());
-        weightClasses.add(new StrengthWeightClassBuilder().withName("Middle Weight Men").withMaxCompetitorWeight(264.4).withEventsInOrder(new ArrayList<>()).build());;
-        weightClasses.add(new StrengthWeightClassBuilder().withName("Heavy Weight Men").withMaxCompetitorWeight(Integer.MAX_VALUE).withEventsInOrder(new ArrayList<>()).build());
-        _weightClassChooserField = new JChooserField<>(this, weightClasses);
+        _weightClassChooserField = new JChooserField<>(this, StrongmanCorpWeightClasses.getValues());
         _createButton = new JButton("Create");
         _cancelButton = new JButton("Cancel");
+        _eventsTable = new EventsTable();
 
         JPanel attributesPanel = new JPanel(new GridBagLayout());
         JPanel createCancelPanel = new JPanel(new GridBagLayout());
@@ -147,16 +236,36 @@ public class NewCompetitionDialog extends JDialog {
         gbc.insets    = new Insets(5,5,0,5);
         attributesPanel.add(_nameTextField, gbc);
 
+        JPanel radioButtonPanel = new JPanel(new BorderLayout());
+        radioButtonPanel.add(_strongmanCorpRadioButton, BorderLayout.WEST);
+        radioButtonPanel.add(_ussRadioButton, BorderLayout.CENTER);
+        radioButtonPanel.add(_otherRadioButton, BorderLayout.EAST);
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = GridBagConstraints.RELATIVE;
-        gbc.weightx   = 0.0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 0.001;
         gbc.weighty   = 0.0;
         gbc.anchor    = GridBagConstraints.NORTHWEST;
         gbc.fill      = GridBagConstraints.NONE;
+        gbc.insets    = new Insets(5,0,0,5);
+        attributesPanel.add(radioButtonPanel, gbc);
+
+        JPanel titledEventsPanel = new JPanel(new BorderLayout());
+        titledEventsPanel.setBorder(BorderFactory.createTitledBorder("Events"));
+        JScrollPane scrollPane = new JScrollPane(_eventsTable);
+        titledEventsPanel.add(scrollPane, BorderLayout.CENTER);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 0.001;
+        gbc.weighty   = 0.001;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = GridBagConstraints.BOTH;
         gbc.insets    = new Insets(5,5,0,5);
-        attributesPanel.add(selectWeightClassesLabel, gbc);
+        attributesPanel.add(titledEventsPanel, gbc);
 
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
@@ -167,7 +276,7 @@ public class NewCompetitionDialog extends JDialog {
         gbc.anchor    = GridBagConstraints.NORTHWEST;
         gbc.fill      = GridBagConstraints.HORIZONTAL;
         gbc.insets    = new Insets(5,5,0,5);
-        attributesPanel.add(_weightClassChooserField, gbc);
+        //attributesPanel.add(_weightClassChooserField, gbc);
 
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
@@ -193,5 +302,15 @@ public class NewCompetitionDialog extends JDialog {
 
         add(attributesPanel, BorderLayout.NORTH);
         add(createCancelPanel, BorderLayout.SOUTH);
+    }
+
+    @Override
+    public void setModified(boolean modified) {
+        _isModified = true;
+    }
+
+    @Override
+    public boolean isModified() {
+        return _isModified;
     }
 }

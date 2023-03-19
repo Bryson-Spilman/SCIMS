@@ -146,6 +146,7 @@ public class JChooserField<T> extends JPanel {
     @Override
     public void setEnabled(boolean enabled) {
         _textField.setEnabled(enabled);
+        _textField.setEditable(enabled);
         _button.setEnabled(enabled);
     }
 
@@ -155,9 +156,6 @@ public class JChooserField<T> extends JPanel {
         if(_textField != null) {
             _textField.setBackground(bg);
         }
-        if(_button != null) {
-            _button.setBackground(bg);
-        }
     }
 
     @Override
@@ -165,9 +163,6 @@ public class JChooserField<T> extends JPanel {
         super.setForeground(bg);
         if(_textField != null) {
             _textField.setForeground(bg);
-        }
-        if(_button != null) {
-            _button.setForeground(bg);
         }
     }
 }

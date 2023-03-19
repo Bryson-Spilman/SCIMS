@@ -35,6 +35,9 @@ class ComboBoxCellRenderer<T> extends JComboBox<T> implements TableCellRenderer,
         } else {
             retVal.setBackground(null);
         }
+        if(!table.isCellEditable(row,column)) {
+            retVal.setEnabled(false);
+        }
         return retVal;
     }
 }

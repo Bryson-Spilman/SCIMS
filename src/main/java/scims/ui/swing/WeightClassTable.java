@@ -50,7 +50,7 @@ class WeightClassTable extends SCIMSTable {
 
     @Override
     Color getHighlightColor() {
-        return Color.YELLOW;
+        return new Color(205,223,229);
     }
 
     @Override

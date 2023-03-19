@@ -29,6 +29,9 @@ public class TextFieldCellRenderer extends JLabel implements TableCellRenderer, 
         } else {
             retVal.setBackground(null);
         }
+        if(!table.isCellEditable(row,column)) {
+            retVal.setEnabled(false);
+        }
         return retVal;
     }
 }

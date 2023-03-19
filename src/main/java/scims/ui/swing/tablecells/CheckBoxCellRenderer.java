@@ -29,6 +29,9 @@ class CheckBoxCellRenderer extends JCheckBox implements TableCellRenderer, Highl
         } else {
             retVal.setBackground(null);
         }
+        if(!table.isCellEditable(row,column)) {
+            retVal.setEnabled(false);
+        }
         return retVal;
     }
 }

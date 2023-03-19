@@ -2,6 +2,8 @@ package scims.ui.swing.tablecells;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 class ComboBoxCellEditor<T> extends DefaultCellEditor {
     private final JComboBox<T> _comboBox;
@@ -15,6 +17,15 @@ class ComboBoxCellEditor<T> extends DefaultCellEditor {
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) _comboBox.getModel();
+        Set<Object> items = new TreeSet<>();
+        for(int i=0; i < model.getSize(); i++) {
+            items.add(model.getElementAt(i));
+        }
+        model.removeAllElements();
+        for(Object item : items) {
+            model.addElement(item);
+        }
         _comboBox.setSelectedItem(value);
         _comboBox.setEnabled(table.isCellEditable(row, column));
         _comboBox.setEditable(table.isCellEditable(row, column));

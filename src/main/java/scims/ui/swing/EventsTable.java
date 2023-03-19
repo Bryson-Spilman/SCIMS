@@ -6,7 +6,6 @@ import scims.model.data.scoring.EventScoring;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.List;
 class EventsTable extends SCIMSTable {
 
     private JComboBox<Object> _eventOrderComboBox;
+    private final List<Runnable> _actionOnEventsSelectionUpdate = new ArrayList<>();
 
     public EventsTable() {
         setModel(new EventsTableModel());
@@ -41,6 +41,9 @@ class EventsTable extends SCIMSTable {
                     if(currentOrder != null && Integer.parseInt(currentOrder.toString()) < getCheckedRows().size() +1) {
                         decreaseOrders(Integer.parseInt(currentOrder.toString()));
                     }
+                }
+                for(Runnable action : _actionOnEventsSelectionUpdate) {
+                    action.run();
                 }
             }
             if(e.getColumn() == EventsTableModel.EVENT_ORDER_COL) {
@@ -134,18 +137,6 @@ class EventsTable extends SCIMSTable {
         return retVal;
     }
 
-    List<Event> buildSelectedEvents()
-    {
-        List<Event> retVal = new ArrayList<>();
-        List<Integer> checkedRows = getCheckedRows();
-        for(int checkedRow : checkedRows) {
-            String name = (String) getValueAt(checkedRow, EventsTableModel.NAME_COL);
-            EventScoring<?> scoreType = (EventScoring<?>) getValueAt(checkedRow, EventsTableModel.SCORE_TYPE_COL);
-            retVal.add(new StrengthEventBuilder().withName(name).withScoring(scoreType).build());
-        }
-        return retVal;
-    }
-
     public boolean hasOrdersSet() {
         boolean retVal = false;
         List<Integer> checkedRows = getCheckedRows();
@@ -165,5 +156,20 @@ class EventsTable extends SCIMSTable {
             setValueAt(null, row, EventsTableModel.EVENT_ORDER_COL);
         }
         ((EventsTableModel)getModel()).setEventOrderColumnEnabled(false);
+    }
+
+    public List<Event> getSelectedEvents() {
+        List<Event> retVal = new ArrayList<>();
+        List<Integer> checkedRows = getCheckedRows();
+        for(int checkedRow : checkedRows) {
+            String name = (String) getValueAt(checkedRow, EventsTableModel.NAME_COL);
+            EventScoring<?> scoreType = (EventScoring<?>) getValueAt(checkedRow, EventsTableModel.SCORE_TYPE_COL);
+            retVal.add(new StrengthEventBuilder().withName(name).withScoring(scoreType).build());
+        }
+        return retVal;
+    }
+
+    public void addNewEventSelectedAction(Runnable updatedEvents) {
+        _actionOnEventsSelectionUpdate.add(updatedEvents);
     }
 }

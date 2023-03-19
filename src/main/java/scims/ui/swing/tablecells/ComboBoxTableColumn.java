@@ -1,26 +1,27 @@
-package scims.ui.swing;
+package scims.ui.swing.tablecells;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.util.List;
 import java.util.function.Function;
 
-class CheckBoxTableColumn extends TableColumn {
-    private final JCheckBox _checkBox;
-    private final CheckBoxCellRenderer _renderer;
-    private final CheckBoxCellEditor _editor;
+public class ComboBoxTableColumn<T> extends HighlightedTableColumn {
+    private final JComboBox<T> _comboBox;
+    private final ComboBoxCellRenderer<T> _renderer;
+    private final ComboBoxCellEditor<T> _editor;
 
-    public CheckBoxTableColumn(JTable parentTable, int modelIndex) {
+    @SuppressWarnings("unchecked")
+    public ComboBoxTableColumn(JTable parentTable, int modelIndex, List<T> items) {
         super(modelIndex);
-        _checkBox = new JCheckBox();
-        _renderer = new CheckBoxCellRenderer();
-        _editor = new CheckBoxCellEditor(parentTable, _checkBox);
+        _comboBox = new JComboBox<>((T[])items.toArray());
+        _renderer = new ComboBoxCellRenderer<>(_comboBox);
+        _editor = new ComboBoxCellEditor<>(parentTable, _comboBox);
     }
 
-    public JCheckBox getCheckBox() {
-        return _checkBox;
+    public JComboBox<T> getComboBox() {
+        return _comboBox;
     }
 
     public void setHighlightCondition(Function<Integer, Boolean> highlightRow) {

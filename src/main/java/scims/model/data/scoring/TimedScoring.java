@@ -30,5 +30,10 @@ public class TimedScoring implements EventScoring<Duration>{
     public String getScoreType() {
         return "Time (seconds)";
     }
+
+    @Override
+    public String toString() {
+        return getScoreType();
+    }
 }
 

@@ -23,4 +23,9 @@ public class RepsScoring implements EventScoring<Integer> {
     public String getScoreType() {
         return "Reps";
     }
+
+    @Override
+    public String toString() {
+        return getScoreType();
+    }
 }

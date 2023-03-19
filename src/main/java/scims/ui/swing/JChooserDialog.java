@@ -9,29 +9,33 @@ import java.util.function.Consumer;
 
 public class JChooserDialog<T> extends JDialog {
 
-    private final List<T> _objects;
+    private final List<T> _objects = new ArrayList<>();
     private final Consumer<List<T>> _chosenAction;
+    private JTextField _textField;
     private JList<T> _leftList;
     private JList<T> _rightList;
     private JButton _addButton;
     private JButton _removeButton;
     private OkCancelPanel _okCancelPanel;
-    private final List<T> _originalLeftList = new ArrayList<>();
-    private final List<T> _originalRightList = new ArrayList<>();
     private boolean _isModified;
     private DefaultListModel<T> _leftModel;
     private DefaultListModel<T> _rightModel;
+    private final List<Runnable> _additionalOkActionEvents = new ArrayList<Runnable>();
 
     public JChooserDialog(Window parentFrame, List<T> objects, Consumer<List<T>> chosenAction) {
         super(parentFrame, "Choose Weight Classes", ModalityType.APPLICATION_MODAL);
         setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
-        _objects = objects;
         _chosenAction = chosenAction;
         setSize(500,500);
         setLocationRelativeTo(parentFrame);
         // Initialize components
         buildComponents();
         addListeners();
+        setObjects(objects);
+    }
+
+    void setTextField(JTextField textField) {
+        _textField = textField;
     }
 
     private void addListeners() {
@@ -42,8 +46,11 @@ public class JChooserDialog<T> extends JDialog {
     }
 
     private void okAction() {
-        _chosenAction.accept(getObjects());
+        _chosenAction.accept(getSelectedObjects());
         setVisible(false);
+        for(Runnable event : _additionalOkActionEvents) {
+            event.run();
+        }
     }
 
     private void closedAction() {
@@ -63,15 +70,13 @@ public class JChooserDialog<T> extends JDialog {
     private void resetLists() {
         _leftModel.clear();
         _rightModel.clear();
-        for(T object : _originalLeftList) {
+        for(T object : _objects) {
             _leftModel.addElement(object);
         }
-        for(T object : _originalRightList) {
-            _rightModel.addElement(object);
-        }
+        setSelectedFromTextField();
     }
 
-    List<T> getObjects() {
+    List<T> getSelectedObjects() {
         List<T> retVal = new ArrayList<>();
         for(int i=0; i < _rightModel.getSize(); i++)
         {
@@ -85,16 +90,23 @@ public class JChooserDialog<T> extends JDialog {
         if(visible)
         {
             _isModified = false;
-            _originalLeftList.clear();
-            for(int i=0; i < _leftList.getModel().getSize(); i++) {
-                _originalLeftList.add(_leftList.getModel().getElementAt(i));
-            }
-            _originalRightList.clear();
-            for(int i=0; i < _rightList.getModel().getSize(); i++) {
-                _originalRightList.add(_rightList.getModel().getElementAt(i));
-            }
+            resetLists();
         }
         super.setVisible(visible);
+    }
+
+    private void setSelectedFromTextField() {
+        String text = _textField.getText();
+        if(text != null) {
+            String[] split = text.split(";");
+            for(String name : split) {
+                for(T object : _objects) {
+                    if(object != null && object.toString().equalsIgnoreCase(name)) {
+                        _rightModel.addElement(object);
+                    }
+                }
+            }
+        }
     }
 
     private void removeButtonClicked() {
@@ -177,5 +189,23 @@ public class JChooserDialog<T> extends JDialog {
         for(T object : objects) {
             _leftModel.addElement(object);
         }
+    }
+
+    public void addOnSelectionEvent(Runnable event) {
+        _additionalOkActionEvents.add(event);
+    }
+
+    public void setSelectedObjects(List<T> selectedObjects) {
+        resetLists();
+        for(T object : selectedObjects) {
+            _rightModel.addElement(object);
+            if(_leftModel.contains(object)) {
+                _leftModel.removeElement(object);
+            }
+        }
+    }
+
+    public List<T> getObjects() {
+        return _objects;
     }
 }

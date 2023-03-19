@@ -1,16 +1,17 @@
-package scims.ui.swing;
+package scims.ui.swing.tablecells;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.function.Function;
 
-class CheckBoxCellRenderer extends JCheckBox implements TableCellRenderer {
+class ComboBoxCellRenderer<T> extends JComboBox<T> implements TableCellRenderer, HighlightedComponent {
 
     private Function<Integer, Boolean> _highlightRow;
     private Color _highlightColor;
 
-    public CheckBoxCellRenderer() {
+    public ComboBoxCellRenderer(JComboBox<T> comboBox) {
+        super(comboBox.getModel());
     }
 
     public void setHighlightCondition(Function<Integer, Boolean> highlightRow) {
@@ -23,10 +24,16 @@ class CheckBoxCellRenderer extends JCheckBox implements TableCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        JCheckBox retVal = new JCheckBox();
-        retVal.setSelected(value != null && Boolean.parseBoolean(value.toString()));
-        if(_highlightRow.apply(row)) {
+        Component retVal;
+        if(value == null) {
+            retVal = new JComboBox<>();
+        } else {
+            retVal = new JComboBox<>(new Integer[]{Integer.parseInt(value.toString())});
+        }
+        if(_highlightRow != null && _highlightRow.apply(row)) {
             retVal.setBackground(_highlightColor);
+        } else {
+            retVal.setBackground(null);
         }
         return retVal;
     }

@@ -1,6 +1,7 @@
 package scims.ui.swing;
 
 import scims.model.data.scoring.DistanceScoring;
+import scims.model.data.scoring.EventScoring;
 import scims.model.data.scoring.RepsScoring;
 import scims.model.data.scoring.TimedScoring;
 
@@ -41,7 +42,7 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 retVal = rowData.getName();
                 break;
             case SCORE_TYPE_COL:
-                retVal = rowData.getEventScoring().getScoreType();
+                retVal = rowData.getEventScoring();
                 break;
             case EVENT_ORDER_COL:
                 retVal = rowData.getEventOrder();
@@ -61,8 +62,10 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 retVal = Boolean.class;
                 break;
             case NAME_COL:
-            case SCORE_TYPE_COL:
                 retVal = String.class;
+                break;
+            case SCORE_TYPE_COL:
+                retVal = EventScoring.class;
                 break;
             case EVENT_ORDER_COL:
                 retVal = Integer.class;
@@ -76,7 +79,8 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     @Override
     public boolean isCellEditable(int row, int col) {
-        return col == CHECK_BOX_COL || (col == EVENT_ORDER_COL && _eventOrderColumnEnabled && isRowChecked(row));
+        return col == CHECK_BOX_COL || col == NAME_COL
+                || (col == EVENT_ORDER_COL && _eventOrderColumnEnabled && isRowChecked(row));
     }
 
     private boolean isRowChecked(int row) {
@@ -98,10 +102,10 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
             case NAME_COL:
                 rowData.setName(String.valueOf(value));
                 break;
-            case SCORE_TYPE_COL:
             case EVENT_ORDER_COL:
                 rowData.setEventOrder(value == null ? null : Integer.parseInt(value.toString()));
                 break;
+            case SCORE_TYPE_COL:
             default:
                 break;
         }

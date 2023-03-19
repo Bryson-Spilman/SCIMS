@@ -22,4 +22,9 @@ public class DistanceScoring implements EventScoring<Double>{
     public String getScoreType() {
         return "Distance";
     }
+
+    @Override
+    public String toString() {
+        return getScoreType();
+    }
 }

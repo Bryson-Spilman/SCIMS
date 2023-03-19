@@ -31,6 +31,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     private boolean _ignoreRadioChange;
     private EventsTable _eventsTable;
     private JCheckBox _sameEventsForAllWeightsClassesCheckbox;
+    private WeightClassTable _weightClassTable;
 
     public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
@@ -55,7 +56,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
                 .withCompetitorAge(25)
                 .withCompetitorWeight(115)
                 .build();
-        List<WeightClass> weightClasses = _weightClassChooserField.getObjects();
+        List<WeightClass> weightClasses = _weightClassChooserField.getSelectedObjects();
         for(WeightClass weightClass : weightClasses) {
             weightClass.addCompetitor(competitor);
             weightClass.addCompetitor(competitor2);
@@ -95,6 +96,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
             }
         });
         _sameEventsForAllWeightsClassesCheckbox.addActionListener(e -> useSameEventsForAllCheckBoxClicked());
+        _eventsTable.addNewEventSelectedAction(this::updatedEvents);
     }
 
     private void useSameEventsForAllCheckBoxClicked() {
@@ -108,6 +110,13 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
             }
         }
         ((EventsTableModel)_eventsTable.getModel()).setEventOrderColumnEnabled(_sameEventsForAllWeightsClassesCheckbox.isSelected());
+        updatedEvents();
+    }
+
+    private void updatedEvents() {
+        _weightClassTable.setEvents(_eventsTable.getSelectedEvents());
+        ((WeightClassTableModel)_weightClassTable.getModel()).setUseSameEventsForAllWeightClasses(_sameEventsForAllWeightsClassesCheckbox.isSelected());
+        _weightClassTable.commitEdits();
     }
 
     private void radioButtonChanged() {
@@ -159,7 +168,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         boolean retVal = true;
         if(!_weightClassChooserField.getText().isEmpty())
         {
-            List<WeightClass> weightClasses = _weightClassChooserField.getObjects();
+            List<WeightClass> weightClasses = _weightClassChooserField.getSelectedObjects();
             for(WeightClass wc : weightClasses)
             {
                 if(!StrongmanCorpWeightClasses.getValues().contains(wc))
@@ -176,7 +185,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         boolean retVal = true;
         if(!_weightClassChooserField.getText().isEmpty())
         {
-            List<WeightClass> weightClasses = _weightClassChooserField.getObjects();
+            List<WeightClass> weightClasses = _weightClassChooserField.getSelectedObjects();
             for(WeightClass wc : weightClasses)
             {
                 if(!USSWeightClasses.getValues().contains(wc))
@@ -221,11 +230,13 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _radioButtonGroup.add(_otherRadioButton);
         _radioButtonGroup.setSelected(_strongmanCorpRadioButton.getModel(), true);
         _sameEventsForAllWeightsClassesCheckbox = new JCheckBox("Use same events for all weight classes");
+        _sameEventsForAllWeightsClassesCheckbox.setSelected(true);
         JLabel selectWeightClassesLabel = new JLabel("Select Weight Classes:");
         _weightClassChooserField = new JChooserField<>(this, StrongmanCorpWeightClasses.getValues());
         _createButton = new JButton("Create");
         _cancelButton = new JButton("Cancel");
         _eventsTable = new EventsTable();
+        _weightClassTable = new WeightClassTable();
 
         JPanel attributesPanel = new JPanel(new GridBagLayout());
         JPanel createCancelPanel = new JPanel(new GridBagLayout());
@@ -260,57 +271,39 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
 
         addComponent(attributesPanel, _sameEventsForAllWeightsClassesCheckbox, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
 
+        JPanel tablesPanel = new JPanel(new BorderLayout());
         JPanel titledEventsPanel = new JPanel(new BorderLayout());
         titledEventsPanel.setBorder(BorderFactory.createTitledBorder("Events"));
         JScrollPane scrollPane = new JScrollPane(_eventsTable);
+        scrollPane.setPreferredSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
         titledEventsPanel.add(scrollPane, BorderLayout.CENTER);
 
-        gbc = new GridBagConstraints();
-        gbc.gridx     = GridBagConstraints.RELATIVE;
-        gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx   = 0.001;
-        gbc.weighty   = 0.001;
-        gbc.anchor    = GridBagConstraints.NORTHWEST;
-        gbc.fill      = GridBagConstraints.BOTH;
-        gbc.insets    = new Insets(5,5,0,5);
-        attributesPanel.add(titledEventsPanel, gbc);
+        JPanel titledWeightClassPanel = new JPanel(new BorderLayout());
+        titledWeightClassPanel.setBorder(BorderFactory.createTitledBorder("Weight Classes"));
+        JScrollPane weightClassScrollPane = new JScrollPane(_weightClassTable);
+        weightClassScrollPane.setPreferredSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
+        weightClassScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
+        titledWeightClassPanel.add(weightClassScrollPane, BorderLayout.CENTER);
+
+        tablesPanel.add(titledEventsPanel, BorderLayout.NORTH);
+        tablesPanel.add(titledWeightClassPanel, BorderLayout.SOUTH);
 
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx   = 0.001;
-        gbc.weighty   = 0.001;
+        gbc.weighty   = 0.0;
         gbc.anchor    = GridBagConstraints.NORTHWEST;
         gbc.fill      = GridBagConstraints.HORIZONTAL;
         gbc.insets    = new Insets(5,5,0,5);
-        //attributesPanel.add(_weightClassChooserField, gbc);
-
-        gbc = new GridBagConstraints();
-        gbc.gridx     = GridBagConstraints.RELATIVE;
-        gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = GridBagConstraints.RELATIVE;
-        gbc.weightx   = 0.001;
-        gbc.weighty   = 0.001;
-        gbc.anchor    = GridBagConstraints.SOUTHEAST;
-        gbc.fill      = GridBagConstraints.NONE;
-        gbc.insets    = new Insets(5,5,5,5);
-        createCancelPanel.add(_createButton, gbc);
-
-        gbc = new GridBagConstraints();
-        gbc.gridx     = GridBagConstraints.RELATIVE;
-        gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx   = 0.0;
-        gbc.weighty   = 0.0;
-        gbc.anchor    = GridBagConstraints.SOUTHEAST;
-        gbc.fill      = GridBagConstraints.NONE;
-        gbc.insets    = new Insets(5,5,5,5);
-        createCancelPanel.add(_cancelButton, gbc);
-
+        attributesPanel.add(tablesPanel, gbc);
+        OkCancelPanel okCancelPanel = new OkCancelPanel("Create");
+        okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
+        okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
         add(attributesPanel, BorderLayout.NORTH);
-        add(createCancelPanel, BorderLayout.SOUTH);
+        add(okCancelPanel, BorderLayout.SOUTH);
     }
 
     private void addComponent(JComponent parentComponent, JComponent componentToAdd, int gridWidth, int fill)

@@ -1,4 +1,4 @@
-package scims.ui.swing;
+package scims.ui.swing.tablecells;
 
 import javax.swing.*;
 import java.awt.*;

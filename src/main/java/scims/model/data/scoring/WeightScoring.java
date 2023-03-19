@@ -22,4 +22,9 @@ public class WeightScoring implements EventScoring<Double>{
     public String getScoreType() {
         return "Weight";
     }
+
+    @Override
+    public String toString() {
+        return getScoreType();
+    }
 }

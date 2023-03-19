@@ -12,11 +12,13 @@ import java.util.List;
 
 class EventsTable extends SCIMSTable {
 
+    private final EventsTableModel _model;
     private JComboBox<Object> _eventOrderComboBox;
     private final List<Runnable> _actionOnEventsSelectionUpdate = new ArrayList<>();
 
     public EventsTable() {
-        setModel(new EventsTableModel());
+        _model = new EventsTableModel();
+        setModel(_model);
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         initTable();
         addListeners();
@@ -29,7 +31,7 @@ class EventsTable extends SCIMSTable {
                 tableModel.fireTableChanged(new TableModelEvent(tableModel));
                 DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) _eventOrderComboBox.getModel();
                 model.removeAllElements();
-                List<Integer> checkedRows = getCheckedRows();
+                List<Integer> checkedRows = _model.getCheckedRows();
                 for(int i=1; i <= checkedRows.size(); i++) {
                     model.addElement(i);
                 }
@@ -38,7 +40,7 @@ class EventsTable extends SCIMSTable {
                 if(!isChecked) {
                     Object currentOrder = getModel().getValueAt(e.getFirstRow(), EventsTableModel.EVENT_ORDER_COL);
                     getModel().setValueAt(null, e.getFirstRow(), EventsTableModel.EVENT_ORDER_COL);
-                    if(currentOrder != null && Integer.parseInt(currentOrder.toString()) < getCheckedRows().size() +1) {
+                    if(currentOrder != null && Integer.parseInt(currentOrder.toString()) < _model.getCheckedRows().size() +1) {
                         decreaseOrders(Integer.parseInt(currentOrder.toString()));
                     }
                 }
@@ -50,34 +52,15 @@ class EventsTable extends SCIMSTable {
                 tableModel.fireTableChanged(new TableModelEvent(tableModel));
                 DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) _eventOrderComboBox.getModel();
                 model.removeAllElements();
-                List<Integer> checkedRows = getCheckedRows();
+                List<Integer> checkedRows = _model.getCheckedRows();
                 for(int i=1; i <= checkedRows.size(); i++) {
-                    if(!orderUsedAlready(i)) {
-                        model.addElement(i);
-                    }
+                    model.addElement(i);
                 }
             }
         });
     }
-
-    private boolean orderUsedAlready(int order) {
-        boolean retVal = false;
-        List<Integer> checkedRows = getCheckedRows();
-        for(Integer row : checkedRows) {
-            Object orderObj = getValueAt(row, EventsTableModel.EVENT_ORDER_COL);
-            if(orderObj != null) {
-                int orderInt = Integer.parseInt(orderObj.toString());
-                if(orderInt == order) {
-                    retVal = true;
-                    break;
-                }
-            }
-        }
-        return retVal;
-    }
-
     private void decreaseOrders(int orderRemoved) {
-        List<Integer> checkedRows = getCheckedRows();
+        List<Integer> checkedRows = _model.getCheckedRows();
         for(Integer row : checkedRows) {
             Object order = getValueAt(row, EventsTableModel.EVENT_ORDER_COL);
             if(order != null) {
@@ -87,17 +70,6 @@ class EventsTable extends SCIMSTable {
                 }
             }
         }
-    }
-
-    private List<Integer> getCheckedRows() {
-        List<Integer> retVal = new ArrayList<>();
-        for(int row=0; row < getModel().getRowCount(); row++) {
-            Boolean checked = (Boolean) getValueAt(row, EventsTableModel.CHECK_BOX_COL);
-            if(checked) {
-                retVal.add(row);
-            }
-        }
-        return retVal;
     }
 
     private void initTable() {
@@ -115,7 +87,7 @@ class EventsTable extends SCIMSTable {
 
     @Override
     public boolean isRowHighlighted(int row) {
-        List<Integer> checkedRows = getCheckedRows();
+        List<Integer> checkedRows = _model.getCheckedRows();
         return checkedRows.contains(row);
     }
 
@@ -139,7 +111,7 @@ class EventsTable extends SCIMSTable {
 
     public boolean hasOrdersSet() {
         boolean retVal = false;
-        List<Integer> checkedRows = getCheckedRows();
+        List<Integer> checkedRows = _model.getCheckedRows();
         for(Integer row : checkedRows) {
             Object order = getValueAt(row, EventsTableModel.EVENT_ORDER_COL);
             if(order != null) {
@@ -151,7 +123,7 @@ class EventsTable extends SCIMSTable {
     }
 
     public void resetEventOrders() {
-        List<Integer> checkedRows = getCheckedRows();
+        List<Integer> checkedRows = _model.getCheckedRows();
         for(Integer row : checkedRows) {
             setValueAt(null, row, EventsTableModel.EVENT_ORDER_COL);
         }
@@ -160,7 +132,7 @@ class EventsTable extends SCIMSTable {
 
     public List<Event> getSelectedEvents() {
         List<Event> retVal = new ArrayList<>();
-        List<Integer> checkedRows = getCheckedRows();
+        List<Integer> checkedRows = _model.getCheckedRows();
         for(int checkedRow : checkedRows) {
             String name = (String) getValueAt(checkedRow, EventsTableModel.NAME_COL);
             EventScoring<?> scoreType = (EventScoring<?>) getValueAt(checkedRow, EventsTableModel.SCORE_TYPE_COL);

@@ -37,4 +37,8 @@ public abstract class SCIMSTableModel<T> extends AbstractTableModel {
     public void addRow(T rowData) {
         _data.add(rowData);
     }
+
+    protected boolean isWrongType(Object aValue, int rowIndex, int columnIndex) {
+        return aValue != null && !getColumnClass(columnIndex).isInstance(aValue);
+    }
 }

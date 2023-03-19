@@ -32,10 +32,11 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     private EventsTable _eventsTable;
     private JCheckBox _sameEventsForAllWeightsClassesCheckbox;
     private WeightClassTable _weightClassTable;
+    private OkCancelPanel _okCancelPanel;
 
     public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
-        setLayout(new BorderLayout());
+        setLayout(new GridBagLayout());
         setSize(500,500);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         _createAction = createAction;
@@ -97,6 +98,8 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         });
         _sameEventsForAllWeightsClassesCheckbox.addActionListener(e -> useSameEventsForAllCheckBoxClicked());
         _eventsTable.addNewEventSelectedAction(this::updatedEvents);
+        _okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
+        _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
     }
 
     private void useSameEventsForAllCheckBoxClicked() {
@@ -115,8 +118,11 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
 
     private void updatedEvents() {
         _weightClassTable.setEvents(_eventsTable.getSelectedEvents());
-        ((WeightClassTableModel)_weightClassTable.getModel()).setUseSameEventsForAllWeightClasses(_sameEventsForAllWeightsClassesCheckbox.isSelected());
+        _weightClassTable.setUseSameEventsForAllWeightClasses(_sameEventsForAllWeightsClassesCheckbox.isSelected());
         _weightClassTable.commitEdits();
+        _weightClassTable.requestFocus();
+        _weightClassTable.repaint();
+        requestFocus();
     }
 
     private void radioButtonChanged() {
@@ -275,38 +281,68 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         JPanel titledEventsPanel = new JPanel(new BorderLayout());
         titledEventsPanel.setBorder(BorderFactory.createTitledBorder("Events"));
         JScrollPane scrollPane = new JScrollPane(_eventsTable);
-        scrollPane.setPreferredSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
+        scrollPane.setMinimumSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
         titledEventsPanel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel titledWeightClassPanel = new JPanel(new BorderLayout());
         titledWeightClassPanel.setBorder(BorderFactory.createTitledBorder("Weight Classes"));
         JScrollPane weightClassScrollPane = new JScrollPane(_weightClassTable);
-        weightClassScrollPane.setPreferredSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
+        weightClassScrollPane.setMinimumSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
         weightClassScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
         titledWeightClassPanel.add(weightClassScrollPane, BorderLayout.CENTER);
 
-        tablesPanel.add(titledEventsPanel, BorderLayout.NORTH);
-        tablesPanel.add(titledWeightClassPanel, BorderLayout.SOUTH);
+//        tablesPanel.add(titledEventsPanel, BorderLayout.NORTH);
+//        tablesPanel.add(titledWeightClassPanel, BorderLayout.SOUTH);
 
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx   = 0.001;
-        gbc.weighty   = 0.0;
+        gbc.weighty   = 0.5;
         gbc.anchor    = GridBagConstraints.NORTHWEST;
-        gbc.fill      = GridBagConstraints.HORIZONTAL;
+        gbc.fill      = GridBagConstraints.BOTH;
         gbc.insets    = new Insets(5,5,0,5);
-        attributesPanel.add(tablesPanel, gbc);
-        OkCancelPanel okCancelPanel = new OkCancelPanel("Create");
-        okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
-        okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
-        add(attributesPanel, BorderLayout.NORTH);
-        add(okCancelPanel, BorderLayout.SOUTH);
+        attributesPanel.add(titledEventsPanel, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 0.001;
+        gbc.weighty   = 0.5;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = GridBagConstraints.BOTH;
+        gbc.insets    = new Insets(5,5,0,5);
+        attributesPanel.add(titledWeightClassPanel, gbc);
+        _okCancelPanel = new OkCancelPanel("Create");
+
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 0.001;
+        gbc.weighty   = 1.0;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = GridBagConstraints.BOTH;
+        gbc.insets    = new Insets(5,0,0,5);
+        add(attributesPanel, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 1.0;
+        gbc.weighty   = 0.0;
+        gbc.anchor    = GridBagConstraints.SOUTHEAST;
+        gbc.fill      = GridBagConstraints.BOTH;
+        gbc.insets    = new Insets(5,0,0,5);
+        add(_okCancelPanel, gbc);
+
     }
 
-    private void addComponent(JComponent parentComponent, JComponent componentToAdd, int gridWidth, int fill)
+    private void addComponent(Container parentComponent, JComponent componentToAdd, int gridWidth, int fill)
     {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;

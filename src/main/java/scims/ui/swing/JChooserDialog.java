@@ -21,6 +21,7 @@ public class JChooserDialog<T> extends JDialog {
     private DefaultListModel<T> _leftModel;
     private DefaultListModel<T> _rightModel;
     private final List<Runnable> _additionalOkActionEvents = new ArrayList<Runnable>();
+    private String _delimeter = ";";
 
     public JChooserDialog(Window parentFrame, List<T> objects, Consumer<List<T>> chosenAction) {
         super(parentFrame, "Choose Weight Classes", ModalityType.APPLICATION_MODAL);
@@ -98,11 +99,15 @@ public class JChooserDialog<T> extends JDialog {
     private void setSelectedFromTextField() {
         String text = _textField.getText();
         if(text != null) {
-            String[] split = text.split(";");
+            String[] split = text.split(_delimeter);
             for(String name : split) {
+                name = name.trim();
                 for(T object : _objects) {
                     if(object != null && object.toString().equalsIgnoreCase(name)) {
                         _rightModel.addElement(object);
+                        if(_leftModel.contains(object)) {
+                            _leftModel.removeElement(object);
+                        }
                     }
                 }
             }
@@ -207,5 +212,9 @@ public class JChooserDialog<T> extends JDialog {
 
     public List<T> getObjects() {
         return _objects;
+    }
+
+    public void setDelimeter(String delimeter) {
+        _delimeter = delimeter;
     }
 }

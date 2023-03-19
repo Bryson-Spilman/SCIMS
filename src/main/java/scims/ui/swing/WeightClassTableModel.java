@@ -3,6 +3,7 @@ package scims.ui.swing;
 import scims.model.data.Event;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
@@ -39,8 +40,10 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
                 retVal = Boolean.class;
                 break;
             case NAME_COL:
-            case EVENTS_COL:
                 retVal = String.class;
+                break;
+            case EVENTS_COL:
+                retVal = List.class;
                 break;
             case MAX_COMPETITOR_WEIGHT_COL:
                 retVal = Double.class;
@@ -74,7 +77,7 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
                 retVal = rowData.getMaxNumberCompetitors();
                 break;
             case EVENTS_COL:
-                retVal = rowData.getEvents().stream().map(Event::getName).collect(Collectors.joining(";"));
+                retVal = rowData.getEvents().stream().map(Event::getName).collect(Collectors.joining("; "));
                 break;
             default:
                 retVal = null;
@@ -83,9 +86,10 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
         return retVal;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        if(rowIndex < 0 || columnIndex < 0) {
+        if(rowIndex < 0 || columnIndex < 0 || isWrongType(aValue, rowIndex, columnIndex)) {
             return;
         }
         WeightClassRowData rowData = getRowData().get(rowIndex);
@@ -104,6 +108,8 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
                 rowData.setMaxNumberCompetitors(aValue == null ? Integer.MAX_VALUE : Integer.parseInt(aValue.toString()));
                 break;
             case EVENTS_COL:
+                rowData.setEvents(aValue == null ? new ArrayList<>() : (List<Event>) aValue);
+                break;
             default:
                 break;
         }

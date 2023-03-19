@@ -6,22 +6,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class JChooserField<T> extends JPanel {
 
-    private List<T> _objects;
     private final Window _parent;
     private JTextField _textField;
     private JButton _button;
 
     private final JChooserDialog<T> _chooserDlg;
 
+    private String _delimeter = ";";
+
     public JChooserField(Window parent, List<T> objects) {
         _parent = parent;
         _chooserDlg = new JChooserDialog<>(parent, objects, this::updateField);
-        _objects = objects;
+        _textField = new JTextField();
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createLoweredBevelBorder());
         buildComponents();
@@ -34,6 +36,15 @@ public class JChooserField<T> extends JPanel {
         {
             ((Modifiable)_parent).setModified(true);
         }
+    }
+
+    public void setDelimeter(String delimeter) {
+        _delimeter = delimeter;
+        _chooserDlg.setDelimeter(delimeter);
+    }
+
+    public String getDelimeter() {
+        return _delimeter;
     }
 
     private void addListeners() {
@@ -50,9 +61,14 @@ public class JChooserField<T> extends JPanel {
     private void buildComponents() {
         _textField = new JTextField();
         _textField.setBorder(BorderFactory.createEmptyBorder());
+        _textField.setPreferredSize(new Dimension(Integer.MAX_VALUE, 25));
         _chooserDlg.setTextField(_textField);
         _button = new JButton("...");
-        _button.setPreferredSize(new Dimension(20, _textField.getPreferredSize().height));
+        _button.setPreferredSize(new Dimension(20, 20));
+        _button.setMaximumSize(_button.getPreferredSize());
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.add(_textField, new Integer(1));
+        layeredPane.add(_button, new Integer(2));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
@@ -64,8 +80,8 @@ public class JChooserField<T> extends JPanel {
         gbc.insets    = new Insets(0,0,0,0);
         add(_textField, gbc);
 
-        gbc.gridx     = GridBagConstraints.RELATIVE;
-        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridx     = 1;
+        gbc.gridy     = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx   = 0.0;
         gbc.weighty   = 0.0;
@@ -86,6 +102,16 @@ public class JChooserField<T> extends JPanel {
 
     public void setObjects(List<T> objects) {
         _chooserDlg.setObjects(objects);
+        String text = _textField.getText();
+        if(text != null) {
+            String[] split = text.split(_delimeter);
+            List<String> objStrings = objects.stream().map(Object::toString).collect(Collectors.toList());
+            objStrings.retainAll(Arrays.asList(split));
+            boolean isEnabled = _textField.isEnabled();
+            _textField.setEnabled(true);
+            _textField.setText(String.join(_delimeter,objStrings));
+            _textField.setEnabled(isEnabled);
+        }
     }
 
     public void reset() {
@@ -107,6 +133,10 @@ public class JChooserField<T> extends JPanel {
 
     public void setSelectedObjects(List<T> selectedObjects) {
         _chooserDlg.setSelectedObjects(selectedObjects);
+        boolean isEnabled = _textField.isEnabled();
+        _textField.setEnabled(true);
+        _textField.setText(selectedObjects.stream().map(Object::toString).collect(Collectors.joining(_delimeter)));
+        _textField.setEnabled(isEnabled);
     }
 
     public void setEditable(boolean editable) {
@@ -119,4 +149,25 @@ public class JChooserField<T> extends JPanel {
         _button.setEnabled(enabled);
     }
 
+    @Override
+    public void setBackground(Color bg) {
+        super.setBackground(bg);
+        if(_textField != null) {
+            _textField.setBackground(bg);
+        }
+        if(_button != null) {
+            _button.setBackground(bg);
+        }
+    }
+
+    @Override
+    public void setForeground(Color bg) {
+        super.setForeground(bg);
+        if(_textField != null) {
+            _textField.setForeground(bg);
+        }
+        if(_button != null) {
+            _button.setForeground(bg);
+        }
+    }
 }

@@ -6,7 +6,6 @@ import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -47,6 +46,10 @@ public class ChooserFieldTableColumn<T> extends HighlightedTableColumn {
         @Override
         public TableCellEditor getCellEditor() {
             return _editor;
+        }
+
+        public void setEnabled(boolean enabled) {
+            _chooserField.setEnabled(enabled);
         }
 
 }

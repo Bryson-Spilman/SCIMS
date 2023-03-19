@@ -5,6 +5,9 @@ import scims.model.data.scoring.EventScoring;
 import scims.model.data.scoring.RepsScoring;
 import scims.model.data.scoring.TimedScoring;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     static final int CHECK_BOX_COL = 0;
@@ -90,7 +93,7 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        if(row < 0 || col < 0) {
+        if(row < 0 || col < 0 || isWrongType(value, row, col)) {
             return;
         }
         EventsRowData rowData = getRowData().get(row);
@@ -103,7 +106,9 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 rowData.setName(String.valueOf(value));
                 break;
             case EVENT_ORDER_COL:
-                rowData.setEventOrder(value == null ? null : Integer.parseInt(value.toString()));
+                Integer order = value == null ? null : Integer.parseInt(value.toString());
+                switchOrdersWithOneAlreadyUsed(order, row, col);
+                rowData.setEventOrder(order);
                 break;
             case SCORE_TYPE_COL:
             default:
@@ -112,8 +117,45 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
         fireTableCellUpdated(row, col);
     }
 
+    private void switchOrdersWithOneAlreadyUsed(Integer orderWeAreSelecting, int row, int col) {
+        Integer currentRowUsingOrder = getCurrentRowUsingOrder(orderWeAreSelecting);
+        if(currentRowUsingOrder != null) {
+            Integer oldValueThisRow = getRowData().get(row).getEventOrder();
+            getRowData().get(currentRowUsingOrder).setEventOrder(oldValueThisRow);
+        }
+    }
+
     public void setEventOrderColumnEnabled(boolean enabled) {
         _eventOrderColumnEnabled = enabled;
         fireTableDataChanged();
+    }
+
+    private Integer getCurrentRowUsingOrder(Integer order) {
+        Integer retVal = null;
+        if(order != null) {
+            List<Integer> checkedRows = getCheckedRows();
+            for(Integer row : checkedRows) {
+                Object orderObj = getValueAt(row, EventsTableModel.EVENT_ORDER_COL);
+                if(orderObj != null) {
+                    int orderInt = Integer.parseInt(orderObj.toString());
+                    if(orderInt == order) {
+                        retVal = row;
+                        break;
+                    }
+                }
+            }
+        }
+        return retVal;
+    }
+
+    List<Integer> getCheckedRows() {
+        List<Integer> retVal = new ArrayList<>();
+        for(int row=0; row < getRowCount(); row++) {
+            Boolean checked = (Boolean) getValueAt(row, EventsTableModel.CHECK_BOX_COL);
+            if(checked) {
+                retVal.add(row);
+            }
+        }
+        return retVal;
     }
 }

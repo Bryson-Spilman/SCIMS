@@ -4,6 +4,7 @@ import scims.model.data.Event;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,5 +61,12 @@ class WeightClassTable extends SCIMSTable {
 
     public void setEvents(List<Event> selectedEvents) {
         _chooserField.setObjects(selectedEvents);
+    }
+
+    public void setUseSameEventsForAllWeightClasses(boolean useSameForAll) {
+        ((WeightClassTableModel)getModel()).setUseSameEventsForAllWeightClasses(useSameForAll);
+        if(useSameForAll) {
+            _chooserField.setSelectedObjects(_chooserField.getObjects());
+        }
     }
 }

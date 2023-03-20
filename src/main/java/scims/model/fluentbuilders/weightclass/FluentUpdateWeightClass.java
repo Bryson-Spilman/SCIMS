@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface FluentUpdateWeightClass extends FluentWeightClassBuilder {
     FluentUpdateWeightClass withUpdatedName(String name);
-    FluentUpdateWeightClass withUpdatedMaxCompetitorWeight(double maxCompetitorWeight);
+    FluentUpdateWeightClass withUpdatedMaxCompetitorWeight(Double maxCompetitorWeight);
     FluentUpdateWeightClass withUpdatedEvents(List<Event> events);
+
+    FluentUpdateWeightClass withUpdatedMaxNumberOfCompetitors(Integer maxNumberOfCompetitors);
 }

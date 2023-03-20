@@ -6,8 +6,8 @@ import java.util.List;
 
 public class StrengthWeightClassBuilder implements FluentWithWeightClassName, FluentFromExistingWeightClass {
     private String _name;
-    private double _maxCompetitorWeight;
-    private int _maxNumberOfCompetitors;
+    private Double _maxCompetitorWeight;
+    private Integer _maxNumberOfCompetitors;
     private List<Event> _eventsInOrder;
 
     @Override
@@ -28,7 +28,7 @@ public class StrengthWeightClassBuilder implements FluentWithWeightClassName, Fl
     private class WithWeightClassMaxCompetitorWeight implements FluentWithWeightClassMaxCompetitorWeight {
 
         @Override
-        public FluentWithWeightClassEvents withMaxCompetitorWeight(double maxCompetitorWeight) {
+        public FluentWithWeightClassEvents withMaxCompetitorWeight(Double maxCompetitorWeight) {
             _maxCompetitorWeight = maxCompetitorWeight;
             return new WithWeightClassEvents();
         }
@@ -46,7 +46,7 @@ public class StrengthWeightClassBuilder implements FluentWithWeightClassName, Fl
     private class WeightClassBuilder implements FluentWeightClassBuilder {
 
         @Override
-        public FluentWeightClassBuilder withMaxNumberOfCompetitors(int maxNumberOfCompetitors) {
+        public FluentWeightClassBuilder withMaxNumberOfCompetitors(Integer maxNumberOfCompetitors) {
             _maxNumberOfCompetitors = maxNumberOfCompetitors;
             return this;
         }
@@ -66,7 +66,7 @@ public class StrengthWeightClassBuilder implements FluentWithWeightClassName, Fl
         }
 
         @Override
-        public FluentUpdateWeightClass withUpdatedMaxCompetitorWeight(double maxCompetitorWeight) {
+        public FluentUpdateWeightClass withUpdatedMaxCompetitorWeight(Double maxCompetitorWeight) {
             _maxCompetitorWeight = maxCompetitorWeight;
             return this;
         }
@@ -74,6 +74,12 @@ public class StrengthWeightClassBuilder implements FluentWithWeightClassName, Fl
         @Override
         public FluentUpdateWeightClass withUpdatedEvents(List<Event> events) {
             _eventsInOrder = events;
+            return this;
+        }
+
+        @Override
+        public FluentUpdateWeightClass withUpdatedMaxNumberOfCompetitors(Integer maxNumberOfCompetitors) {
+            _maxNumberOfCompetitors = maxNumberOfCompetitors;
             return this;
         }
     }

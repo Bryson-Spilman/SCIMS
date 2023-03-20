@@ -1,13 +1,16 @@
 package scims.ui.swing;
 
 import scims.model.data.Event;
+import scims.model.enums.UnitSystem;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
 
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
     static final int CHECK_BOX_COL = 0;
     static final int NAME_COL = 1;
     static final int MAX_COMPETITOR_WEIGHT_COL = 2;
@@ -17,7 +20,6 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
 
     WeightClassTableModel() {
         setColumnNames();
-        addRow(new WeightClassRowData(false, "Light Weight Men", 200.4, 15, new ArrayList<>()));
     }
 
     void setUseSameEventsForAllWeightClasses(boolean useSameEventsForAllWeightClasses) {
@@ -72,6 +74,9 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
                 break;
             case MAX_COMPETITOR_WEIGHT_COL:
                 retVal = rowData.getMaxCompetitorWeight();
+                if(retVal != null) {
+                    retVal = Double.parseDouble(DECIMAL_FORMAT.format(retVal));
+                }
                 break;
             case MAX_NUM_COMPETITORS_COL:
                 retVal = rowData.getMaxNumberCompetitors();
@@ -119,5 +124,14 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return columnIndex != EVENTS_COL || !_useSameEventsForAllWeightClasses;
+    }
+
+    void convertWeights(UnitSystem oldUnitSystem, UnitSystem newUnitSystem) {
+        for(WeightClassRowData weightClassRowData : getRowData()) {
+            Double currentWeight = weightClassRowData.getMaxCompetitorWeight();
+            Double newWeight = UnitSystem.convertUnits(currentWeight, oldUnitSystem, newUnitSystem);
+            weightClassRowData.setMaxCompetitorWeight(newWeight);
+        }
+        fireTableDataChanged();
     }
 }

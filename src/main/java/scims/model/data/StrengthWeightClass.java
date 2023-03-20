@@ -2,16 +2,17 @@ package scims.model.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class StrengthWeightClass implements WeightClass {
 
     private final String _name;
-    private final double _maxCompetitorWeight;
-    private final int _maxNumberOfCompetitors;
+    private final Double _maxCompetitorWeight;
+    private final Integer _maxNumberOfCompetitors;
     private final List<Event> _eventsInOrder;
     private final List<Competitor> _competitors;
 
-    StrengthWeightClass(String name, double maxCompetitorWeight, int maxNumberOfCompetitors, List<Event> eventsInOrder) {
+    StrengthWeightClass(String name, Double maxCompetitorWeight, Integer maxNumberOfCompetitors, List<Event> eventsInOrder) {
         _name = name;
         _maxCompetitorWeight = maxCompetitorWeight;
         _maxNumberOfCompetitors = maxNumberOfCompetitors;
@@ -35,7 +36,7 @@ public class StrengthWeightClass implements WeightClass {
     }
 
     @Override
-    public int getMaxNumberOfCompetitors() {
+    public Integer getMaxNumberOfCompetitors() {
         return _maxNumberOfCompetitors;
     }
 
@@ -57,7 +58,7 @@ public class StrengthWeightClass implements WeightClass {
     }
 
     @Override
-    public double getMaxCompetitorWeight() {
+    public Double getMaxCompetitorWeight() {
         return _maxCompetitorWeight;
     }
 
@@ -74,5 +75,18 @@ public class StrengthWeightClass implements WeightClass {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StrengthWeightClass that = (StrengthWeightClass) o;
+        return Objects.equals(_name, that._name) && Objects.equals(_maxCompetitorWeight, that._maxCompetitorWeight);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_name, _maxCompetitorWeight);
     }
 }

@@ -1,20 +1,23 @@
 package scims.ui.swing;
 
 import scims.model.data.Event;
+import scims.model.data.WeightClass;
+import scims.model.enums.UnitSystem;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 class WeightClassTable extends SCIMSTable {
 
+    private final WeightClassTableModel _model;
     private JChooserField<Event> _chooserField;
 
     WeightClassTable() {
-        setModel(new WeightClassTableModel());
+        _model = new WeightClassTableModel();
+        setModel(_model);
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         initTable();
         addListeners();
@@ -68,5 +71,41 @@ class WeightClassTable extends SCIMSTable {
         if(useSameForAll) {
             _chooserField.setSelectedObjects(_chooserField.getObjects());
         }
+    }
+
+    public List<WeightClass> getAllWeightClasses() {
+        List<WeightClass> retVal = new ArrayList<>();
+        for(WeightClassRowData weightClassData : _model.getRowData()) {
+            retVal.add(weightClassData.getWeightClass());
+        }
+        return retVal;
+    }
+
+    public void clear() {
+        _model.clear();
+    }
+
+    public void setWeightClasses(List<WeightClass> weightClasses) {
+        for(WeightClass wc : weightClasses) {
+            WeightClassRowData rowData = new WeightClassRowData(false, wc.getName(), wc.getMaxCompetitorWeight(), wc.getMaxNumberOfCompetitors(), wc.getEventsInOrder());
+            _model.addRow(rowData);
+        }
+        _model.fireTableDataChanged();
+    }
+
+    public void convertWeights(UnitSystem oldUnitSystem, UnitSystem newUnitSystem) {
+        _model.convertWeights(oldUnitSystem, newUnitSystem);
+    }
+
+    public boolean hasMaxWeights() {
+        boolean retVal = false;
+        for(int row =0; row < _model.getRowCount(); row++) {
+            Object value = getValueAt(row, WeightClassTableModel.MAX_COMPETITOR_WEIGHT_COL);
+            if(value != null && ((Double)value) > Double.MIN_VALUE) {
+                retVal = true;
+                break;
+            }
+        }
+        return retVal;
     }
 }

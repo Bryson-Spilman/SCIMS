@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class JChooserField<T> extends JPanel {
 
-    private final Window _parent;
+    private Window _parent;
     private JTextField _textField;
     private JButton _button;
 
@@ -49,8 +49,33 @@ public class JChooserField<T> extends JPanel {
 
     private void addListeners() {
         _button.addActionListener(e -> {
+            if(_parent == null) {
+                _parent = SwingUtilities.getWindowAncestor(this);
+                if(_parent instanceof JFrame) {
+                    _chooserDlg.setIconImage(((JFrame)_parent).getIconImage());
+                }
+                else {
+                    JFrame frame = getTopLevelFrame(this);
+                    _chooserDlg.setIconImage(frame.getIconImage());
+                }
+                boolean modal = _chooserDlg.isModal();
+                _chooserDlg.setModal(false);
+                _chooserDlg.setAlwaysOnTop(true);
+                _chooserDlg.setLocationRelativeTo(_parent);
+                _chooserDlg.setModal(modal);
+            }
             _chooserDlg.setVisible(true);
         });
+    }
+
+    public JFrame getTopLevelFrame(Component c) {
+        if (c.getParent() == null) {
+            return null;
+        }
+        if (c.getParent() instanceof JFrame) {
+            return (JFrame) c.getParent();
+        }
+        return getTopLevelFrame(c.getParent());
     }
 
     public void addKeyListener(KeyListener keyListener)

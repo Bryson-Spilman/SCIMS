@@ -1,14 +1,23 @@
 package scims.ui.swing;
 
 
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JChooserDialog<T> extends JDialog {
 
+    private static final Logger LOGGER = Logger.getLogger(JChooserDialog.class.getName());
     private final List<T> _objects = new ArrayList<>();
     private final Consumer<List<T>> _chosenAction;
     private JTextField _textField;
@@ -184,6 +193,10 @@ public class JChooserDialog<T> extends JDialog {
         rightPanel.add(_okCancelPanel, BorderLayout.SOUTH);
         getContentPane().add(rightPanel);
 
+        _rightList.setDragEnabled(true);
+        _rightList.setTransferHandler(new ChooserTransferHandler<>(_rightList, _rightModel));
+
+        _rightList.setDropMode(DropMode.ON);
     }
 
     public void setObjects(List<T> objects) {
@@ -216,5 +229,66 @@ public class JChooserDialog<T> extends JDialog {
 
     public void setDelimeter(String delimeter) {
         _delimeter = delimeter;
+    }
+
+    private static class ChooserTransferHandler<T> extends TransferHandler {
+        private final JList<T> _list;
+        private final DefaultListModel<T> _model;
+        int _index;
+
+        ChooserTransferHandler(JList<T> list, DefaultListModel<T> model) {
+            _list = list;
+            _model = model;
+        }
+        @Override
+        public int getSourceActions(JComponent comp) {
+            return COPY_OR_MOVE;
+        }
+
+        @Override
+        public Transferable createTransferable(JComponent comp) {
+            _index = _list.getSelectedIndex();
+            return new StringSelection(_list.getSelectedValue().toString());
+        }
+
+
+        @Override
+        public void exportDone( JComponent comp, Transferable trans, int action ) {
+        }
+
+        @Override
+        public boolean canImport(TransferHandler.TransferSupport support) {
+            // data of type string?
+            return support.isDataFlavorSupported(DataFlavor.stringFlavor);
+        }
+
+        @Override
+        public boolean importData(TransferHandler.TransferSupport support) {
+            try {
+                // convert data to string
+                String s = (String)support.getTransferable().getTransferData(DataFlavor.stringFlavor);
+                JList.DropLocation dl = (JList.DropLocation)support.getDropLocation();
+                T data = _list.getSelectedValuesList().stream().filter(item -> item.toString().equalsIgnoreCase(s))
+                        .findFirst().orElse(null);
+                int indexFrom = -1;
+                for(int i=0; i<_model.getSize(); i++) {
+                    if(_model.getElementAt(i) == data) {
+                        indexFrom = i;
+                        break;
+                    }
+                }
+                int moveToIndex = dl.getIndex();
+                if(indexFrom >= 0) {
+                    T temp = _model.get(moveToIndex);
+                    _model.set(moveToIndex, _model.get(indexFrom));
+                    _model.set(indexFrom, temp);
+                }
+                return true;
+            }
+            catch (UnsupportedFlavorException | IOException e) {
+                LOGGER.log(Level.CONFIG, e.getMessage(), e);
+            }
+            return false;
+        }
     }
 }

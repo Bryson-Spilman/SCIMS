@@ -3,8 +3,6 @@ package scims.ui.swing;
 import scims.ui.swing.tablecells.*;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 import java.awt.*;
 import java.util.ArrayList;

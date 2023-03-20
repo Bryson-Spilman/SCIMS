@@ -1,6 +1,8 @@
 package scims.ui.swing;
 
 import scims.model.data.Event;
+import scims.model.data.StrengthWeightClassBuilder;
+import scims.model.data.WeightClass;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +12,7 @@ class WeightClassRowData {
     private String _name;
     private Double _maxCompetitorWeight;
     private Integer _maxNumberCompetitors;
-    private List<Event> _events = new ArrayList<>();
+    private List<Event> _events;
 
     WeightClassRowData(boolean isChecked, String name, Double maxCompetitorWeight, Integer maxNumberCompetitors, List<Event> events) {
         _isChecked = isChecked;
@@ -58,5 +60,15 @@ class WeightClassRowData {
 
     public void setEvents(List<Event> events) {
         _events = events;
+    }
+
+    public WeightClass getWeightClass() {
+        return new StrengthWeightClassBuilder()
+                .withName(_name)
+                .withMaxCompetitorWeight(_maxCompetitorWeight)
+                .withEventsInOrder(_events)
+                .withMaxNumberOfCompetitors(_maxNumberCompetitors)
+                .build();
+
     }
 }

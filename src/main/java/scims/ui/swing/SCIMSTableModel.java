@@ -41,4 +41,9 @@ public abstract class SCIMSTableModel<T> extends AbstractTableModel {
     protected boolean isWrongType(Object aValue, int rowIndex, int columnIndex) {
         return aValue != null && !getColumnClass(columnIndex).isInstance(aValue);
     }
+
+    void clear() {
+        _data.clear();
+        fireTableDataChanged();
+    }
 }

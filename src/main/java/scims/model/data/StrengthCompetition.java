@@ -1,6 +1,7 @@
 package scims.model.data;
 
-import scims.model.enums.UnitSystem;
+import scims.model.enums.DistanceUnitSystem;
+import scims.model.enums.WeightUnitSystem;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -9,14 +10,16 @@ public class StrengthCompetition implements Competition {
     private final String _name;
     private final ZonedDateTime _dateTime;
     private final List<WeightClass> _weightClasses;
-    private final UnitSystem _unitSystem;
+    private final WeightUnitSystem _weightunitSystem;
     private final boolean _isSameNumberOfEventsForAllWeightClasses;
+    private final DistanceUnitSystem _distanceUnitSystem;
 
-    StrengthCompetition(String name, ZonedDateTime dateTime, List<WeightClass> weightClasses, UnitSystem unitSystem, boolean isSameNumberOfEventsForAllWeightClasses) {
+    StrengthCompetition(String name, ZonedDateTime dateTime, List<WeightClass> weightClasses, WeightUnitSystem weightunitSystem, DistanceUnitSystem distanceUnitSystem, boolean isSameNumberOfEventsForAllWeightClasses) {
         _name = name;
         _dateTime = dateTime;
         _weightClasses = weightClasses;
-        _unitSystem = unitSystem;
+        _weightunitSystem = weightunitSystem;
+        _distanceUnitSystem = distanceUnitSystem;
         _isSameNumberOfEventsForAllWeightClasses = isSameNumberOfEventsForAllWeightClasses;
     }
 
@@ -41,8 +44,13 @@ public class StrengthCompetition implements Competition {
     }
 
     @Override
-    public UnitSystem getUnitSystem() {
-        return _unitSystem;
+    public WeightUnitSystem getWeightUnitSystem() {
+        return _weightunitSystem;
+    }
+
+    @Override
+    public DistanceUnitSystem getDistanceUnitSystem() {
+        return _distanceUnitSystem;
     }
 
     @Override

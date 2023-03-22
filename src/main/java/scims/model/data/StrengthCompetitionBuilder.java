@@ -1,6 +1,7 @@
 package scims.model.data;
 
-import scims.model.enums.UnitSystem;
+import scims.model.enums.DistanceUnitSystem;
+import scims.model.enums.WeightUnitSystem;
 import scims.model.fluentbuilders.competition.*;
 
 import java.time.ZonedDateTime;
@@ -9,16 +10,18 @@ import java.util.List;
 public class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFromExistingCompetition {
     private String _name;
     private ZonedDateTime _dateTime;
-    private UnitSystem _unitSystem;
+    private WeightUnitSystem _weightunitSystem;
     private List<WeightClass> _weightClasses;
     private boolean _isSameNumberOfEventsForAllWeightClasses;
+    private DistanceUnitSystem _distanceUnitSystem;
 
     @Override
     public FluentUpdateCompetition fromExistingCompetition(Competition competition) {
         _name = competition.getName();
         _dateTime = competition.getDateTime();
-        _unitSystem = competition.getUnitSystem();
+        _weightunitSystem = competition.getWeightUnitSystem();
         _weightClasses = competition.getWeightClasses();
+        _distanceUnitSystem = competition.getDistanceUnitSystem();
         _isSameNumberOfEventsForAllWeightClasses = competition.isSameNumberOfEventsForAllWeightClasses();
         return new UpdateCompetition();
     }
@@ -50,17 +53,26 @@ public class StrengthCompetitionBuilder implements FluentWithCompetitionName, Fl
     private class WithWeightClasses implements FluentWithWeightClasses {
 
         @Override
-        public FluentWithUnitSystem withWeightClasses(List<WeightClass> weightClasses) {
+        public FluentWithWeightUnitSystem withWeightClasses(List<WeightClass> weightClasses) {
             _weightClasses = weightClasses;
-            return new WithUnitSystem();
+            return new WithWeightUnitSystem();
         }
     }
 
-    private class WithUnitSystem implements FluentWithUnitSystem {
+    private class WithWeightUnitSystem implements FluentWithWeightUnitSystem {
 
         @Override
-        public FluentCompetitionBuilder withUnitSystem(UnitSystem unitSystem) {
-            _unitSystem = unitSystem;
+        public FluentWithDistanceUnitSystem withWeightUnitSystem(WeightUnitSystem unitSystem) {
+            _weightunitSystem = unitSystem;
+            return new WithDistanceUnitSystem();
+        }
+    }
+
+    private class WithDistanceUnitSystem implements FluentWithDistanceUnitSystem {
+
+        @Override
+        public FluentCompetitionBuilder withDistanceUnitSystem(DistanceUnitSystem distanceUnitSystem) {
+            _distanceUnitSystem = distanceUnitSystem;
             return new CompetitionBuilder();
         }
     }
@@ -69,7 +81,7 @@ public class StrengthCompetitionBuilder implements FluentWithCompetitionName, Fl
 
         @Override
         public StrengthCompetition build() {
-            return new StrengthCompetition(_name, _dateTime, _weightClasses, _unitSystem, _isSameNumberOfEventsForAllWeightClasses);
+            return new StrengthCompetition(_name, _dateTime, _weightClasses, _weightunitSystem, _distanceUnitSystem, _isSameNumberOfEventsForAllWeightClasses);
         }
     }
 
@@ -100,8 +112,14 @@ public class StrengthCompetitionBuilder implements FluentWithCompetitionName, Fl
         }
 
         @Override
-        public FluentUpdateCompetition withUpdatedUnitSystem(UnitSystem unitSystem) {
-            _unitSystem = unitSystem;
+        public FluentUpdateCompetition withUpdatedWeightUnitSystem(WeightUnitSystem unitSystem) {
+            _weightunitSystem = unitSystem;
+            return this;
+        }
+
+        @Override
+        public FluentUpdateCompetition withUpdatedDistanceUnitSystem(DistanceUnitSystem unitSystem) {
+            _distanceUnitSystem = unitSystem;
             return this;
         }
     }

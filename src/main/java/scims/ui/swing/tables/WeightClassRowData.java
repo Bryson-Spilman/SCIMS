@@ -1,4 +1,4 @@
-package scims.ui.swing;
+package scims.ui.swing.tables;
 
 import scims.model.data.Event;
 import scims.model.data.StrengthWeightClassBuilder;
@@ -71,4 +71,5 @@ class WeightClassRowData {
                 .build();
 
     }
+
 }

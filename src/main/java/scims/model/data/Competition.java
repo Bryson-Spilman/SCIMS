@@ -1,6 +1,7 @@
 package scims.model.data;
 
-import scims.model.enums.UnitSystem;
+import scims.model.enums.DistanceUnitSystem;
+import scims.model.enums.WeightUnitSystem;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -11,5 +12,6 @@ public interface Competition {
     ZonedDateTime getDateTime();
     boolean isSameNumberOfEventsForAllWeightClasses();
     List<WeightClass> getWeightClasses();
-    UnitSystem getUnitSystem();
+    WeightUnitSystem getWeightUnitSystem();
+    DistanceUnitSystem getDistanceUnitSystem();
 }

@@ -1,10 +1,10 @@
-package scims.ui.swing;
+package scims.ui.swing.tables;
 
-import scims.model.data.scoring.DistanceScoring;
-import scims.model.data.scoring.EventScoring;
-import scims.model.data.scoring.RepsScoring;
-import scims.model.data.scoring.TimedScoring;
+import scims.model.data.scoring.*;
+import scims.model.enums.DistanceUnitSystem;
+import scims.model.enums.WeightUnitSystem;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,22 +13,24 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
     static final int CHECK_BOX_COL = 0;
     static final int NAME_COL = 1;
     static final int SCORE_TYPE_COL = 2;
-    static final int EVENT_ORDER_COL = 3;
+    static final int TIME_LIMIT_COL = 3;
+    static final int EVENT_ORDER_COL = 4;
     private boolean _eventOrderColumnEnabled = true;
 
     EventsTableModel() {
         setColumnNames();
-        addRow(new EventsRowData(false, "Event 1", new TimedScoring(), null));
-        addRow(new EventsRowData(false, "Event 2", new RepsScoring(), null));
-        addRow(new EventsRowData(false, "Event 3", new DistanceScoring(), null));
-        addRow(new EventsRowData(false, "Event 4", new RepsScoring(), null));
-        addRow(new EventsRowData(false, "Event 5", new TimedScoring(), null));
+        addRow(new EventsRowData(false, "Event 1", new TimeScoring(), null, null));
+        addRow(new EventsRowData(false, "Event 2", new RepsScoring(),null, null));
+        addRow(new EventsRowData(false, "Event 3", new DistanceScoring(),null, null));
+        addRow(new EventsRowData(false, "Event 4", new RepsScoring(),null, null));
+        addRow(new EventsRowData(false, "Event 5", new TimeScoring(),null, null));
     }
 
     private void setColumnNames() {
         setColumnName(CHECK_BOX_COL, "");
         setColumnName(NAME_COL, "Event Name");
         setColumnName(SCORE_TYPE_COL, "Score Type");
+        setColumnName(TIME_LIMIT_COL, "<html><center>Time Limit<br>(seconds)</center></html>");
         setColumnName(EVENT_ORDER_COL, "Event Order");
     }
 
@@ -49,6 +51,10 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 break;
             case EVENT_ORDER_COL:
                 retVal = rowData.getEventOrder();
+                break;
+            case TIME_LIMIT_COL:
+                Duration timeLimit = (rowData.getTimeLimit());
+                retVal = timeLimit == null ? null : Long.valueOf(timeLimit.getSeconds()).doubleValue();
                 break;
             default:
                 retVal = "";
@@ -73,6 +79,9 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
             case EVENT_ORDER_COL:
                 retVal = Integer.class;
                 break;
+            case TIME_LIMIT_COL:
+                retVal = Double.class;
+                break;
             default:
                 retVal = super.getColumnClass(c);
                 break;
@@ -83,7 +92,8 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
     @Override
     public boolean isCellEditable(int row, int col) {
         return col == CHECK_BOX_COL || col == NAME_COL
-                || (col == EVENT_ORDER_COL && _eventOrderColumnEnabled && isRowChecked(row));
+                || (col == EVENT_ORDER_COL && _eventOrderColumnEnabled && isRowChecked(row))
+                || col == TIME_LIMIT_COL;
     }
 
     private boolean isRowChecked(int row) {
@@ -109,6 +119,9 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 Integer order = value == null ? null : Integer.parseInt(value.toString());
                 switchOrdersWithOneAlreadyUsed(order, row, col);
                 rowData.setEventOrder(order);
+                break;
+            case TIME_LIMIT_COL:
+                rowData.setTimeLimit(value == null ? null : Duration.ofSeconds(Double.valueOf(Double.parseDouble(value.toString())).longValue()));
                 break;
             case SCORE_TYPE_COL:
             default:
@@ -158,4 +171,25 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
         }
         return retVal;
     }
+
+    public void setDistanceUnits(DistanceUnitSystem selected) {
+        for(EventsRowData rowData : getRowData()) {
+            if(rowData.getEventScoring() instanceof DistanceScoring)
+            {
+                ((DistanceScoring)rowData.getEventScoring()).setUnitSystem(selected);
+            }
+        }
+        fireTableDataChanged();
+    }
+
+    public void setWeightUnits(WeightUnitSystem selected) {
+        for(EventsRowData rowData : getRowData()) {
+            if(rowData.getEventScoring() instanceof WeightScoring)
+            {
+                ((WeightScoring)rowData.getEventScoring()).setUnitSystem(selected);
+            }
+        }
+        fireTableDataChanged();
+    }
+
 }

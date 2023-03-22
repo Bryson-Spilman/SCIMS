@@ -1,7 +1,11 @@
 package scims.model.data.scoring;
 
+import scims.model.enums.DistanceUnitSystem;
+import scims.model.enums.WeightUnitSystem;
+
 public class WeightScoring implements EventScoring<Double>{
     private Double _score = 0.0;
+    private WeightUnitSystem _unitSystem = WeightUnitSystem.POUNDS;
 
     @Override
     public void setScore(Double score) {
@@ -9,22 +13,15 @@ public class WeightScoring implements EventScoring<Double>{
     }
 
     @Override
-    public String getDisplayScore() {
-        return _score.toString();
-    }
-
-    @Override
     public Double getScore() {
         return _score;
     }
 
-    @Override
-    public String getScoreType() {
-        return "Weight";
+    public void setUnitSystem(WeightUnitSystem unitSystem) {
+        _unitSystem = unitSystem;
     }
-
     @Override
     public String toString() {
-        return getScoreType();
+        return getScoreType()  + (_unitSystem == WeightUnitSystem.KILOS ? " (kgs)" : " (lbs)");
     }
 }

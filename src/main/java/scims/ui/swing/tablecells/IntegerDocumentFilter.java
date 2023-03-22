@@ -20,6 +20,9 @@ public class IntegerDocumentFilter extends DocumentFilter{
 
     @Override
     public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+        if(text == null) {
+            text = "";
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(fb.getDocument().getText(0, fb.getDocument().getLength()));
         sb.replace(offset, offset + length, text);

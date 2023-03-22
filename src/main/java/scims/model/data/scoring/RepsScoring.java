@@ -10,18 +10,8 @@ public class RepsScoring implements EventScoring<Integer> {
     }
 
     @Override
-    public String getDisplayScore() {
-        return _score.toString();
-    }
-
-    @Override
     public Integer getScore() {
         return _score;
-    }
-
-    @Override
-    public String getScoreType() {
-        return "Reps";
     }
 
     @Override

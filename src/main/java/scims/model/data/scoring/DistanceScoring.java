@@ -1,16 +1,14 @@
 package scims.model.data.scoring;
 
+import scims.model.enums.DistanceUnitSystem;
+
 public class DistanceScoring implements EventScoring<Double>{
     private Double _score = 0.0;
+    private DistanceUnitSystem _unitSystem = DistanceUnitSystem.FEET;
 
     @Override
     public void setScore(Double score) {
         _score = score;
-    }
-
-    @Override
-    public String getDisplayScore() {
-        return _score.toString();
     }
 
     @Override
@@ -19,12 +17,11 @@ public class DistanceScoring implements EventScoring<Double>{
     }
 
     @Override
-    public String getScoreType() {
-        return "Distance";
+    public String toString() {
+        return getScoreType() + (_unitSystem == DistanceUnitSystem.METERS ? " (m)" : " (ft)");
     }
 
-    @Override
-    public String toString() {
-        return getScoreType();
+    public void setUnitSystem(DistanceUnitSystem unitSystem) {
+        _unitSystem = unitSystem;
     }
 }

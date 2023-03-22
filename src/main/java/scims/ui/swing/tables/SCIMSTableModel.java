@@ -1,4 +1,4 @@
-package scims.ui.swing;
+package scims.ui.swing.tables;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -36,6 +36,7 @@ public abstract class SCIMSTableModel<T> extends AbstractTableModel {
 
     public void addRow(T rowData) {
         _data.add(rowData);
+        fireTableDataChanged();
     }
 
     protected boolean isWrongType(Object aValue, int rowIndex, int columnIndex) {

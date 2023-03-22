@@ -1,7 +1,8 @@
-package scims.ui.swing;
+package scims.ui.swing.tables;
 
 import scims.model.data.Event;
-import scims.model.enums.UnitSystem;
+import scims.model.data.WeightClass;
+import scims.model.enums.WeightUnitSystem;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -126,10 +127,10 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
         return columnIndex != EVENTS_COL || !_useSameEventsForAllWeightClasses;
     }
 
-    void convertWeights(UnitSystem oldUnitSystem, UnitSystem newUnitSystem) {
+    void convertWeights(WeightUnitSystem oldUnitSystem, WeightUnitSystem newUnitSystem) {
         for(WeightClassRowData weightClassRowData : getRowData()) {
             Double currentWeight = weightClassRowData.getMaxCompetitorWeight();
-            Double newWeight = UnitSystem.convertUnits(currentWeight, oldUnitSystem, newUnitSystem);
+            Double newWeight = WeightUnitSystem.convertUnits(currentWeight, oldUnitSystem, newUnitSystem);
             weightClassRowData.setMaxCompetitorWeight(newWeight);
         }
         fireTableDataChanged();

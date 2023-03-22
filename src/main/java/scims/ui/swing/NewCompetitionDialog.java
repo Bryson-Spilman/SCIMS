@@ -1,14 +1,18 @@
 package scims.ui.swing;
 
 import scims.model.data.*;
+import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.StrongmanCorpWeightClasses;
 import scims.model.enums.USSWeightClasses;
-import scims.model.enums.UnitSystem;
+import scims.model.enums.WeightUnitSystem;
 import scims.ui.Modifiable;
+import scims.ui.swing.tables.EventsTable;
+import scims.ui.swing.tables.WeightClassTable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -31,15 +35,18 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     private OkCancelPanel _okCancelPanel;
     private JButton _createNewEventButton;
     private JButton _createNewWeightClassButton;
-    private ButtonGroup _uniSystemButtonGroup;
     private JRadioButton _poundsRadioButton;
     private JRadioButton _kilosRadioButton;
+    private JRadioButton _feetRadioButton;
+    private JRadioButton _metersRadioButton;
+    private DateTimeTextField _dateTimeTextField;
 
     public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
         setLayout(new GridBagLayout());
         setSize(650,700);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        setLocationRelativeTo(parentFrame);
         _createAction = createAction;
         // Initialize components
         buildComponents();
@@ -47,10 +54,23 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         addListeners();
     }
 
-    private Competition buildCompetition()
-    {
-        //TODO
-        return null;
+    private Competition buildCompetition() throws MissingRequiredValueException {
+        String name = _nameTextField.getText();
+        if(name == null || name.trim().isEmpty()) {
+            throw new MissingRequiredValueException("Name");
+        }
+        ZonedDateTime dateTime = null;
+        if(_dateTimeTextField.getText() != null &&  !_dateTimeTextField.getText().trim().isEmpty()) {
+            dateTime = _dateTimeTextField.getZonedDateTime();
+        }
+        return new StrengthCompetitionBuilder()
+                .withName(name)
+                .withDateTime(dateTime)
+                .withIsSameNumberOfEventsForAllWeightClasses(_sameEventsForAllWeightsClassesCheckbox.isSelected())
+                .withWeightClasses(_weightClassTable.getSelectedWeightClasses())
+                .withWeightUnitSystem(_poundsRadioButton.isSelected() ? WeightUnitSystem.POUNDS : WeightUnitSystem.KILOS)
+                .withDistanceUnitSystem(_feetRadioButton.isSelected() ? DistanceUnitSystem.FEET : DistanceUnitSystem.METERS)
+                .build();
     }
 
     private void addListeners() {
@@ -76,25 +96,52 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _eventsTable.addNewEventSelectedAction(this::updatedEvents);
         _okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
-        _poundsRadioButton.addActionListener(e -> unitSystemChanged(e));
-        _kilosRadioButton.addActionListener(e -> unitSystemChanged(e));
+        _poundsRadioButton.addActionListener(this::weightUnitSystemChanged);
+        _kilosRadioButton.addActionListener(this::weightUnitSystemChanged);
+        _feetRadioButton.addActionListener(this::distanceUnitSystemChanged);
+        _metersRadioButton.addActionListener(this::distanceUnitSystemChanged);
+        _createNewEventButton.addActionListener(e -> newEventButtonAction());
+        _createNewWeightClassButton.addActionListener(e -> newWeightClassButtonAction());
     }
 
-    private void unitSystemChanged(ActionEvent e) {
+    private void distanceUnitSystemChanged(ActionEvent actionEvent) {
+        DistanceUnitSystem selected = DistanceUnitSystem.FEET;
+        if(_metersRadioButton.isSelected()) {
+            selected = DistanceUnitSystem.METERS;
+        }
+        _eventsTable.applyDistanceUnitsChange(selected);
+    }
+
+    private void newEventButtonAction() {
+        NewEventDialog dlg = new NewEventDialog(this, _eventsTable::addEvent);
+        dlg.setVisible(true);
+    }
+
+    private void newWeightClassButtonAction() {
+        NewWeightClassDialog dlg = new NewWeightClassDialog(this, _weightClassTable::addWeightClass);
+        dlg.setVisible(true);
+    }
+
+    private void weightUnitSystemChanged(ActionEvent e) {
         if(_prevSelectedUnitSystem != e.getSource() && _weightClassTable.hasMaxWeights()) {
             int opt = JOptionPane.showConfirmDialog(this, "Unit system changed. Would you like to apply a unit conversion to the max competitor weights?",
                     "Apply Unit Conversion", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if(opt == JOptionPane.YES_OPTION) {
-                UnitSystem newUnitSystem = UnitSystem.POUNDS;
-                UnitSystem oldUnitSystem = UnitSystem.KILOS;
+                WeightUnitSystem newUnitSystem = WeightUnitSystem.POUNDS;
+                WeightUnitSystem oldUnitSystem = WeightUnitSystem.KILOS;
                 if(_kilosRadioButton.isSelected()) {
-                    newUnitSystem = UnitSystem.KILOS;
-                    oldUnitSystem = UnitSystem.POUNDS;
+                    newUnitSystem = WeightUnitSystem.KILOS;
+                    oldUnitSystem = WeightUnitSystem.POUNDS;
                 }
                 _weightClassTable.convertWeights(oldUnitSystem, newUnitSystem);
             }
             _prevSelectedUnitSystem = (JRadioButton) e.getSource();
         }
+        WeightUnitSystem selected = WeightUnitSystem.POUNDS;
+        if(_kilosRadioButton.isSelected()) {
+            selected = WeightUnitSystem.KILOS;
+        }
+        _eventsTable.applyWeightUnitsChange(selected);
     }
 
     private void useSameEventsForAllCheckBoxClicked() {
@@ -102,12 +149,11 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         if(_eventsTable.hasOrdersSet()) {
             int opt = JOptionPane.showConfirmDialog(this, "Selecting this will reset any event orders set in the events table. Continue?",
                     "Confirm Reset Events Orders", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (opt == JOptionPane.YES_OPTION)
-            {
+            if (opt == JOptionPane.YES_OPTION) {
                 _eventsTable.resetEventOrders();
             }
         }
-        ((EventsTableModel)_eventsTable.getModel()).setEventOrderColumnEnabled(_sameEventsForAllWeightsClassesCheckbox.isSelected());
+        _eventsTable.setEventOrderColumnEnabled(_sameEventsForAllWeightsClassesCheckbox.isSelected());
         updatedEvents();
     }
 
@@ -132,6 +178,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
                     {
                         _weightClassTable.clear();
                         _weightClassTable.setWeightClasses(StrongmanCorpWeightClasses.getValues());
+                        if(_kilosRadioButton.isSelected()) {
+                            _weightClassTable.convertWeights(WeightUnitSystem.POUNDS, WeightUnitSystem.KILOS);
+                        }
                         _prevRadioButton = _strongmanCorpRadioButton;
                     } else {
                         _ignoreRadioChange = true;
@@ -139,6 +188,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
                     }
                 } else {
                     _weightClassTable.setWeightClasses(StrongmanCorpWeightClasses.getValues());
+                    if(_kilosRadioButton.isSelected()) {
+                        _weightClassTable.convertWeights(WeightUnitSystem.POUNDS, WeightUnitSystem.KILOS);
+                    }
                 }
             } else if (_ussRadioButton.isSelected()) {
                 if(!emptyOrOnlyContainsUssWeightClasses()) {
@@ -146,6 +198,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
                     if(opt == JOptionPane.YES_OPTION) {
                         _weightClassTable.clear();
                         _weightClassTable.setWeightClasses(USSWeightClasses.getValues());
+                        if(_kilosRadioButton.isSelected()) {
+                            _weightClassTable.convertWeights(WeightUnitSystem.POUNDS, WeightUnitSystem.KILOS);
+                        }
                         _prevRadioButton = _ussRadioButton;
                     } else {
                         _ignoreRadioChange = true;
@@ -153,6 +208,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
                     }
                 } else {
                     _weightClassTable.setWeightClasses(USSWeightClasses.getValues());
+                    if(_kilosRadioButton.isSelected()) {
+                        _weightClassTable.convertWeights(WeightUnitSystem.POUNDS, WeightUnitSystem.KILOS);
+                    }
                 }
             }
             else {
@@ -197,8 +255,14 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     }
 
     private void createCompetitionClicked() {
-        _createAction.accept(buildCompetition());
-        dispose();
+        try {
+            _createAction.accept(buildCompetition());
+            dispose();
+        } catch (MissingRequiredValueException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Competition",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
     }
 
     private void closeDialogClicked()
@@ -219,13 +283,22 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     {
         JLabel nameLabel = new JLabel("Competition Name:");
         _nameTextField = new JTextField();
-        JLabel unitSystemLabel = new JLabel("Unit System:");
-        _uniSystemButtonGroup = new ButtonGroup();
-        _poundsRadioButton = new JRadioButton(UnitSystem.POUNDS.getDisplayName());
-        _kilosRadioButton = new JRadioButton(UnitSystem.KILOS.getDisplayName());
-        _uniSystemButtonGroup.add(_poundsRadioButton);
-        _uniSystemButtonGroup.add(_kilosRadioButton);
-        _uniSystemButtonGroup.setSelected(_poundsRadioButton.getModel(), true);
+        JLabel dateTimeLabel = new JLabel("Date & Time:");
+        _dateTimeTextField = new DateTimeTextField();
+        JLabel weightUnitSystemLabel = new JLabel("Weight Unit System:");
+        ButtonGroup weightUnitSystemButtonGroup = new ButtonGroup();
+        _poundsRadioButton = new JRadioButton(WeightUnitSystem.POUNDS.getDisplayName());
+        _kilosRadioButton = new JRadioButton(WeightUnitSystem.KILOS.getDisplayName());
+        weightUnitSystemButtonGroup.add(_poundsRadioButton);
+        weightUnitSystemButtonGroup.add(_kilosRadioButton);
+        weightUnitSystemButtonGroup.setSelected(_poundsRadioButton.getModel(), true);
+        JLabel distanceUnitSystemLabel = new JLabel("Distance Unit System:");
+        ButtonGroup distanceUnitSystemButtonGroup = new ButtonGroup();
+        _feetRadioButton = new JRadioButton(DistanceUnitSystem.FEET.getDisplayName());
+        _metersRadioButton = new JRadioButton(DistanceUnitSystem.METERS.getDisplayName());
+        distanceUnitSystemButtonGroup.add(_feetRadioButton);
+        distanceUnitSystemButtonGroup.add(_metersRadioButton);
+        distanceUnitSystemButtonGroup.setSelected(_feetRadioButton.getModel(), true);
         JLabel typeLabel = new JLabel("Competiton Type:");
         _sanctionRadioButtonGroup = new ButtonGroup();
         _strongmanCorpRadioButton = new JRadioButton("Strongman Corporation");
@@ -244,8 +317,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _weightClassTable.setWeightClasses(StrongmanCorpWeightClasses.getValues());
 
         JPanel attributesPanel = new JPanel(new GridBagLayout());
-        JPanel createCancelPanel = new JPanel(new GridBagLayout());
-        // Set GridBagConstraints for the label and text field
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
@@ -276,6 +348,29 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         gbc.weighty   = 0.0;
         gbc.anchor    = GridBagConstraints.NORTHWEST;
         gbc.fill      = GridBagConstraints.NONE;
+        gbc.insets    = new Insets(5,5,0,5);
+        attributesPanel.add(dateTimeLabel, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        gbc.weightx   = 0.0;
+        gbc.weighty   = 0.0;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = GridBagConstraints.HORIZONTAL;
+        gbc.insets    = new Insets(5,5,0,5);
+        _dateTimeTextField.setColumns(10);
+        attributesPanel.add(_dateTimeTextField, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        gbc.weightx   = 0.0;
+        gbc.weighty   = 0.0;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = GridBagConstraints.NONE;
         gbc.insets    = new Insets(8,5,0,0);
         attributesPanel.add(typeLabel, gbc);
 
@@ -294,11 +389,17 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         gbc.insets    = new Insets(5,-10,0,5);
         attributesPanel.add(sanctionRadioButtonPanel, gbc);
 
-        JPanel unitSystemRadioButtonPanel = new JPanel(new BorderLayout());
-        unitSystemRadioButtonPanel.add(unitSystemLabel, BorderLayout.WEST);
-        unitSystemRadioButtonPanel.add(_poundsRadioButton, BorderLayout.CENTER);
-        unitSystemRadioButtonPanel.add(_kilosRadioButton, BorderLayout.EAST);
-        addComponent(attributesPanel, unitSystemRadioButtonPanel, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
+        JPanel weightUnitSystemRadioButtonPanel = new JPanel(new BorderLayout());
+        weightUnitSystemRadioButtonPanel.add(weightUnitSystemLabel, BorderLayout.WEST);
+        weightUnitSystemRadioButtonPanel.add(_poundsRadioButton, BorderLayout.CENTER);
+        weightUnitSystemRadioButtonPanel.add(_kilosRadioButton, BorderLayout.EAST);
+        addComponent(attributesPanel, weightUnitSystemRadioButtonPanel, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
+
+        JPanel distanceUnitSystemRadioButtonPanel = new JPanel(new BorderLayout());
+        distanceUnitSystemRadioButtonPanel.add(distanceUnitSystemLabel, BorderLayout.WEST);
+        distanceUnitSystemRadioButtonPanel.add(_feetRadioButton, BorderLayout.CENTER);
+        distanceUnitSystemRadioButtonPanel.add(_metersRadioButton, BorderLayout.EAST);
+        addComponent(attributesPanel, distanceUnitSystemRadioButtonPanel, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
 
         addComponent(attributesPanel, _sameEventsForAllWeightsClassesCheckbox, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
 

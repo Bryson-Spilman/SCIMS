@@ -1,8 +1,9 @@
-package scims.ui.swing;
+package scims.ui.swing.tables;
 
 import scims.model.data.Event;
 import scims.model.data.WeightClass;
-import scims.model.enums.UnitSystem;
+import scims.model.enums.WeightUnitSystem;
+import scims.ui.swing.JChooserField;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -10,12 +11,13 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class WeightClassTable extends SCIMSTable {
+public class WeightClassTable extends SCIMSTable {
 
     private final WeightClassTableModel _model;
     private JChooserField<Event> _chooserField;
+    private WeightUnitSystem _weightUnitSystem = WeightUnitSystem.POUNDS;
 
-    WeightClassTable() {
+    public WeightClassTable() {
         _model = new WeightClassTableModel();
         setModel(_model);
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -93,7 +95,8 @@ class WeightClassTable extends SCIMSTable {
         _model.fireTableDataChanged();
     }
 
-    public void convertWeights(UnitSystem oldUnitSystem, UnitSystem newUnitSystem) {
+    public void convertWeights(WeightUnitSystem oldUnitSystem, WeightUnitSystem newUnitSystem) {
+        _weightUnitSystem = newUnitSystem;
         _model.convertWeights(oldUnitSystem, newUnitSystem);
     }
 
@@ -105,6 +108,20 @@ class WeightClassTable extends SCIMSTable {
                 retVal = true;
                 break;
             }
+        }
+        return retVal;
+    }
+
+    public void addWeightClass(WeightClass wc) {
+        _model.addRow(new WeightClassRowData(true, wc.getName(), wc.getMaxCompetitorWeight(), wc.getMaxNumberOfCompetitors(), wc.getEventsInOrder()));
+    }
+
+    public List<WeightClass> getSelectedWeightClasses() {
+        List<WeightClass> retVal = new ArrayList<>();
+        List<Integer> checkedRows = getCheckedRows();
+        for(int row : checkedRows) {
+            WeightClass wc = _model.getRowData().get(row).getWeightClass();
+            retVal.add(wc);
         }
         return retVal;
     }

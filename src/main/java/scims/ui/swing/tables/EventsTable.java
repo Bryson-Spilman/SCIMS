@@ -1,16 +1,20 @@
-package scims.ui.swing;
+package scims.ui.swing.tables;
 
 import scims.model.data.Event;
 import scims.model.data.StrengthEventBuilder;
+import scims.model.data.WeightClass;
 import scims.model.data.scoring.EventScoring;
+import scims.model.enums.DistanceUnitSystem;
+import scims.model.enums.WeightUnitSystem;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import java.awt.*;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-class EventsTable extends SCIMSTable {
+public class EventsTable extends SCIMSTable {
 
     private final EventsTableModel _model;
     private JComboBox<Object> _eventOrderComboBox;
@@ -75,6 +79,7 @@ class EventsTable extends SCIMSTable {
     private void initTable() {
         _eventOrderComboBox = setComboBoxColumn(EventsTableModel.EVENT_ORDER_COL);
         setCheckBoxColumn(EventsTableModel.CHECK_BOX_COL);
+        setDoubleFieldColumn(EventsTableModel.TIME_LIMIT_COL);
         DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<>();
         _eventOrderComboBox.setModel(model);
         getColumnModel().getColumn(EventsTableModel.CHECK_BOX_COL).setMaxWidth(30);
@@ -93,20 +98,7 @@ class EventsTable extends SCIMSTable {
 
     @Override
     public Class<?> getColumnClass(int column) {
-        Class<?> retVal = super.getColumnClass(column);
-        switch(column) {
-            case EventsTableModel.CHECK_BOX_COL:
-                retVal = Boolean.class;
-                break;
-            case EventsTableModel.NAME_COL:
-            case EventsTableModel.SCORE_TYPE_COL:
-                retVal = String.class;
-                break;
-            case EventsTableModel.EVENT_ORDER_COL:
-                retVal = Integer.class;
-                break;
-        }
-        return retVal;
+        return _model.getColumnClass(column);
     }
 
     public boolean hasOrdersSet() {
@@ -136,12 +128,29 @@ class EventsTable extends SCIMSTable {
         for(int checkedRow : checkedRows) {
             String name = (String) getValueAt(checkedRow, EventsTableModel.NAME_COL);
             EventScoring<?> scoreType = (EventScoring<?>) getValueAt(checkedRow, EventsTableModel.SCORE_TYPE_COL);
-            retVal.add(new StrengthEventBuilder().withName(name).withScoring(scoreType).build());
+            Duration timeLimit = _model.getRowData().get(checkedRow).getTimeLimit();
+            retVal.add(new StrengthEventBuilder().withName(name).withScoring(scoreType).withTimeLimit(timeLimit).build());
         }
         return retVal;
     }
 
     public void addNewEventSelectedAction(Runnable updatedEvents) {
         _actionOnEventsSelectionUpdate.add(updatedEvents);
+    }
+
+    public void setEventOrderColumnEnabled(boolean enabled) {
+        _model.setEventOrderColumnEnabled(enabled);
+    }
+
+    public void addEvent(Event event) {
+        _model.addRow(new EventsRowData(true, event.getName(), event.getScoring(), event.getTimeLimit(), null));
+    }
+
+    public void applyDistanceUnitsChange(DistanceUnitSystem selected) {
+        _model.setDistanceUnits(selected);
+    }
+
+    public void applyWeightUnitsChange(WeightUnitSystem selected) {
+        _model.setWeightUnits(selected);
     }
 }

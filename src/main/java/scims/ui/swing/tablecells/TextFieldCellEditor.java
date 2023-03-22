@@ -1,6 +1,8 @@
 package scims.ui.swing.tablecells;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 
 class TextFieldCellEditor extends DefaultCellEditor {
@@ -17,9 +19,14 @@ class TextFieldCellEditor extends DefaultCellEditor {
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         _textField.setText(value == null ? null : value.toString());
+        ((AbstractDocument) _textField.getDocument()).setDocumentFilter(getDocumentFilter());
         _textField.setEnabled(table.isCellEditable(row, column));
         _textField.setEditable(table.isCellEditable(row, column));
         return _textField;
+    }
+
+    protected DocumentFilter getDocumentFilter() {
+        return new DocumentFilter();
     }
 
     @Override
@@ -32,7 +39,7 @@ class TextFieldCellEditor extends DefaultCellEditor {
         fireEditingStopped();
         int row = _parentTable.getSelectedRow();
         int column = _parentTable.getSelectedColumn();
-        _parentTable.getModel().setValueAt(_textField.getText(), row, column);
+        _parentTable.getModel().setValueAt(getCellEditorValue(), row, column);
         return super.stopCellEditing();
     }
 }

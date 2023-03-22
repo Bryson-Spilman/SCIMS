@@ -23,6 +23,7 @@ public class SCIMSFrame extends JFrame {
         super("SCIMS");
         super.setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         // Set the size of the JFrame and make it visible
         setSize(800, 600);
         URL scimsFrameImageUrl = getClass().getResource("SCIMS.png");
@@ -35,6 +36,7 @@ public class SCIMSFrame extends JFrame {
         _controller = new CompetitionModelController(_competitionTree, _competitionTreeTable);
         addListeners();
         setVisible(true);
+        setLocationRelativeTo(null);
     }
 
     private void addListeners()

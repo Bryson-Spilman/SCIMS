@@ -1,5 +1,6 @@
-package scims.ui.swing;
+package scims.ui.swing.tables;
 
+import scims.ui.swing.JChooserField;
 import scims.ui.swing.tablecells.*;
 
 import javax.swing.*;

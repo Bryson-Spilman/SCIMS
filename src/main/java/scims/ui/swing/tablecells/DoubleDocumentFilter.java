@@ -4,7 +4,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-class DoubleDocumentFilter extends DocumentFilter {
+public class DoubleDocumentFilter extends DocumentFilter {
 
     @Override
     public void insertString(FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException {
@@ -21,6 +21,9 @@ class DoubleDocumentFilter extends DocumentFilter {
 
     @Override
     public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+        if(text == null) {
+            text = "";
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(fb.getDocument().getText(0, fb.getDocument().getLength()));
         sb.replace(offset, offset + length, text);

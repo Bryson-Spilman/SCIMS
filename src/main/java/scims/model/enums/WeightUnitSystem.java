@@ -1,13 +1,13 @@
 package scims.model.enums;
 
-public enum UnitSystem {
+public enum WeightUnitSystem {
     POUNDS("Pounds"),
     KILOS("Kilos");
 
     private static final double POUNDS_TO_KILOS_FACTOR = 0.45359237;
     private final String _displayName;
 
-    UnitSystem(String displayName) {
+    WeightUnitSystem(String displayName) {
         this._displayName = displayName;
     }
 
@@ -15,7 +15,7 @@ public enum UnitSystem {
         return _displayName;
     }
 
-    public static Double convertUnits(Double value, UnitSystem from, UnitSystem to) {
+    public static Double convertUnits(Double value, WeightUnitSystem from, WeightUnitSystem to) {
         Double retVal = value;
         if(value != null && from != to) {
             if(from == POUNDS) {
@@ -27,7 +27,7 @@ public enum UnitSystem {
         return retVal;
     }
 
-    public static Integer convertUnits(Integer value, UnitSystem from, UnitSystem to) {
+    public static Integer convertUnits(Integer value, WeightUnitSystem from, WeightUnitSystem to) {
         Integer retVal = value;
         if(value != null && from != to) {
             if(from == POUNDS) {
@@ -40,10 +40,10 @@ public enum UnitSystem {
     }
 
     public static double poundsToKilograms(double pounds) {
-        return pounds * 0.45359237;
+        return pounds * POUNDS_TO_KILOS_FACTOR;
     }
 
     public static double kilogramsToPounds(double kilograms) {
-        return kilograms / 0.45359237;
+        return kilograms / POUNDS_TO_KILOS_FACTOR;
     }
 }

@@ -2,9 +2,11 @@ package scims.model.data.scoring;
 
 public interface EventScoring<T> {
     void setScore(T score);
-    String getDisplayScore();
     T getScore();
 
-    String getScoreType();
+    default String getScoreType() {
+        String className = this.getClass().getSimpleName();
+        return className.substring(0, className.indexOf("Scoring"));
+    }
 
 }

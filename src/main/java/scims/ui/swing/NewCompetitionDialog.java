@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -54,7 +55,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         addListeners();
     }
 
-    private Competition buildCompetition() throws MissingRequiredValueException {
+    private Competition buildCompetition() throws MissingRequiredValueException, DateTimeParseException {
         String name = _nameTextField.getText();
         if(name == null || name.trim().isEmpty()) {
             throw new MissingRequiredValueException("Name");
@@ -261,6 +262,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         } catch (MissingRequiredValueException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Competition",
                     JOptionPane.ERROR_MESSAGE);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "<html>Invalid Competition Date! Date should be of form MM-dd-yyyy,<br>" +
+                            "and Time should be of form HH:mm (AM/PM)<html>", "Invalid Competition", JOptionPane.ERROR_MESSAGE);
         }
 
     }
@@ -354,7 +358,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx   = 0.0;
         gbc.weighty   = 0.0;
         gbc.anchor    = GridBagConstraints.NORTHWEST;
@@ -393,15 +397,15 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         weightUnitSystemRadioButtonPanel.add(weightUnitSystemLabel, BorderLayout.WEST);
         weightUnitSystemRadioButtonPanel.add(_poundsRadioButton, BorderLayout.CENTER);
         weightUnitSystemRadioButtonPanel.add(_kilosRadioButton, BorderLayout.EAST);
-        addComponent(attributesPanel, weightUnitSystemRadioButtonPanel, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
+        addComponent(attributesPanel, weightUnitSystemRadioButtonPanel);
 
         JPanel distanceUnitSystemRadioButtonPanel = new JPanel(new BorderLayout());
         distanceUnitSystemRadioButtonPanel.add(distanceUnitSystemLabel, BorderLayout.WEST);
         distanceUnitSystemRadioButtonPanel.add(_feetRadioButton, BorderLayout.CENTER);
         distanceUnitSystemRadioButtonPanel.add(_metersRadioButton, BorderLayout.EAST);
-        addComponent(attributesPanel, distanceUnitSystemRadioButtonPanel, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
+        addComponent(attributesPanel, distanceUnitSystemRadioButtonPanel);
 
-        addComponent(attributesPanel, _sameEventsForAllWeightsClassesCheckbox, GridBagConstraints.REMAINDER, GridBagConstraints.NONE);
+        addComponent(attributesPanel, _sameEventsForAllWeightsClassesCheckbox);
 
         JPanel titledEventsPanel = new JPanel(new BorderLayout());
         titledEventsPanel.setBorder(BorderFactory.createTitledBorder("Events"));
@@ -495,16 +499,16 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
 
     }
 
-    private void addComponent(Container parentComponent, JComponent componentToAdd, int gridWidth, int fill)
+    private void addComponent(Container parentComponent, JComponent componentToAdd)
     {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = gridWidth;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx   = 0.001;
         gbc.weighty   = 0.0;
         gbc.anchor    = GridBagConstraints.NORTHWEST;
-        gbc.fill      = fill;
+        gbc.fill      = GridBagConstraints.NONE;
         gbc.insets    = new Insets(5,5,0,5);
         parentComponent.add(componentToAdd, gbc);
     }

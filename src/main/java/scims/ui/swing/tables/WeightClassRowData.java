@@ -4,7 +4,6 @@ import scims.model.data.Event;
 import scims.model.data.StrengthWeightClassBuilder;
 import scims.model.data.WeightClass;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class WeightClassRowData {

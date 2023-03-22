@@ -8,7 +8,7 @@ class EventsRowData {
     private Duration _timeLimit;
     private String _name;
     private boolean _checked;
-    private EventScoring<?> _eventScoring;
+    private final EventScoring<?> _eventScoring;
     private Integer _eventOrder;
 
     public EventsRowData(boolean checked, String name, EventScoring<?> eventScoring, Duration timeLimit, Integer eventOrder) {
@@ -37,10 +37,6 @@ class EventsRowData {
 
     public EventScoring<?> getEventScoring() {
         return _eventScoring;
-    }
-
-    public void setEventScoring(EventScoring<?> eventScoring) {
-        _eventScoring = eventScoring;
     }
 
     public Integer getEventOrder() {

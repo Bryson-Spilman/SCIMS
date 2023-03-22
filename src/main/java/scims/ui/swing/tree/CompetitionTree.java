@@ -6,6 +6,7 @@ import scims.model.data.WeightClass;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 public class CompetitionTree extends JTree {
 
@@ -30,6 +31,7 @@ public class CompetitionTree extends JTree {
             }
             competitionNode.add(weightClassNode);
         }
+        expandPath(new TreePath(competitionNode.getPath()));
     }
 
     public void removeCompetition(Competition competition)

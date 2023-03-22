@@ -117,7 +117,7 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 break;
             case EVENT_ORDER_COL:
                 Integer order = value == null ? null : Integer.parseInt(value.toString());
-                switchOrdersWithOneAlreadyUsed(order, row, col);
+                switchOrdersWithOneAlreadyUsed(order, row);
                 rowData.setEventOrder(order);
                 break;
             case TIME_LIMIT_COL:
@@ -130,7 +130,7 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
         fireTableCellUpdated(row, col);
     }
 
-    private void switchOrdersWithOneAlreadyUsed(Integer orderWeAreSelecting, int row, int col) {
+    private void switchOrdersWithOneAlreadyUsed(Integer orderWeAreSelecting, int row) {
         Integer currentRowUsingOrder = getCurrentRowUsingOrder(orderWeAreSelecting);
         if(currentRowUsingOrder != null) {
             Integer oldValueThisRow = getRowData().get(row).getEventOrder();

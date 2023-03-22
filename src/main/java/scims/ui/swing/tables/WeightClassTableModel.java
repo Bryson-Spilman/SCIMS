@@ -1,7 +1,6 @@
 package scims.ui.swing.tables;
 
 import scims.model.data.Event;
-import scims.model.data.WeightClass;
 import scims.model.enums.WeightUnitSystem;
 
 import java.text.DecimalFormat;

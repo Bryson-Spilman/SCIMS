@@ -8,14 +8,14 @@ import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 class DateTimeTextField extends JTextField {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy h:mm a");
+    private static final DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("MM-dd-yyyy");
     private static final String allowedCharacters = "0123456789:AMP";
 
     private String _placeholder;
@@ -212,6 +212,18 @@ class DateTimeTextField extends JTextField {
 
     public ZonedDateTime getZonedDateTime() throws DateTimeParseException {
         String text = getText();
-        return ZonedDateTime.parse(text, formatter.withZone(java.time.ZoneId.systemDefault()));
+        ZonedDateTime retVal = null;
+        if(text != null) {
+            text = text.trim();
+            try {
+                retVal = ZonedDateTime.parse(text, formatter.withZone(java.time.ZoneId.systemDefault()));
+            } catch (DateTimeParseException e) {
+                LocalDate localDate = LocalDate.parse(text, formatter2);
+                ZoneId zoneId = ZoneId.systemDefault();
+                retVal = ZonedDateTime.of(localDate, LocalTime.MIN, zoneId);
+            }
+        }
+
+        return retVal;
     }
 }

@@ -15,7 +15,6 @@ public class WeightClassTable extends SCIMSTable {
 
     private final WeightClassTableModel _model;
     private JChooserField<Event> _chooserField;
-    private WeightUnitSystem _weightUnitSystem = WeightUnitSystem.POUNDS;
 
     public WeightClassTable() {
         _model = new WeightClassTableModel();
@@ -96,7 +95,6 @@ public class WeightClassTable extends SCIMSTable {
     }
 
     public void convertWeights(WeightUnitSystem oldUnitSystem, WeightUnitSystem newUnitSystem) {
-        _weightUnitSystem = newUnitSystem;
         _model.convertWeights(oldUnitSystem, newUnitSystem);
     }
 

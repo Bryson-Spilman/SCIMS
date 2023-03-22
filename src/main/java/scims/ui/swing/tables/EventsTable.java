@@ -2,7 +2,6 @@ package scims.ui.swing.tables;
 
 import scims.model.data.Event;
 import scims.model.data.StrengthEventBuilder;
-import scims.model.data.WeightClass;
 import scims.model.data.scoring.EventScoring;
 import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.WeightUnitSystem;

@@ -3,6 +3,7 @@ package scims.ui.swing.tablecells;
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.DocumentFilter;
+import java.awt.event.FocusListener;
 
 public class IntegerFieldTableColumn extends TextFieldTableColumn {
 
@@ -25,6 +26,11 @@ public class IntegerFieldTableColumn extends TextFieldTableColumn {
                 value = Integer.parseInt(value.toString());
             }
             return value;
+        }
+
+        @Override
+        protected FocusListener getFocusListener() {
+            return null;
         }
 
         @Override

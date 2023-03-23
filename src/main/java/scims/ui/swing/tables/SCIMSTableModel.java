@@ -39,8 +39,30 @@ public abstract class SCIMSTableModel<T> extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    protected boolean isWrongType(Object aValue, int rowIndex, int columnIndex) {
-        return aValue != null && !getColumnClass(columnIndex).isInstance(aValue);
+    protected boolean isCorrectType(Object aValue, int columnIndex) {
+        return aValue == null || getColumnClass(columnIndex).isInstance(aValue)
+                || (getColumnClass(columnIndex).equals(Integer.class) && canConvertToInteger(aValue))
+                || (getColumnClass(columnIndex).equals(Double.class) && canConvertToDouble(aValue));
+    }
+
+    private boolean canConvertToInteger(Object aValue) {
+        boolean retVal = true;
+        try {
+            Integer.parseInt(aValue.toString());
+        } catch (NumberFormatException e) {
+            retVal = false;
+        }
+        return retVal;
+    }
+
+    private boolean canConvertToDouble(Object aValue) {
+        boolean retVal = true;
+        try {
+            Double.parseDouble(aValue.toString());
+        } catch (NumberFormatException e) {
+            retVal = false;
+        }
+        return retVal;
     }
 
     void clear() {

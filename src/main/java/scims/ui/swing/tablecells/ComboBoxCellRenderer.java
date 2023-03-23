@@ -26,7 +26,7 @@ class ComboBoxCellRenderer<T> extends JComboBox<T> implements TableCellRenderer,
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component retVal;
         if(value == null) {
-            retVal = new JComboBox<>();
+            retVal = new JComboBox<>(new Object[]{getModel().getSelectedItem()});
         } else {
             retVal = new JComboBox<>(new Integer[]{Integer.parseInt(value.toString())});
         }
@@ -35,9 +35,8 @@ class ComboBoxCellRenderer<T> extends JComboBox<T> implements TableCellRenderer,
         } else {
             retVal.setBackground(null);
         }
-        if(!table.isCellEditable(row,column)) {
-            retVal.setEnabled(false);
-        }
+        retVal.setEnabled(table.isCellEditable(row,column));
+
         return retVal;
     }
 }

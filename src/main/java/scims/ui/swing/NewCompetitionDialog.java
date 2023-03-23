@@ -1,6 +1,7 @@
 package scims.ui.swing;
 
 import scims.model.data.*;
+import scims.model.data.Event;
 import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.StrongmanCorpWeightClasses;
 import scims.model.enums.USSWeightClasses;
@@ -42,6 +43,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     private JRadioButton _metersRadioButton;
     private DateTimeTextField _dateTimeTextField;
     private boolean _ignoreSameEventsCheckBoxAction = false;
+    private boolean _ignoreEventsChanged = false;
+    private JScrollPane _eventsTableScrollPane;
+    private JScrollPane _weightClassScrollPane;
 
     public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
@@ -96,7 +100,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _otherRadioButton.addActionListener(e -> sanctionRadioButtonChanged());
         _sameEventsForAllWeightsClassesCheckbox.addActionListener(e -> useSameEventsForAllCheckBoxClicked());
         _eventsTable.addNewEventSelectedAction(this::updatedEvents);
-        _eventsTable.addOrderChangedAction(this::updatedEvents);
+        _eventsTable.addOrderChangedAction(this::orderChanged);
         _okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
         _poundsRadioButton.addActionListener(this::weightUnitSystemChanged);
@@ -105,6 +109,16 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _metersRadioButton.addActionListener(this::distanceUnitSystemChanged);
         _createNewEventButton.addActionListener(e -> newEventButtonAction());
         _createNewWeightClassButton.addActionListener(e -> newWeightClassButtonAction());
+    }
+
+    private void orderChanged() {
+        if(!_ignoreEventsChanged) {
+            _ignoreEventsChanged = true;
+            _eventsTable.commitEdits();
+        }
+        _ignoreEventsChanged = false;
+        updatedEvents();
+
     }
 
     private void distanceUnitSystemChanged(ActionEvent actionEvent) {
@@ -116,13 +130,31 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     }
 
     private void newEventButtonAction() {
-        NewEventDialog dlg = new NewEventDialog(this, _eventsTable::addEvent);
+        NewEventDialog dlg = new NewEventDialog(this, this::addEvent);
         dlg.setVisible(true);
     }
 
+    private void addEvent(Event event) {
+        _eventsTable.addEvent(event);
+        updatedEvents();
+        SwingUtilities.invokeLater(() -> {
+            JViewport scrollViewPort = _eventsTableScrollPane.getViewport();
+            scrollViewPort.setViewPosition(new Point(0, scrollViewPort.getViewSize().height));
+        });
+    }
+
     private void newWeightClassButtonAction() {
-        NewWeightClassDialog dlg = new NewWeightClassDialog(this, _weightClassTable::addWeightClass);
+        NewWeightClassDialog dlg = new NewWeightClassDialog(this, this::addWeightClass);
         dlg.setVisible(true);
+    }
+
+    private void addWeightClass(WeightClass weightClass) {
+        _weightClassTable.addWeightClass(weightClass);
+        SwingUtilities.invokeLater(() -> {
+            JViewport scrollViewPort = _weightClassScrollPane.getViewport();
+            scrollViewPort.setViewPosition(new Point(0, scrollViewPort.getViewSize().height));
+        });
+
     }
 
     private void weightUnitSystemChanged(ActionEvent e) {
@@ -167,15 +199,16 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     }
 
     private void updatedEvents() {
-        _weightClassTable.setAvailableEvents(_eventsTable.getSelectedEvents());
-        if(_sameEventsForAllWeightsClassesCheckbox.isSelected()) {
-            _weightClassTable.setSelectedEvents(_eventsTable.getSelectedEvents());
+        if(!_ignoreEventsChanged) {
+            _weightClassTable.setAvailableEvents(_eventsTable.getSelectedEvents());
+            if(_sameEventsForAllWeightsClassesCheckbox.isSelected()) {
+                _weightClassTable.setSelectedEvents(_eventsTable.getSelectedEvents());
+            }
+            _weightClassTable.setUseSameEventsForAllWeightClasses(_sameEventsForAllWeightsClassesCheckbox.isSelected());
+            _weightClassTable.commitEdits();
+            _weightClassTable.requestFocus();
+            _weightClassTable.repaint();
         }
-        _weightClassTable.setUseSameEventsForAllWeightClasses(_sameEventsForAllWeightsClassesCheckbox.isSelected());
-        _weightClassTable.commitEdits();
-        _weightClassTable.requestFocus();
-        _weightClassTable.repaint();
-        requestFocus();
     }
 
     private void sanctionRadioButtonChanged() {
@@ -420,9 +453,9 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
 
         JPanel titledEventsPanel = new JPanel(new BorderLayout());
         titledEventsPanel.setBorder(BorderFactory.createTitledBorder("Events"));
-        JScrollPane eventsTableScrollPane = new JScrollPane(_eventsTable);
-        eventsTableScrollPane.setMinimumSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
-        eventsTableScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
+        _eventsTableScrollPane = new JScrollPane(_eventsTable);
+        _eventsTableScrollPane.setMinimumSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
+        _eventsTableScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
 
         _createNewEventButton = new JButton("Create New Event...");
         titledEventsPanel.add(_createNewEventButton, BorderLayout.WEST);
@@ -438,14 +471,14 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         gbc.insets    = new Insets(5,0,0,5);
         newEventPanel.add(_createNewEventButton, gbc);
 
-        titledEventsPanel.add(eventsTableScrollPane, BorderLayout.CENTER);
+        titledEventsPanel.add(_eventsTableScrollPane, BorderLayout.CENTER);
         titledEventsPanel.add(newEventPanel, BorderLayout.SOUTH);
 
         JPanel titledWeightClassPanel = new JPanel(new BorderLayout());
         titledWeightClassPanel.setBorder(BorderFactory.createTitledBorder("Weight Classes"));
-        JScrollPane weightClassScrollPane = new JScrollPane(_weightClassTable);
-        weightClassScrollPane.setMinimumSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
-        weightClassScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
+        _weightClassScrollPane = new JScrollPane(_weightClassTable);
+        _weightClassScrollPane.setMinimumSize(new Dimension(Integer.MAX_VALUE, 200)); // Set maximum height to 200 pixels
+        _weightClassScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //
 
         _createNewWeightClassButton = new JButton("Create New Weight Class...");
         JPanel newWeightClassPanel = new JPanel(new GridBagLayout());
@@ -460,7 +493,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         gbc.insets    = new Insets(5,0,0,5);
         newWeightClassPanel.add(_createNewWeightClassButton, gbc);
 
-        titledWeightClassPanel.add(weightClassScrollPane, BorderLayout.CENTER);
+        titledWeightClassPanel.add(_weightClassScrollPane, BorderLayout.CENTER);
         titledWeightClassPanel.add(newWeightClassPanel, BorderLayout.SOUTH);
 
         gbc = new GridBagConstraints();

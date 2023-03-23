@@ -5,30 +5,38 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+import static java.util.stream.Collectors.*;
+
 class ComboBoxCellEditor<T> extends DefaultCellEditor {
     private final JComboBox<T> _comboBox;
     private final JTable _parentTable;
     public ComboBoxCellEditor(JTable parentTable, JComboBox<T> comboBox) {
         super(comboBox);
         _parentTable = parentTable;
-        this._comboBox = comboBox;
+        _comboBox = comboBox;
         comboBox.addActionListener(e -> stopCellEditing());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        DefaultComboBoxModel<Object> model = (DefaultComboBoxModel<Object>) _comboBox.getModel();
-        Set<Object> items = new TreeSet<>();
+        DefaultComboBoxModel<T> model = (DefaultComboBoxModel<T>) _comboBox.getModel();
+        List<Object> items = new ArrayList<>();
         for(int i=0; i < model.getSize(); i++) {
-            items.add(model.getElementAt(i));
+            Object elem = model.getElementAt(i);
+            if(elem != null) {
+                items.add(elem);
+            }
         }
+        List<Object> itemsUnique = items.stream().distinct().collect(toList());
         model.removeAllElements();
-        for(Object item : items) {
-            model.addElement(item);
+        for(Object item : itemsUnique) {
+            model.addElement((T) item);
         }
+
+        _comboBox.setModel(model);
         _comboBox.setSelectedItem(value);
         _comboBox.setEnabled(table.isCellEditable(row, column));
-        _comboBox.setEditable(table.isCellEditable(row, column));
         return _comboBox;
     }
 
@@ -40,9 +48,6 @@ class ComboBoxCellEditor<T> extends DefaultCellEditor {
     @Override
     public boolean stopCellEditing() {
         fireEditingStopped();
-        int row = _parentTable.getSelectedRow();
-        int column = _parentTable.getSelectedColumn();
-        _parentTable.getModel().setValueAt(_comboBox.getSelectedItem(), row, column);
         return super.stopCellEditing();
     }
 

@@ -4,16 +4,46 @@ import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 class TextFieldCellEditor extends DefaultCellEditor {
     private final JTextField _textField;
     private final JTable _parentTable;
-
+    private int _editingRow;
+    private int _editingColumn;
     public TextFieldCellEditor(JTable parentTable, JTextField textField) {
         super(textField);
         _textField = textField;
         _parentTable = parentTable;
         textField.addActionListener(e -> stopCellEditing());
+        FocusListener focusListener = getFocusListener();
+        if(focusListener != null) {
+            textField.addFocusListener(focusListener);
+        }
+    }
+
+    protected FocusListener getFocusListener() {
+        return new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                // get the editing row and column
+                _editingRow = _parentTable.getEditingRow();
+                _editingColumn = _parentTable.getEditingColumn();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                // get the new cell value from the JTextField
+                Object value = _textField.getText();
+
+                // apply the new value to the editing cell
+                _parentTable.getModel().setValueAt(value, _editingRow, _editingColumn);
+
+                // stop editing the cell
+                _parentTable.getCellEditor(_editingRow, _editingColumn).stopCellEditing();
+            }
+        };
     }
 
     @Override
@@ -37,9 +67,7 @@ class TextFieldCellEditor extends DefaultCellEditor {
     @Override
     public boolean stopCellEditing() {
         fireEditingStopped();
-        int row = _parentTable.getSelectedRow();
-        int column = _parentTable.getSelectedColumn();
-        _parentTable.getModel().setValueAt(getCellEditorValue(), row, column);
+        _parentTable.getModel().setValueAt(getCellEditorValue(), _editingRow, _editingColumn);
         return super.stopCellEditing();
     }
 }

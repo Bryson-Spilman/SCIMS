@@ -54,13 +54,20 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 break;
             case TIME_LIMIT_COL:
                 Duration timeLimit = (rowData.getTimeLimit());
-                retVal = timeLimit == null ? null : Long.valueOf(timeLimit.getSeconds()).doubleValue();
+                retVal = timeLimit == null ? null : getDurationAsDouble(timeLimit);
                 break;
             default:
                 retVal = "";
                 break;
         }
         return retVal;
+    }
+
+    private Double getDurationAsDouble(Duration timeLimit) {
+        double seconds = timeLimit.getSeconds();
+        double millis = timeLimit.toMillis() % 1000;
+        double totalSeconds = seconds + millis / 1000.0;
+        return Math.round(totalSeconds * 100.0) / 100.0;
     }
 
     @Override
@@ -103,7 +110,7 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        if(row < 0 || col < 0 || isWrongType(value, row, col)) {
+        if(row < 0 || col < 0 || !isCorrectType(value, col)) {
             return;
         }
         EventsRowData rowData = getRowData().get(row);
@@ -116,12 +123,22 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 rowData.setName(String.valueOf(value));
                 break;
             case EVENT_ORDER_COL:
-                Integer order = value == null ? null : Integer.parseInt(value.toString());
-                switchOrdersWithOneAlreadyUsed(order, row);
-                rowData.setEventOrder(order);
+                if(value != null) {
+                    Integer order = Integer.parseInt(value.toString());
+                    switchOrdersWithOneAlreadyUsed(order, row);
+                    rowData.setEventOrder(order);
+                }
                 break;
             case TIME_LIMIT_COL:
-                rowData.setTimeLimit(value == null ? null : Duration.ofSeconds(Double.valueOf(Double.parseDouble(value.toString())).longValue()));
+                Duration duration = null;
+                if(value != null) {
+                    double seconds = Double.parseDouble(value.toString());
+                    long wholeSeconds = (long) seconds;
+                    int millis = (int) ((seconds - wholeSeconds) * 1000);
+                    duration = Duration.ofSeconds(wholeSeconds).plus(Duration.ofMillis(millis));
+                }
+                rowData.setTimeLimit(duration);
+
                 break;
             case SCORE_TYPE_COL:
             default:

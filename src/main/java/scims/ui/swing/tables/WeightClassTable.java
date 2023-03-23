@@ -67,6 +67,8 @@ public class WeightClassTable extends SCIMSTable {
         for(WeightClassRowData rowData : _model.getRowData()) {
             rowData.setEvents(selectedEvents);
         }
+        _chooserField.setSelectedObjects(selectedEvents);
+        _model.fireTableDataChanged();
     }
 
     public void setAvailableEvents(List<Event> availableEvents) {

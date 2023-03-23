@@ -16,6 +16,7 @@ public class ComboBoxTableColumn<T> extends HighlightedTableColumn {
     public ComboBoxTableColumn(JTable parentTable, int modelIndex, List<T> items) {
         super(modelIndex);
         _comboBox = new JComboBox<>((T[])items.toArray());
+        _comboBox.setEditable(false);
         _renderer = new ComboBoxCellRenderer<>(_comboBox);
         _editor = new ComboBoxCellEditor<>(parentTable, _comboBox);
     }

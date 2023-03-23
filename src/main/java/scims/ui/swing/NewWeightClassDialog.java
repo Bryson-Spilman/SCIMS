@@ -98,7 +98,7 @@ class NewWeightClassDialog extends JDialog implements Modifiable {
     }
 
     private void buildComponents() {
-        JLabel nameLabel = new JLabel("Competition Name:");
+        JLabel nameLabel = new JLabel("Weight Class Name:");
         _nameTextField = new JTextField();
         JLabel maxNumberCompetitorLabel = new JLabel("Max Number of Competitors:");
         _maxNumberOfCompetitorsField = new JTextField();

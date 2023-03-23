@@ -3,6 +3,7 @@ package scims.ui.swing.tablecells;
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.DocumentFilter;
+import java.awt.event.FocusListener;
 
 public class DoubleFieldTableColumn extends TextFieldTableColumn {
     public DoubleFieldTableColumn(JTable parentTable, int modelIndex) {
@@ -24,6 +25,11 @@ public class DoubleFieldTableColumn extends TextFieldTableColumn {
                 value = Double.parseDouble(value.toString());
             }
             return value;
+        }
+
+        @Override
+        protected FocusListener getFocusListener() {
+            return null;
         }
 
         @Override

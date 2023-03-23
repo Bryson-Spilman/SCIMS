@@ -3,7 +3,7 @@ package scims.ui.swing.tree;
 import javax.swing.*;
 import java.net.URL;
 
-class IconNode {
+public class IconNode {
     private final Object _userObject;
     private ImageIcon _icon;
 

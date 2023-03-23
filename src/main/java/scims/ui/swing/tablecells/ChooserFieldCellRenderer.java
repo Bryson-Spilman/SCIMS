@@ -35,7 +35,7 @@ class ChooserFieldCellRenderer<T> extends JChooserField<T> implements TableCellR
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JChooserField<T> retVal = new JChooserField<>(_parent, getObjects());
         retVal.setObjects(_chooserField.getObjects());
-        retVal.setText(_chooserField.getText());
+        retVal.setText(value == null ? null : value.toString());
         if (_highlightRow != null && _highlightRow.apply(row)) {
             retVal.setBackground(_highlightColor);
         }

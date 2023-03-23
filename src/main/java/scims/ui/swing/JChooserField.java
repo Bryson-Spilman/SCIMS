@@ -131,6 +131,7 @@ public class JChooserField<T> extends JPanel {
         if(text != null) {
             String[] split = text.split(_delimeter);
             List<String> objStrings = objects.stream().map(Object::toString).collect(Collectors.toList());
+            //keep intersection
             objStrings.retainAll(Arrays.asList(split));
             boolean isEnabled = _textField.isEnabled();
             _textField.setEnabled(true);

@@ -1,16 +1,25 @@
 package scims.ui.swing;
 
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.StackPane;
 import scims.controllers.CompetitionModelController;
+import scims.model.data.Competition;
+import scims.model.data.StrengthCompetition;
 import scims.ui.actions.NewCompetitionAction;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.tree.CompetitionTree;
+import scims.ui.swing.tree.IconNode;
 import scims.ui.swing.tree.IconTreeCellRenderer;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 
 public class SCIMSFrame extends JFrame {
@@ -18,6 +27,7 @@ public class SCIMSFrame extends JFrame {
     private JMenuItem _newCompetitionMenuItem;
     private final CompetitionModelController _controller;
     private CompetitionTreeTable _competitionTreeTable;
+    private TitledPane _titledPane;
 
     public SCIMSFrame() {
         super("SCIMS");
@@ -33,7 +43,7 @@ public class SCIMSFrame extends JFrame {
             setIconImage(scaledImage);
         }
         buildComponents();
-        _controller = new CompetitionModelController(_competitionTree, _competitionTreeTable);
+        _controller = new CompetitionModelController(this, _competitionTree, _competitionTreeTable);
         addListeners();
         setVisible(true);
         setLocationRelativeTo(null);
@@ -48,10 +58,12 @@ public class SCIMSFrame extends JFrame {
         // Create a new JFXPanel to host the JavaFX TreeTableView
         JFXPanel fxPanel = new JFXPanel();
         _competitionTreeTable = new CompetitionTreeTable();
+        _titledPane = new TitledPane("No Competition Selected", _competitionTreeTable);
+        _titledPane.setCollapsible(false);
         // Create the JavaFX scene containing the TreeTableView
         StackPane pane = new StackPane();
-        pane.getChildren().add(_competitionTreeTable);
-        Scene scene = new Scene(pane);
+        //pane.getChildren().add(_competitionTreeTable);
+        Scene scene = new Scene(_titledPane);
         // Add the scene to the JFXPanel
         fxPanel.setScene(scene);
 
@@ -77,5 +89,13 @@ public class SCIMSFrame extends JFrame {
         getContentPane().add(leftPanel, BorderLayout.WEST);
         getContentPane().add(fxPanel, BorderLayout.CENTER);
         getContentPane().add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    public void updateFxPanelTitle(String name) {
+        Platform.runLater(() -> {
+            _titledPane.setText(name);
+            _titledPane.requestLayout();
+        });
+
     }
 }

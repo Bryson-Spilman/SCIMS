@@ -214,7 +214,8 @@ public class JChooserDialog<T> extends JDialog {
     }
 
     public void setSelectedObjects(List<T> selectedObjects) {
-        resetLists();
+        _leftModel.clear();
+        _rightModel.clear();
         for(T object : selectedObjects) {
             _rightModel.addElement(object);
             if(_leftModel.contains(object)) {

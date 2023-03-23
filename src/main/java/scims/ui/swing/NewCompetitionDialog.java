@@ -41,6 +41,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     private JRadioButton _feetRadioButton;
     private JRadioButton _metersRadioButton;
     private DateTimeTextField _dateTimeTextField;
+    private boolean _ignoreSameEventsCheckBoxAction = false;
 
     public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
@@ -95,6 +96,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _otherRadioButton.addActionListener(e -> sanctionRadioButtonChanged());
         _sameEventsForAllWeightsClassesCheckbox.addActionListener(e -> useSameEventsForAllCheckBoxClicked());
         _eventsTable.addNewEventSelectedAction(this::updatedEvents);
+        _eventsTable.addOrderChangedAction(this::updatedEvents);
         _okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
         _poundsRadioButton.addActionListener(this::weightUnitSystemChanged);
@@ -147,19 +149,28 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
 
     private void useSameEventsForAllCheckBoxClicked() {
         _isModified = true;
-        if(_eventsTable.hasOrdersSet()) {
-            int opt = JOptionPane.showConfirmDialog(this, "Selecting this will reset any event orders set in the events table. Continue?",
-                    "Confirm Reset Events Orders", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (opt == JOptionPane.YES_OPTION) {
-                _eventsTable.resetEventOrders();
+        if(!_ignoreSameEventsCheckBoxAction) {
+            if(_eventsTable.hasOrdersSet()) {
+                int opt = JOptionPane.showConfirmDialog(this, "Selecting this will reset any event orders set in the events table. Continue?",
+                        "Confirm Reset Events Orders", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (opt == JOptionPane.YES_OPTION) {
+                    _eventsTable.resetEventOrders();
+                } else {
+                    _ignoreSameEventsCheckBoxAction = true;
+                    _sameEventsForAllWeightsClassesCheckbox.setSelected(!_sameEventsForAllWeightsClassesCheckbox.isSelected());
+                    _ignoreSameEventsCheckBoxAction = false;
+                }
             }
+            _eventsTable.setEventOrderColumnEnabled(_sameEventsForAllWeightsClassesCheckbox.isSelected());
+            updatedEvents();
         }
-        _eventsTable.setEventOrderColumnEnabled(_sameEventsForAllWeightsClassesCheckbox.isSelected());
-        updatedEvents();
     }
 
     private void updatedEvents() {
-        _weightClassTable.setEvents(_eventsTable.getSelectedEvents());
+        _weightClassTable.setAvailableEvents(_eventsTable.getSelectedEvents());
+        if(_sameEventsForAllWeightsClassesCheckbox.isSelected()) {
+            _weightClassTable.setSelectedEvents(_eventsTable.getSelectedEvents());
+        }
         _weightClassTable.setUseSameEventsForAllWeightClasses(_sameEventsForAllWeightsClassesCheckbox.isSelected());
         _weightClassTable.commitEdits();
         _weightClassTable.requestFocus();

@@ -63,8 +63,14 @@ public class WeightClassTable extends SCIMSTable {
         return checkedRows.contains(row);
     }
 
-    public void setEvents(List<Event> selectedEvents) {
-        _chooserField.setObjects(selectedEvents);
+    public void setSelectedEvents(List<Event> selectedEvents) {
+        for(WeightClassRowData rowData : _model.getRowData()) {
+            rowData.setEvents(selectedEvents);
+        }
+    }
+
+    public void setAvailableEvents(List<Event> availableEvents) {
+        _chooserField.setObjects(availableEvents);
     }
 
     public void setUseSameEventsForAllWeightClasses(boolean useSameForAll) {

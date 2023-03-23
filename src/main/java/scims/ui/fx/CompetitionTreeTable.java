@@ -15,14 +15,15 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
 
     public CompetitionTreeTable() {
         setRoot(new TreeItem<>());
-        TreeItem<Object> root = getRoot();
-        root.setExpanded(true);
+        _root = getRoot();
+        _root.setExpanded(true);
         setShowRoot(false);
         setEditable(true);
     }
 
     public void refresh(Competition competition) {
         _competition = competition;
+        clear();
         List<WeightClass> weightClasses = competition.getWeightClasses();
         //add columns
         getColumns().add(new CompetitorsColumn());
@@ -69,5 +70,6 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
         {
             _root.getChildren().clear();
         }
+        getColumns().clear();
     }
 }

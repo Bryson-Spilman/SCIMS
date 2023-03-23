@@ -20,9 +20,23 @@ class ChooserFieldCellEditor<T> extends AbstractCellEditor implements TableCellE
     @SuppressWarnings("unchecked")
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        _chooserField.setText(value == null ? null : value.toString());
+        if(value != null) {
+            _chooserField.setSelectedObjects(getObjectsByName(value.toString()));
+        }
         _chooserField.setEnabled(table.isCellEditable(row, column));
         _chooserField.setEditable(table.isCellEditable(row, column));
         return _chooserField;
+    }
+
+    private List<T> getObjectsByName(String objectNames) {
+        List<T> retVal = new ArrayList<>();
+        for(String name : objectNames.split(_chooserField.getDelimeter())) {
+            String nameTrimmed = name.trim();
+            _chooserField.getObjects().stream().filter(o -> o.toString().equalsIgnoreCase(nameTrimmed))
+                    .findFirst().ifPresent(retVal::add);
+        }
+        return retVal;
     }
 
     @Override

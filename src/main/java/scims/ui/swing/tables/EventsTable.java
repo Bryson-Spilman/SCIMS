@@ -12,6 +12,9 @@ import java.awt.*;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class EventsTable extends SCIMSTable {
 
@@ -122,15 +125,24 @@ public class EventsTable extends SCIMSTable {
     }
 
     public List<Event> getSelectedEvents() {
-        List<Event> retVal = new ArrayList<>();
         List<Integer> checkedRows = _model.getCheckedRows();
+        Map<Integer, Event> sortedMap = new TreeMap<>();
         for(int checkedRow : checkedRows) {
             String name = (String) getValueAt(checkedRow, EventsTableModel.NAME_COL);
             EventScoring<?> scoreType = (EventScoring<?>) getValueAt(checkedRow, EventsTableModel.SCORE_TYPE_COL);
             Duration timeLimit = _model.getRowData().get(checkedRow).getTimeLimit();
-            retVal.add(new StrengthEventBuilder().withName(name).withScoring(scoreType).withTimeLimit(timeLimit).build());
+            Object orderObj = _model.getValueAt(checkedRow, EventsTableModel.EVENT_ORDER_COL);
+            Integer order = Integer.MAX_VALUE - checkedRows.size();
+            if(orderObj != null) {
+                order = Integer.parseInt(orderObj.toString());
+            }
+            while(sortedMap.containsKey(order)) {
+                order++;
+            }
+            sortedMap.put(order, new StrengthEventBuilder().withName(name).withScoring(scoreType).withTimeLimit(timeLimit).build());
         }
-        return retVal;
+
+        return new ArrayList<>(sortedMap.values());
     }
 
     public void addNewEventSelectedAction(Runnable updatedEvents) {
@@ -151,5 +163,9 @@ public class EventsTable extends SCIMSTable {
 
     public void applyWeightUnitsChange(WeightUnitSystem selected) {
         _model.setWeightUnits(selected);
+    }
+
+    public void addOrderChangedAction(Runnable action) {
+        _eventOrderComboBox.addActionListener(e -> action.run());
     }
 }

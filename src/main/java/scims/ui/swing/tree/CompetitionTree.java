@@ -6,6 +6,7 @@ import scims.model.data.WeightClass;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 public class CompetitionTree extends JTree {
@@ -22,6 +23,7 @@ public class CompetitionTree extends JTree {
     {
         DefaultMutableTreeNode competitionNode = new IconMutableTreeNode(competition, getClass().getResource("CompetitionIcon.png"));
         _root.add(competitionNode);
+
         for(WeightClass weightClass : competition.getWeightClasses())
         {
             DefaultMutableTreeNode weightClassNode = new IconMutableTreeNode(weightClass, getClass().getResource("WeightClassIcon.png"));
@@ -32,6 +34,8 @@ public class CompetitionTree extends JTree {
             competitionNode.add(weightClassNode);
         }
         expandPath(new TreePath(competitionNode.getPath()));
+
+        ((DefaultTreeModel) getModel()).reload();
     }
 
     public void removeCompetition(Competition competition)

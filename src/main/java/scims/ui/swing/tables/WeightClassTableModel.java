@@ -1,6 +1,7 @@
 package scims.ui.swing.tables;
 
 import scims.model.data.Event;
+import scims.model.data.WeightClass;
 import scims.model.enums.WeightUnitSystem;
 
 import java.text.DecimalFormat;
@@ -133,5 +134,16 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
             weightClassRowData.setMaxCompetitorWeight(newWeight);
         }
         fireTableDataChanged();
+    }
+
+    public boolean containsWeightClass(WeightClass wc) {
+        boolean retVal = false;
+        for(WeightClassRowData rowData : getRowData()) {
+            if(rowData.getWeightClass().equals(wc)) {
+                retVal = true;
+                break;
+            }
+        }
+        return retVal;
     }
 }

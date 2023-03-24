@@ -6,21 +6,23 @@ import javafx.scene.Scene;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.StackPane;
 import scims.controllers.CompetitionModelController;
-import scims.model.data.Competition;
-import scims.model.data.StrengthCompetition;
+import scims.main.CustomEventClassRegistry;
+import scims.model.data.Event;
+import scims.model.data.StrengthEventBuilder;
+import scims.model.data.scoring.DistanceScoring;
+import scims.model.data.scoring.EventScoring;
+import scims.model.data.scoring.RepsScoring;
+import scims.model.data.scoring.TimeScoring;
 import scims.ui.actions.NewCompetitionAction;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.tree.CompetitionTree;
-import scims.ui.swing.tree.IconNode;
 import scims.ui.swing.tree.IconTreeCellRenderer;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.net.URL;
+import java.util.*;
+import java.util.List;
 
 public class SCIMSFrame extends JFrame {
     private CompetitionTree _competitionTree;
@@ -44,9 +46,31 @@ public class SCIMSFrame extends JFrame {
         }
         buildComponents();
         _controller = new CompetitionModelController(this, _competitionTree, _competitionTreeTable);
+        _competitionTree.setController(_controller);
+        _competitionTreeTable.setController(_controller);
         addListeners();
         setVisible(true);
         setLocationRelativeTo(null);
+        for(Event event : buildTestEvents()) {
+            CustomEventClassRegistry.getInstance().registerEvent(event);
+        }
+    }
+
+    private List<Event> buildTestEvents() {
+        List<Event> retVal = new ArrayList<>();
+        Map<Integer, EventScoring> randomScoring = new HashMap<>();
+        randomScoring.put(1, new RepsScoring());
+        randomScoring.put(2, new TimeScoring());
+        randomScoring.put(3, new DistanceScoring());
+        randomScoring.put(4, new TimeScoring());
+        Random rand = new Random();
+        for(int i=1; i <=5; i++) {
+            retVal.add(new StrengthEventBuilder().withName("Event" + i)
+                    .withScoring(randomScoring.get(rand.nextInt(4) + 1))
+                    .withTimeLimit(null)
+                    .build());
+        }
+        return retVal;
     }
 
     private void addListeners()
@@ -68,6 +92,7 @@ public class SCIMSFrame extends JFrame {
         fxPanel.setScene(scene);
 
         _competitionTree = new CompetitionTree();
+        _competitionTree.setController(_controller);
         IconTreeCellRenderer renderer = new IconTreeCellRenderer();
         _competitionTree.setCellRenderer(renderer);
         // Create the panels

@@ -3,6 +3,7 @@ package scims.ui.fx;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
+import scims.controllers.CompetitionModelController;
 import scims.model.data.*;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
 
     private Competition _competition;
     TreeItem<Object> _root;
+    private CompetitionModelController _controller;
 
     public CompetitionTreeTable() {
         setRoot(new TreeItem<>());
@@ -71,5 +73,9 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
             _root.getChildren().clear();
         }
         getColumns().clear();
+    }
+
+    public void setController(CompetitionModelController controller) {
+        _controller = controller;
     }
 }

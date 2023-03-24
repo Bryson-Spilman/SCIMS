@@ -56,4 +56,12 @@ public class OkCancelPanel extends JPanel {
         add(okCancelPanel, BorderLayout.EAST);
     }
 
+    public void setOkText(String update) {
+        _okButton.setText(update);
+        _okButton.repaint();
+    }
+
+    public String getOkText() {
+        return _okButton.getText();
+    }
 }

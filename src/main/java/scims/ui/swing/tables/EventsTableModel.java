@@ -1,5 +1,6 @@
 package scims.ui.swing.tables;
 
+import scims.model.data.Event;
 import scims.model.data.scoring.*;
 import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.WeightUnitSystem;
@@ -7,6 +8,7 @@ import scims.model.enums.WeightUnitSystem;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
@@ -19,11 +21,6 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     EventsTableModel() {
         setColumnNames();
-        addRow(new EventsRowData(false, "Event 1", new TimeScoring(), null, null));
-        addRow(new EventsRowData(false, "Event 2", new RepsScoring(),null, null));
-        addRow(new EventsRowData(false, "Event 3", new DistanceScoring(),null, null));
-        addRow(new EventsRowData(false, "Event 4", new RepsScoring(),null, null));
-        addRow(new EventsRowData(false, "Event 5", new TimeScoring(),null, null));
     }
 
     private void setColumnNames() {
@@ -209,4 +206,29 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
         fireTableDataChanged();
     }
 
+    public void setSelectedEvents(List<Event> events) {
+        for(EventsRowData rowData : getRowData()) {
+            if(events.stream().anyMatch(event -> event.getName().equalsIgnoreCase(rowData.getName()))) {
+                rowData.setChecked(true);
+            }
+        }
+        fireTableDataChanged();
+    }
+
+    public void setOrdersByListOrder(List<Event> events) {
+        for(Event event : events) {
+            Optional<EventsRowData> eventRowDataFound = getRowData().stream()
+                    .filter(erd -> event.getName().equalsIgnoreCase(erd.getName()))
+                    .findFirst();
+            eventRowDataFound.ifPresent(erd -> erd.setEventOrder(events.indexOf(event) + 1));
+        }
+        fireTableDataChanged();
+    }
+
+    public void deselectAll() {
+        for(EventsRowData rowData : getRowData()) {
+            rowData.setChecked(false);
+        }
+        fireTableDataChanged();
+    }
 }

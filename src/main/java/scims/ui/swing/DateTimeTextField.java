@@ -14,8 +14,8 @@ import java.time.format.DateTimeParseException;
 
 class DateTimeTextField extends JTextField {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy h:mm a");
-    private static final DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy h:mm a");
+    static final DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("MM-dd-yyyy");
     private static final String allowedCharacters = "0123456789:AMP";
 
     private String _placeholder;

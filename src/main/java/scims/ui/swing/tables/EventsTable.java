@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 public class EventsTable extends SCIMSTable {
 
@@ -167,5 +166,17 @@ public class EventsTable extends SCIMSTable {
 
     public void addOrderChangedAction(Runnable action) {
         _eventOrderComboBox.addActionListener(e -> action.run());
+    }
+
+    public void setSelectedEvents(List<Event> events) {
+        _model.setSelectedEvents(events);
+    }
+
+    public void setOrdersByListOrder(List<Event> events) {
+        _model.setOrdersByListOrder(events);
+    }
+
+    public void deselectAll() {
+        _model.deselectAll();
     }
 }

@@ -2,6 +2,11 @@ package scims.controllers;
 
 import javafx.application.Platform;
 import scims.model.data.Competition;
+import scims.model.data.WeightClass;
+import scims.ui.actions.EditCompetitionAction;
+import scims.ui.actions.EditWeightClassAction;
+import scims.ui.actions.NewCompetitionAction;
+import scims.ui.actions.NewWeightClassAction;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.SCIMSFrame;
 import scims.ui.swing.tree.CompetitionTree;
@@ -78,5 +83,38 @@ public class CompetitionModelController {
                 _treeTableInView.clear();
             }
         });
+    }
+
+    public void newCompetitionAction() {
+        new NewCompetitionAction(_parentFrame, this::newCompetitionCreated).actionPerformed(null);
+    }
+
+    public void editWeightClass(WeightClass weightClass) {
+        new EditWeightClassAction(_parentFrame, weightClass, this::weightClassUpdated);
+    }
+
+    private void weightClassUpdated(WeightClass weightClass) {
+        //TODO
+    }
+
+    public void addNewCompetitorAction(WeightClass weightClass) {
+        //TODO
+    }
+
+    public void addNewWeightClassAction(Competition competition) {
+        new NewWeightClassAction(_parentFrame, wc -> addWeightClass(wc, competition)).actionPerformed(null);
+    }
+
+    private void addWeightClass(WeightClass wc, Competition competition) {
+        //TODO
+    }
+
+    public void editCompetitionAction(Competition competition) {
+        new EditCompetitionAction(_parentFrame, competition, updatedCompetition -> updateCompetition(updatedCompetition, competition)).actionPerformed(null);
+    }
+
+    private void updateCompetition(Competition updatedCompetition, Competition originalCompetition) {
+        System.out.println();
+
     }
 }

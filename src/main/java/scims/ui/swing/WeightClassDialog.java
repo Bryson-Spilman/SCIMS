@@ -1,6 +1,7 @@
 package scims.ui.swing;
 
 
+import scims.main.CustomWeightClassRegistry;
 import scims.model.data.StrengthWeightClassBuilder;
 import scims.model.data.WeightClass;
 import scims.ui.Modifiable;
@@ -15,7 +16,7 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-class NewWeightClassDialog extends JDialog implements Modifiable {
+public class WeightClassDialog extends JDialog implements Modifiable {
 
     private final Consumer<WeightClass> _createAction;
     private JTextField _nameTextField;
@@ -24,7 +25,7 @@ class NewWeightClassDialog extends JDialog implements Modifiable {
     private OkCancelPanel _okCancelPanel;
     private boolean _isModified;
 
-    NewWeightClassDialog(Window parent, Consumer<WeightClass> createAction) {
+    public WeightClassDialog(Window parent, Consumer<WeightClass> createAction) {
         super(parent, "New Weight Class");
         setModal(true);
         setLayout(new GridBagLayout());
@@ -67,7 +68,9 @@ class NewWeightClassDialog extends JDialog implements Modifiable {
 
     private void createClicked() {
         try {
-            _createAction.accept(buildWeightClass());
+            WeightClass wc = buildWeightClass();
+            CustomWeightClassRegistry.getInstance().registerWeightClass(wc);
+            _createAction.accept(wc);
             dispose();
         } catch (MissingRequiredValueException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Weight Class",
@@ -156,5 +159,9 @@ class NewWeightClassDialog extends JDialog implements Modifiable {
     @Override
     public boolean isModified() {
         return _isModified;
+    }
+
+    public void fillPanel(WeightClass weightClass) {
+        //TODO
     }
 }

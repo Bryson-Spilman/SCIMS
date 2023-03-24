@@ -131,4 +131,8 @@ public class WeightClassTable extends SCIMSTable {
         }
         return retVal;
     }
+
+    public boolean containsWeightClass(WeightClass wc) {
+        return _model.containsWeightClass(wc);
+    }
 }

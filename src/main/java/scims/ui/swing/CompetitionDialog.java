@@ -1,5 +1,7 @@
 package scims.ui.swing;
 
+import scims.main.CustomEventClassRegistry;
+import scims.main.CustomWeightClassRegistry;
 import scims.model.data.*;
 import scims.model.data.Event;
 import scims.model.enums.DistanceUnitSystem;
@@ -18,7 +20,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class NewCompetitionDialog extends JDialog implements Modifiable {
+public class CompetitionDialog extends JDialog implements Modifiable {
     private final Consumer<Competition> _createAction;
     private JRadioButton _prevSelectedUnitSystem;
     private JTextField _nameTextField;
@@ -47,7 +49,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     private JScrollPane _eventsTableScrollPane;
     private JScrollPane _weightClassScrollPane;
 
-    public NewCompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
+    public CompetitionDialog(JFrame parentFrame, Consumer<Competition> createAction) {
         super(parentFrame, "New Competition", true);
         setLayout(new GridBagLayout());
         setSize(650,700);
@@ -56,8 +58,17 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _createAction = createAction;
         // Initialize components
         buildComponents();
+        _createNewWeightClassButton.setEnabled(false);
+        initializeTables();
         _prevSelectedUnitSystem = _poundsRadioButton;
         addListeners();
+    }
+
+    private void initializeTables() {
+        for(Event event : CustomEventClassRegistry.getInstance().getEvents()) {
+            _eventsTable.addEvent(event);
+            _eventsTable.deselectAll();
+        }
     }
 
     private Competition buildCompetition() throws MissingRequiredValueException, DateTimeParseException {
@@ -111,6 +122,39 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         _createNewWeightClassButton.addActionListener(e -> newWeightClassButtonAction());
     }
 
+    public void fillPanel(Competition competition) {
+        _nameTextField.setText(competition.getName());
+        ZonedDateTime zonedDateTime = competition.getDateTime();
+        if(zonedDateTime != null) {
+            String dateTime = zonedDateTime.format(DateTimeTextField.formatter2);
+            if(competition.getDateTime().toString().contains(":"))
+            {
+                dateTime = competition.getDateTime().format(DateTimeTextField.formatter);
+            }
+            _dateTimeTextField.setText(dateTime);
+        }
+        _feetRadioButton.setSelected(competition.getDistanceUnitSystem() == DistanceUnitSystem.FEET);
+        _metersRadioButton.setSelected(competition.getDistanceUnitSystem() == DistanceUnitSystem.METERS);
+        _poundsRadioButton.setSelected(competition.getWeightUnitSystem() == WeightUnitSystem.POUNDS);
+        _poundsRadioButton.setSelected(competition.getWeightUnitSystem() == WeightUnitSystem.KILOS);
+        _okCancelPanel.setOkText("Update");
+        _otherRadioButton.setSelected(true);
+        _sameEventsForAllWeightsClassesCheckbox.setSelected(competition.isSameNumberOfEventsForAllWeightClasses());
+        List<WeightClass> weightClasses = competition.getWeightClasses();
+        for(WeightClass wc : weightClasses) {
+            List<Event> events = wc.getEventsInOrder();
+            _weightClassTable.setSelectedEvents(events);
+            _eventsTable.setSelectedEvents(events);
+        }
+        if(competition.isSameNumberOfEventsForAllWeightClasses() && !weightClasses.isEmpty()) {
+            _eventsTable.setEventOrderColumnEnabled(true);
+            _eventsTable.setOrdersByListOrder(weightClasses.get(0).getEventsInOrder());
+        }
+        _strongmanCorpRadioButton.setSelected(containsOnlyStrongmanCorpWeightClasses(weightClasses));
+        _ussRadioButton.setSelected(containsOnlyUSSWeightClasses(weightClasses));
+        sanctionRadioButtonChanged();
+    }
+
     private void orderChanged() {
         if(!_ignoreEventsChanged) {
             _ignoreEventsChanged = true;
@@ -130,7 +174,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     }
 
     private void newEventButtonAction() {
-        NewEventDialog dlg = new NewEventDialog(this, this::addEvent);
+        EventDialog dlg = new EventDialog(this, this::addEvent);
         dlg.setVisible(true);
     }
 
@@ -144,11 +188,17 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
     }
 
     private void newWeightClassButtonAction() {
-        NewWeightClassDialog dlg = new NewWeightClassDialog(this, this::addWeightClass);
+        WeightClassDialog dlg = new WeightClassDialog(this, this::addWeightClass);
         dlg.setVisible(true);
     }
 
     private void addWeightClass(WeightClass weightClass) {
+        if(_sameEventsForAllWeightsClassesCheckbox.isSelected()) {
+            weightClass = new StrengthWeightClassBuilder()
+                    .fromExistingWeightClass(weightClass)
+                    .withUpdatedEvents(_eventsTable.getSelectedEvents())
+                    .build();
+        }
         _weightClassTable.addWeightClass(weightClass);
         SwingUtilities.invokeLater(() -> {
             JViewport scrollViewPort = _weightClassScrollPane.getViewport();
@@ -260,23 +310,34 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
             }
             else {
                 _prevRadioButton = _otherRadioButton;
+                for(WeightClass wc : CustomWeightClassRegistry.getInstance().getWeightClasses()) {
+                    if(!_weightClassTable.containsWeightClass(wc)) {
+                        _weightClassTable.addWeightClass(wc);
+                    }
+                }
             }
             _ignoreRadioChange = false;
         }
+        _createNewWeightClassButton.setEnabled(_otherRadioButton.isSelected());
     }
 
     private boolean emptyOrOnlyContainsStrongmanCorpWeightClasses() {
         boolean retVal = true;
         if(_weightClassTable.getModel().getRowCount() > 0)
         {
-            List<WeightClass> weightClasses = _weightClassTable.getAllWeightClasses();
-            for(WeightClass wc : weightClasses)
+           retVal = containsOnlyStrongmanCorpWeightClasses(_weightClassTable.getAllWeightClasses());
+        }
+        return retVal;
+    }
+
+    private boolean containsOnlyStrongmanCorpWeightClasses(List<WeightClass> weightClasses) {
+        boolean retVal = true;
+        for(WeightClass wc : weightClasses)
+        {
+            if(!StrongmanCorpWeightClasses.getValues().contains(wc))
             {
-                if(!StrongmanCorpWeightClasses.getValues().contains(wc))
-                {
-                    retVal = false;
-                    break;
-                }
+                retVal = false;
+                break;
             }
         }
         return retVal;
@@ -294,6 +355,19 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
                     retVal = false;
                     break;
                 }
+            }
+        }
+        return retVal;
+    }
+
+    private boolean containsOnlyUSSWeightClasses(List<WeightClass> weightClasses) {
+        boolean retVal = true;
+        for(WeightClass wc : weightClasses)
+        {
+            if(!USSWeightClasses.getValues().contains(wc))
+            {
+                retVal = false;
+                break;
             }
         }
         return retVal;
@@ -318,7 +392,7 @@ public class NewCompetitionDialog extends JDialog implements Modifiable {
         int opt = JOptionPane.YES_OPTION;
         if(_isModified)
         {
-            opt = JOptionPane.showConfirmDialog(this, "Cancel creation of competition?", "Confirm Cancel",
+            opt = JOptionPane.showConfirmDialog(this, "Cancel "  + _okCancelPanel.getOkText() + " of competition?", "Confirm Cancel",
                     JOptionPane.YES_NO_OPTION);
         }
         if(opt == JOptionPane.YES_OPTION)

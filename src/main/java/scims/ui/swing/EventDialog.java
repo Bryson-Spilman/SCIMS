@@ -1,5 +1,6 @@
 package scims.ui.swing;
 
+import scims.main.CustomEventClassRegistry;
 import scims.model.data.Event;
 import scims.model.data.StrengthEventBuilder;
 import scims.model.data.scoring.CustomEventScoring;
@@ -17,7 +18,7 @@ import java.awt.event.WindowEvent;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-class NewEventDialog extends JDialog implements Modifiable {
+class EventDialog extends JDialog implements Modifiable {
 
     private static final String NO_TIE_BREAKER = "NO_TIE_BREAKER";
     private static final String HAS_TIE_BREAKER = "HAS_TIE_BREAKER";
@@ -31,7 +32,7 @@ class NewEventDialog extends JDialog implements Modifiable {
     private OkCancelPanel _okCancelPanel;
     private JPanel _secondaryScoringCardPanel;
 
-    NewEventDialog(Window parent, Consumer<Event> createAction) {
+    EventDialog(Window parent, Consumer<Event> createAction) {
         super(parent, "New Event");
         setModal(true);
         setLayout(new GridBagLayout());
@@ -81,7 +82,9 @@ class NewEventDialog extends JDialog implements Modifiable {
 
     private void createClicked() {
         try {
-            _createAction.accept(buildEvent());
+            Event event = buildEvent();
+            CustomEventClassRegistry.getInstance().registerEvent(event);
+            _createAction.accept(event);
             dispose();
         } catch (MissingRequiredValueException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Event",

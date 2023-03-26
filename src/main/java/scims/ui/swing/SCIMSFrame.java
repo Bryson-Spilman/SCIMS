@@ -75,7 +75,7 @@ public class SCIMSFrame extends JFrame {
 
     private void addListeners()
     {
-        _newCompetitionMenuItem.addActionListener(new NewCompetitionAction(this, _controller::newCompetitionCreated));
+        _newCompetitionMenuItem.addActionListener(e -> _controller.addNewCompetitionAction());
     }
 
     private void buildComponents() {

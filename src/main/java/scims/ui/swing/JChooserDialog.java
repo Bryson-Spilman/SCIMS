@@ -44,7 +44,7 @@ public class JChooserDialog<T> extends JDialog {
         setObjects(objects);
     }
 
-    void setTextField(JTextField textField) {
+    public void setTextField(JTextField textField) {
         _textField = textField;
     }
 
@@ -86,7 +86,7 @@ public class JChooserDialog<T> extends JDialog {
         setSelectedFromTextField();
     }
 
-    List<T> getSelectedObjects() {
+    public List<T> getSelectedObjects() {
         List<T> retVal = new ArrayList<>();
         for(int i=0; i < _rightModel.getSize(); i++)
         {

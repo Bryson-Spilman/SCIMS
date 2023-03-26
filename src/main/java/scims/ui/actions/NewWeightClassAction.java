@@ -1,7 +1,7 @@
 package scims.ui.actions;
 
 import scims.model.data.WeightClass;
-import scims.ui.swing.WeightClassDialog;
+import scims.ui.swing.dialogs.WeightClassDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

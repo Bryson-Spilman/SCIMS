@@ -1,7 +1,7 @@
 package scims.ui.actions;
 
 import scims.model.data.Competition;
-import scims.ui.swing.CompetitionDialog;
+import scims.ui.swing.dialogs.CompetitionDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

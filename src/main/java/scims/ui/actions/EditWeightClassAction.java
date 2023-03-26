@@ -1,8 +1,7 @@
 package scims.ui.actions;
 
-import scims.model.data.Competition;
 import scims.model.data.WeightClass;
-import scims.ui.swing.WeightClassDialog;
+import scims.ui.swing.dialogs.WeightClassDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -23,6 +22,7 @@ public class EditWeightClassAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         WeightClassDialog dlg = new WeightClassDialog(_parentFrame, _consumerOfCreate);
+        dlg.setTitle("Update Weight Class");
         dlg.fillPanel(_weightClass);
         dlg.setVisible(true);
     }

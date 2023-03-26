@@ -1,48 +1,45 @@
-package scims.ui.swing;
+package scims.ui.swing.dialogs;
 
-
-import scims.main.CustomWeightClassRegistry;
-import scims.model.data.StrengthWeightClassBuilder;
-import scims.model.data.WeightClass;
+import scims.main.CustomEventClassRegistry;
+import scims.model.data.Competitor;
+import scims.model.data.StrengthCompetitorBuilder;
 import scims.ui.Modifiable;
+import scims.ui.swing.MissingRequiredValueException;
+import scims.ui.swing.OkCancelPanel;
 import scims.ui.swing.tablecells.DoubleDocumentFilter;
 import scims.ui.swing.tablecells.IntegerDocumentFilter;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
+import java.awt.event.*;
 import java.util.function.Consumer;
 
-public class WeightClassDialog extends JDialog implements Modifiable {
-
-    private final Consumer<WeightClass> _createAction;
+public class CompetitorDialog extends JDialog implements Modifiable {
+    private final Consumer<Competitor> _createAction;
     private JTextField _nameTextField;
-    private JTextField _maxNumberOfCompetitorsField;
-    private JTextField _maxCompetitorWeight;
+    private JTextField _ageField;
+    private JTextField _weightField;
     private OkCancelPanel _okCancelPanel;
     private boolean _isModified;
 
-    public WeightClassDialog(Window parent, Consumer<WeightClass> createAction) {
-        super(parent, "New Weight Class");
+    public CompetitorDialog(Window parent, Consumer<Competitor> createAction) {
+        super(parent, "New Competitor");
         setModal(true);
         setLayout(new GridBagLayout());
-        setSize(400,175);
+        setSize(400,250);
         setMinimumSize(new Dimension(Integer.MIN_VALUE, 175));
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(parent);
         _createAction = createAction;
-        // Initialize components
         buildComponents();
         addListeners();
     }
 
     private void addListeners() {
-        _nameTextField.addActionListener(e -> setModified(true));
-        _maxNumberOfCompetitorsField.addActionListener(e -> setModified(true));
-        _maxCompetitorWeight.addActionListener(e -> setModified(true));
+        _nameTextField.addKeyListener(getModifiedKeyListener());
+        _ageField.addKeyListener(getModifiedKeyListener());
+        _weightField.addKeyListener(getModifiedKeyListener());
         _okCancelPanel.addOkActionListener(e -> createClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
         addWindowListener( new WindowAdapter() {
@@ -53,11 +50,20 @@ public class WeightClassDialog extends JDialog implements Modifiable {
         });
     }
 
+    private KeyListener getModifiedKeyListener() {
+        return new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                setModified(true);
+            }
+        };
+    }
+
     private void closeDialogClicked() {
         int opt = JOptionPane.YES_OPTION;
         if(_isModified)
         {
-            opt = JOptionPane.showConfirmDialog(this, "Cancel creation of weight class?", "Confirm Cancel",
+            opt = JOptionPane.showConfirmDialog(this, "Cancel creation of event?", "Confirm Cancel",
                     JOptionPane.YES_NO_OPTION);
         }
         if(opt == JOptionPane.YES_OPTION)
@@ -68,54 +74,52 @@ public class WeightClassDialog extends JDialog implements Modifiable {
 
     private void createClicked() {
         try {
-            WeightClass wc = buildWeightClass();
-            CustomWeightClassRegistry.getInstance().registerWeightClass(wc);
-            _createAction.accept(wc);
+            Competitor competitor = buildCompetitor();
+            _createAction.accept(competitor);
             dispose();
         } catch (MissingRequiredValueException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Weight Class",
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Competitor",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private WeightClass buildWeightClass() throws MissingRequiredValueException {
+    private Competitor buildCompetitor() throws MissingRequiredValueException {
         String name = _nameTextField.getText();
-        String maxCompetitorWeight = _maxCompetitorWeight.getText();
-        String maxNumberOfCompetitorsStr = _maxNumberOfCompetitorsField.getText();
-        Integer maxNumberOfCompetitors = null;
-        if(!maxNumberOfCompetitorsStr.trim().isEmpty()) {
-            maxNumberOfCompetitors = Integer.parseInt(maxNumberOfCompetitorsStr);
-        }
         if(name == null || name.trim().isEmpty()) {
             throw new MissingRequiredValueException("Name");
         }
-        if(maxCompetitorWeight == null || maxCompetitorWeight.trim().isEmpty()) {
-            throw new MissingRequiredValueException("Max Weight");
+        String ageTxt = _ageField.getText();
+        Integer age = null;
+        if(ageTxt != null && !ageTxt.isEmpty()) {
+            age = Integer.parseInt(ageTxt);
         }
-        return new StrengthWeightClassBuilder()
-                .withName(name)
-                .withMaxCompetitorWeight(Double.parseDouble(maxCompetitorWeight))
-                .withEventsInOrder(new ArrayList<>())
-                .withMaxNumberOfCompetitors(maxNumberOfCompetitors)
+        String weightTxt = _weightField.getText();
+        Double weight = null;
+        if(weightTxt != null && !weightTxt.isEmpty()) {
+            weight = Double.parseDouble(weightTxt);
+        }
+        return new StrengthCompetitorBuilder()
+                .withCompetitorName(name)
+                .withCompetitorAge(age)
+                .withCompetitorWeight(weight)
                 .build();
     }
-
     private void buildComponents() {
-        JLabel nameLabel = new JLabel("Weight Class Name:");
+        JLabel nameLabel = new JLabel("Name:");
         _nameTextField = new JTextField();
-        JLabel maxNumberCompetitorLabel = new JLabel("Max Number of Competitors:");
-        _maxNumberOfCompetitorsField = new JTextField();
-        ((AbstractDocument) _maxNumberOfCompetitorsField.getDocument()).setDocumentFilter(new IntegerDocumentFilter());
-        JLabel maxCompetitorWeightLabel = new JLabel("Max Competitor Weight:");
-        _maxCompetitorWeight = new JTextField();
-        ((AbstractDocument) _maxCompetitorWeight.getDocument()).setDocumentFilter(new DoubleDocumentFilter());
-
+        JLabel ageLabel = new JLabel("Age <Optional>:");
+        _ageField = new JTextField();
+        ((AbstractDocument)_ageField.getDocument()).setDocumentFilter(new IntegerDocumentFilter());
+        JLabel weightLabel = new JLabel("Weight <Optional>:");
+        _weightField = new JTextField();
+        ((AbstractDocument)_weightField.getDocument()).setDocumentFilter(new DoubleDocumentFilter());
         _okCancelPanel = new OkCancelPanel("Create");
-        addLabeledTextField(this, nameLabel, _nameTextField, 0.0);
-        addLabeledTextField(this, maxCompetitorWeightLabel, _maxCompetitorWeight, 0.0);
-        addLabeledTextField(this, maxNumberCompetitorLabel, _maxNumberOfCompetitorsField, 0.001);
 
-        GridBagConstraints  gbc = new GridBagConstraints();
+        addLabeledComponentOnOwnLine(this, nameLabel, _nameTextField, 0.0);
+        addLabeledComponentOnOwnLine(this, ageLabel, _ageField, 0.0);
+        addLabeledComponentOnOwnLine(this, weightLabel, _weightField, 0.001);
+
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -127,7 +131,7 @@ public class WeightClassDialog extends JDialog implements Modifiable {
         add(_okCancelPanel, gbc);
     }
 
-    private void addLabeledTextField(Container parent, JLabel label, JTextField textField, double weightY) {
+    private void addLabeledComponentOnOwnLine(Container parent, JLabel label, JComponent component, double weightY) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
@@ -148,7 +152,7 @@ public class WeightClassDialog extends JDialog implements Modifiable {
         gbc.anchor    = GridBagConstraints.NORTHWEST;
         gbc.fill      = GridBagConstraints.HORIZONTAL;
         gbc.insets    = new Insets(5,5,0,5);
-        parent.add(textField, gbc);
+        parent.add(component, gbc);
     }
 
     @Override
@@ -161,7 +165,16 @@ public class WeightClassDialog extends JDialog implements Modifiable {
         return _isModified;
     }
 
-    public void fillPanel(WeightClass weightClass) {
-        //TODO
+    public void fillPanel(Competitor competitor) {
+        _nameTextField.setText(competitor.getName());
+        Integer age = competitor.getAge();
+        Double weight = competitor.getWeight();
+        if(age != null) {
+            _ageField.setText(age.toString());
+        }
+        if(weight != null) {
+            _weightField.setText(weight.toString());
+        }
+        _okCancelPanel.setOkText("Update");
     }
 }

@@ -1,4 +1,4 @@
-package scims.ui.swing;
+package scims.ui.swing.dialogs;
 
 import scims.main.CustomEventClassRegistry;
 import scims.main.CustomWeightClassRegistry;
@@ -9,6 +9,9 @@ import scims.model.enums.StrongmanCorpWeightClasses;
 import scims.model.enums.USSWeightClasses;
 import scims.model.enums.WeightUnitSystem;
 import scims.ui.Modifiable;
+import scims.ui.swing.DateTimeTextField;
+import scims.ui.swing.MissingRequiredValueException;
+import scims.ui.swing.OkCancelPanel;
 import scims.ui.swing.tables.EventsTable;
 import scims.ui.swing.tables.WeightClassTable;
 
@@ -126,10 +129,10 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         _nameTextField.setText(competition.getName());
         ZonedDateTime zonedDateTime = competition.getDateTime();
         if(zonedDateTime != null) {
-            String dateTime = zonedDateTime.format(DateTimeTextField.formatter2);
+            String dateTime = zonedDateTime.format(DateTimeTextField.DATE_FORMATTER);
             if(competition.getDateTime().toString().contains(":"))
             {
-                dateTime = competition.getDateTime().format(DateTimeTextField.formatter);
+                dateTime = competition.getDateTime().format(DateTimeTextField.DATE_TIME_FORMATTER);
             }
             _dateTimeTextField.setText(dateTime);
         }

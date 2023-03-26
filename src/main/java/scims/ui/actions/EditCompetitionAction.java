@@ -1,7 +1,7 @@
 package scims.ui.actions;
 
 import scims.model.data.Competition;
-import scims.ui.swing.CompetitionDialog;
+import scims.ui.swing.dialogs.CompetitionDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -22,6 +22,7 @@ public class EditCompetitionAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         CompetitionDialog competitionDialog = new CompetitionDialog(_parentFrame, _consumerOfCreate);
+        competitionDialog.setTitle("Update Competition");
         competitionDialog.fillPanel(_competition);
         competitionDialog.setVisible(true);
     }

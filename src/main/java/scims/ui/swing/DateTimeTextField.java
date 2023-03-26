@@ -12,10 +12,10 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-class DateTimeTextField extends JTextField {
+public class DateTimeTextField extends JTextField {
 
-    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy h:mm a");
-    static final DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd-yyyy h:mm a");
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd-yyyy");
     private static final String allowedCharacters = "0123456789:AMP";
 
     private String _placeholder;
@@ -216,9 +216,9 @@ class DateTimeTextField extends JTextField {
         if(text != null) {
             text = text.trim();
             try {
-                retVal = ZonedDateTime.parse(text, formatter.withZone(java.time.ZoneId.systemDefault()));
+                retVal = ZonedDateTime.parse(text, DATE_TIME_FORMATTER.withZone(java.time.ZoneId.systemDefault()));
             } catch (DateTimeParseException e) {
-                LocalDate localDate = LocalDate.parse(text, formatter2);
+                LocalDate localDate = LocalDate.parse(text, DATE_FORMATTER);
                 ZoneId zoneId = ZoneId.systemDefault();
                 retVal = ZonedDateTime.of(localDate, LocalTime.MIN, zoneId);
             }

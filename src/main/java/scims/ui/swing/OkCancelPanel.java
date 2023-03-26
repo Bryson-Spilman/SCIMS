@@ -19,7 +19,7 @@ public class OkCancelPanel extends JPanel {
         buildOkCancelButtons();
     }
 
-     void addOkActionListener(ActionListener actionListener) {
+    public void addOkActionListener(ActionListener actionListener) {
         _okButton.addActionListener(actionListener);
     }
     public void addCancelActionListener(ActionListener actionListener) {

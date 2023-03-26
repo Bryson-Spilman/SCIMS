@@ -2,11 +2,9 @@ package scims.controllers;
 
 import javafx.application.Platform;
 import scims.model.data.Competition;
+import scims.model.data.Competitor;
 import scims.model.data.WeightClass;
-import scims.ui.actions.EditCompetitionAction;
-import scims.ui.actions.EditWeightClassAction;
-import scims.ui.actions.NewCompetitionAction;
-import scims.ui.actions.NewWeightClassAction;
+import scims.ui.actions.*;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.SCIMSFrame;
 import scims.ui.swing.tree.CompetitionTree;
@@ -17,21 +15,17 @@ import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CompetitionModelController {
     private final CompetitionTree _competitionTree;
     private final SCIMSFrame _parentFrame;
     private CompetitionTreeTable _treeTableInView;
-    private final List<Competition> _competitionsList;
 
     public CompetitionModelController(SCIMSFrame parentFrame, CompetitionTree competitionTree, CompetitionTreeTable treeTableInView)
     {
         _parentFrame = parentFrame;
         _competitionTree = competitionTree;
         _treeTableInView = treeTableInView;
-        _competitionsList = new ArrayList<>();
         addListeners();
     }
 
@@ -67,16 +61,8 @@ public class CompetitionModelController {
         Platform.runLater(() -> _treeTableInView.refresh(competition));
     }
 
-    public void newCompetitionCreated(Competition competition)
-    {
-        _competitionsList.add(competition);
-        _competitionTree.addNewCompetition(competition);
-        updateTreeTableView(competition);
-    }
-
     public void competitionRemoved(Competition competition)
     {
-        _competitionsList.remove(competition);
         _competitionTree.removeCompetition(competition);
         Platform.runLater(() -> {
             if(_treeTableInView.isShowingCompetition(competition)) {
@@ -85,20 +71,12 @@ public class CompetitionModelController {
         });
     }
 
-    public void newCompetitionAction() {
-        new NewCompetitionAction(_parentFrame, this::newCompetitionCreated).actionPerformed(null);
+    public void addNewCompetitionAction() {
+        new NewCompetitionAction(_parentFrame, this::addCompetition).actionPerformed(null);
     }
 
-    public void editWeightClass(WeightClass weightClass) {
-        new EditWeightClassAction(_parentFrame, weightClass, this::weightClassUpdated);
-    }
-
-    private void weightClassUpdated(WeightClass weightClass) {
-        //TODO
-    }
-
-    public void addNewCompetitorAction(WeightClass weightClass) {
-        //TODO
+    public void addNewCompetitorAction(Competition competition, WeightClass weightClass) {
+        new NewCompetitorAction(_parentFrame, competitor -> addCompetitor(competitor, weightClass, competition)).actionPerformed(null);
     }
 
     public void addNewWeightClassAction(Competition competition) {
@@ -106,7 +84,25 @@ public class CompetitionModelController {
     }
 
     private void addWeightClass(WeightClass wc, Competition competition) {
-        //TODO
+        _competitionTree.addNewWeightClass(competition, wc);
+    }
+
+    private void addCompetitor(Competitor competitor, WeightClass weightClass, Competition competition) {
+        _competitionTree.addNewCompetitor(competition, weightClass, competitor);
+    }
+
+    private void addCompetition(Competition competition)
+    {
+        _competitionTree.addNewCompetition(competition);
+        updateTreeTableView(competition);
+    }
+
+    public void editCompetitorAction(Competition competition, WeightClass weightClass, Competitor competitor) {
+        new EditCompetitorAction(_parentFrame, competitor, updatedCompetitor -> updateCompetitor(updatedCompetitor, competitor, competition, weightClass)).actionPerformed(null);
+    }
+
+    public void editWeightClassAction(Competition competition, WeightClass weightClass) {
+        new EditWeightClassAction(_parentFrame, weightClass, wc -> updateWeightClass(competition, wc, weightClass)).actionPerformed(null);
     }
 
     public void editCompetitionAction(Competition competition) {
@@ -114,7 +110,14 @@ public class CompetitionModelController {
     }
 
     private void updateCompetition(Competition updatedCompetition, Competition originalCompetition) {
-        System.out.println();
+        _competitionTree.updateCompetition(originalCompetition, updatedCompetition);
+    }
 
+    private void updateCompetitor(Competitor updatedCompetitor, Competitor oldCompetitor, Competition competition, WeightClass weightClass) {
+        _competitionTree.updateCompetitor(oldCompetitor, updatedCompetitor, competition, weightClass);
+    }
+
+    private void updateWeightClass(Competition competition, WeightClass weightClass, WeightClass oldWeightClass) {
+        _competitionTree.updateWeightClass(oldWeightClass, weightClass, competition);
     }
 }

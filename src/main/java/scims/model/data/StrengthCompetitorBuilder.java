@@ -5,8 +5,8 @@ import scims.model.fluentbuilders.competitor.*;
 public class StrengthCompetitorBuilder implements FluentWithCompetitorName, FluentFromExistingCompetitor {
 
     private String _name;
-    private int _age;
-    private double _weight;
+    private Integer _age;
+    private Double _weight;
 
     @Override
     public FluentWithCompetitorAge withCompetitorName(String name) {
@@ -24,7 +24,7 @@ public class StrengthCompetitorBuilder implements FluentWithCompetitorName, Flue
 
     private class WithCompetitorAge implements FluentWithCompetitorAge {
         @Override
-        public FluentWithCompetitorWeight withCompetitorAge(int age) {
+        public FluentWithCompetitorWeight withCompetitorAge(Integer age) {
             _age = age;
             return new WithCompetitorWeight();
         }
@@ -32,7 +32,7 @@ public class StrengthCompetitorBuilder implements FluentWithCompetitorName, Flue
 
     private class WithCompetitorWeight implements FluentWithCompetitorWeight {
         @Override
-        public FluentCompetitorBuilder withCompetitorWeight(double weight) {
+        public FluentCompetitorBuilder withCompetitorWeight(Double weight) {
             _weight = weight;
             return new CompetitorBuilder();
         }
@@ -55,13 +55,13 @@ public class StrengthCompetitorBuilder implements FluentWithCompetitorName, Flue
         }
 
         @Override
-        public FluentUpdateCompetitor withUpdatedAge(int age) {
+        public FluentUpdateCompetitor withUpdatedAge(Integer age) {
             _age = age;
             return this;
         }
 
         @Override
-        public FluentUpdateCompetitor withUpdatedWeight(double weight) {
+        public FluentUpdateCompetitor withUpdatedWeight(Double weight) {
             _weight = weight;
             return this;
         }

@@ -1,4 +1,4 @@
-package scims.ui.swing;
+package scims.ui.swing.dialogs;
 
 import scims.main.CustomEventClassRegistry;
 import scims.model.data.Event;
@@ -8,17 +8,18 @@ import scims.model.data.scoring.CustomScore;
 import scims.model.data.scoring.EventScoring;
 import scims.model.data.scoring.ScoringFactory;
 import scims.ui.Modifiable;
+import scims.ui.swing.MissingRequiredValueException;
+import scims.ui.swing.OkCancelPanel;
 import scims.ui.swing.tablecells.DoubleDocumentFilter;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-class EventDialog extends JDialog implements Modifiable {
+public class EventDialog extends JDialog implements Modifiable {
 
     private static final String NO_TIE_BREAKER = "NO_TIE_BREAKER";
     private static final String HAS_TIE_BREAKER = "HAS_TIE_BREAKER";
@@ -32,7 +33,7 @@ class EventDialog extends JDialog implements Modifiable {
     private OkCancelPanel _okCancelPanel;
     private JPanel _secondaryScoringCardPanel;
 
-    EventDialog(Window parent, Consumer<Event> createAction) {
+    public EventDialog(Window parent, Consumer<Event> createAction) {
         super(parent, "New Event");
         setModal(true);
         setLayout(new GridBagLayout());
@@ -47,6 +48,10 @@ class EventDialog extends JDialog implements Modifiable {
     }
 
     private void addListeners() {
+        _nameTextField.addKeyListener(getModifiedKeyListener());
+        _primaryScoringComboBox.addActionListener(e -> setModified(true));
+        _secondaryScoringComboBox.addActionListener(e -> setModified(true));
+        _timeLimitTextField.addKeyListener(getModifiedKeyListener());
         _hasTieBreakerScoring.addActionListener(e -> tieBreakerCheckBoxClicked());
         _okCancelPanel.addOkActionListener(e -> createClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
@@ -58,6 +63,15 @@ class EventDialog extends JDialog implements Modifiable {
         });
     }
 
+    private KeyListener getModifiedKeyListener() {
+        return new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                setModified(true);
+            }
+        };
+    }
+
     private void tieBreakerCheckBoxClicked() {
         CardLayout cardLayout = (CardLayout) _secondaryScoringCardPanel.getLayout();
         if(_hasTieBreakerScoring.isSelected()) {
@@ -65,6 +79,7 @@ class EventDialog extends JDialog implements Modifiable {
         } else {
             cardLayout.show(_secondaryScoringCardPanel, NO_TIE_BREAKER);
         }
+        setModified(true);
     }
 
     private void closeDialogClicked() {

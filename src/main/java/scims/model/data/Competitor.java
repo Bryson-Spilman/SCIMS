@@ -1,7 +1,7 @@
 package scims.model.data;
 
 public interface Competitor {
-    int getAge();
-    double getWeight();
+    Integer getAge();
+    Double getWeight();
     String getName();
 }

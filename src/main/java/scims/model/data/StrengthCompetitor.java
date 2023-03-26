@@ -5,22 +5,22 @@ import java.util.Objects;
 public class StrengthCompetitor implements Competitor {
 
     private final String _name;
-    private final int _age;
-    private final double _weight;
+    private final Integer _age;
+    private final Double _weight;
 
-    StrengthCompetitor(String name, int age, double weight)
+    StrengthCompetitor(String name, Integer age, Double weight)
     {
         _name = name;
         _age = age;
         _weight = weight;
     }
     @Override
-    public int getAge() {
+    public Integer getAge() {
         return _age;
     }
 
     @Override
-    public double getWeight() {
+    public Double getWeight() {
         return _weight;
     }
 
@@ -34,7 +34,7 @@ public class StrengthCompetitor implements Competitor {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StrengthCompetitor that = (StrengthCompetitor) o;
-        return _age == that._age && Objects.equals(_name, that._name);
+        return Objects.equals(_age, that._age) && Objects.equals(_name, that._name);
     }
 
     @Override

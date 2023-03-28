@@ -2,6 +2,8 @@ package scims.ui.swing.dialogs;
 
 
 import scims.main.CustomWeightClassRegistry;
+import scims.model.data.Competitor;
+import scims.model.data.StrengthWeightClass;
 import scims.model.data.StrengthWeightClassBuilder;
 import scims.model.data.WeightClass;
 import scims.ui.Modifiable;
@@ -15,6 +17,7 @@ import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class WeightClassDialog extends JDialog implements Modifiable {
@@ -25,6 +28,7 @@ public class WeightClassDialog extends JDialog implements Modifiable {
     private JTextField _maxCompetitorWeight;
     private OkCancelPanel _okCancelPanel;
     private boolean _isModified;
+    private final List<Competitor> _competitors = new ArrayList<>();
 
     public WeightClassDialog(Window parent, Consumer<WeightClass> createAction) {
         super(parent, "New Weight Class");
@@ -102,12 +106,16 @@ public class WeightClassDialog extends JDialog implements Modifiable {
         if(maxCompetitorWeight == null || maxCompetitorWeight.trim().isEmpty()) {
             throw new MissingRequiredValueException("Max Weight");
         }
-        return new StrengthWeightClassBuilder()
+        StrengthWeightClass retVal = new StrengthWeightClassBuilder()
                 .withName(name)
                 .withMaxCompetitorWeight(Double.parseDouble(maxCompetitorWeight))
                 .withEventsInOrder(new ArrayList<>())
                 .withMaxNumberOfCompetitors(maxNumberOfCompetitors)
                 .build();
+        for(Competitor competitor : _competitors) {
+            retVal.addCompetitor(competitor);
+        }
+        return retVal;
     }
 
     private void buildComponents() {
@@ -173,6 +181,8 @@ public class WeightClassDialog extends JDialog implements Modifiable {
 
     public void fillPanel(WeightClass weightClass) {
         _okCancelPanel.setOkText("Update");
+        _competitors.clear();
+        _competitors.addAll(weightClass.getCompetitors());
         _nameTextField.setText(weightClass.getName() == null ? null : weightClass.getName());
         _maxCompetitorWeight.setText(weightClass.getMaxCompetitorWeight() == null ? null : weightClass.getMaxCompetitorWeight().toString());
         _maxNumberOfCompetitorsField.setText(weightClass.getMaxNumberOfCompetitors() == null ? null : weightClass.getMaxNumberOfCompetitors().toString());

@@ -9,11 +9,7 @@ import scims.controllers.CompetitionModelController;
 import scims.main.CustomEventClassRegistry;
 import scims.model.data.Event;
 import scims.model.data.StrengthEventBuilder;
-import scims.model.data.scoring.DistanceScoring;
-import scims.model.data.scoring.EventScoring;
-import scims.model.data.scoring.RepsScoring;
-import scims.model.data.scoring.TimeScoring;
-import scims.ui.actions.NewCompetitionAction;
+import scims.model.data.scoring.*;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.tree.CompetitionTree;
 import scims.ui.swing.tree.IconTreeCellRenderer;
@@ -63,10 +59,12 @@ public class SCIMSFrame extends JFrame {
         randomScoring.put(2, new TimeScoring());
         randomScoring.put(3, new DistanceScoring());
         randomScoring.put(4, new TimeScoring());
+        randomScoring.put(5, new LastManStandingEliminationScoring());
+        randomScoring.put(6, new LastManStandingWithPointsScoring());
         Random rand = new Random();
         for(int i=1; i <=5; i++) {
             retVal.add(new StrengthEventBuilder().withName("Event" + i)
-                    .withScoring(randomScoring.get(rand.nextInt(4) + 1))
+                    .withScoring(randomScoring.get(rand.nextInt(randomScoring.size()) + 1))
                     .withTimeLimit(null)
                     .build());
         }

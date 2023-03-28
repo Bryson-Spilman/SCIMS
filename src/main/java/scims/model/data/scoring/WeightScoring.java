@@ -1,6 +1,5 @@
 package scims.model.data.scoring;
 
-import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.WeightUnitSystem;
 
 public class WeightScoring implements EventScoring<Double>{

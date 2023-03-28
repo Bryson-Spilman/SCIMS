@@ -15,4 +15,6 @@ public interface WeightClass {
     Double getMaxCompetitorWeight();
     String getName();
     List<Competitor> getCompetitors();
+
+    void addCompetitor(int index, Competitor updatedCompetitor);
 }

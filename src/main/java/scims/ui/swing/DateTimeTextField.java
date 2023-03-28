@@ -106,6 +106,9 @@ public class DateTimeTextField extends JTextField {
             text = sb.toString();
 
             String newText = beforeText + text + afterText;
+            if(newText.isEmpty()) {
+                return;
+            }
             try {
                 if(newText.contains("-"))
                 {

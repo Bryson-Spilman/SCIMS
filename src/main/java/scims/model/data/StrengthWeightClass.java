@@ -73,6 +73,11 @@ public class StrengthWeightClass implements WeightClass {
     }
 
     @Override
+    public void addCompetitor(int index, Competitor updatedCompetitor) {
+        _competitors.add(index, updatedCompetitor);
+    }
+
+    @Override
     public String toString() {
         return getName();
     }

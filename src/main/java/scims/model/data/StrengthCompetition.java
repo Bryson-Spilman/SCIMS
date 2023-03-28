@@ -5,6 +5,7 @@ import scims.model.enums.WeightUnitSystem;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public class StrengthCompetition implements Competition {
     private final String _name;
@@ -56,5 +57,18 @@ public class StrengthCompetition implements Competition {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StrengthCompetition that = (StrengthCompetition) o;
+        return _isSameNumberOfEventsForAllWeightClasses == that._isSameNumberOfEventsForAllWeightClasses && Objects.equals(_name, that._name) && Objects.equals(_dateTime, that._dateTime) && Objects.equals(_weightClasses, that._weightClasses) && _weightunitSystem == that._weightunitSystem && _distanceUnitSystem == that._distanceUnitSystem;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_name, _dateTime, _weightClasses, _weightunitSystem, _isSameNumberOfEventsForAllWeightClasses, _distanceUnitSystem);
     }
 }

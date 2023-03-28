@@ -21,7 +21,6 @@ public class CompetitionTree extends JTree {
     private static final URL WEIGHT_CLASS_IMG_URL = CompetitionTree.class.getResource("WeightClassIcon.png");
     private final IconMutableTreeNode _root;
     private CompetitionModelController _controller;
-
     public CompetitionTree()
     {
         super(new IconMutableTreeNode("Competitions", null));
@@ -62,15 +61,15 @@ public class CompetitionTree extends JTree {
         popupMenu.addSeparator();
         popupMenu.add(menuItem2);
         menuItem1.addActionListener(e -> _controller.addNewCompetitorAction(competition, weightClass));
-        menuItem2.addActionListener(e -> _controller.editWeightClassAction(competition, weightClass));
+        menuItem2.addActionListener(e -> _controller.editWeightClassAction(weightClass));
         return popupMenu;
     }
 
-    private JPopupMenu buildCompetitorPopUpMenu(Competition competition, WeightClass weightClass, Competitor competitor) {
+    private JPopupMenu buildCompetitorPopUpMenu(Competition competition, Competitor competitor) {
         JPopupMenu jPopupMenu = new JPopupMenu();
         JMenuItem menuItem1 = new JMenuItem("Edit Competitor...");
         jPopupMenu.add(menuItem1);
-        menuItem1.addActionListener(e -> _controller.editCompetitorAction(competition, weightClass, competitor));
+        menuItem1.addActionListener(e -> _controller.editCompetitorAction(competitor));
         return jPopupMenu;
     }
 
@@ -163,7 +162,7 @@ public class CompetitionTree extends JTree {
         IconMutableTreeNode weightClassNode = getWeightClassNode(competition, weightClass);
         if(weightClassNode != null) {
             IconMutableTreeNode competitorNode = new IconMutableTreeNode(competitor, COMPETITOR_IMG_URL);
-            competitorNode.setPopUpMenu(buildCompetitorPopUpMenu(competition, weightClass, competitor));
+            competitorNode.setPopUpMenu(buildCompetitorPopUpMenu(competition, competitor));
             weightClassNode.add(competitorNode);
             expandPath(new TreePath(competitorNode.getPath()));
         }
@@ -205,7 +204,7 @@ public class CompetitionTree extends JTree {
         IconMutableTreeNode oldCompetitorNode = getCompetitorNode(competition, weightClass, oldCompetitor);
         if(oldCompetitorNode != null) {
             oldCompetitorNode.setUserObject(new IconNode(updatedCompetitor, COMPETITOR_IMG_URL));
-            oldCompetitorNode.setPopUpMenu(buildCompetitorPopUpMenu(competition, weightClass, updatedCompetitor));
+            oldCompetitorNode.setPopUpMenu(buildCompetitorPopUpMenu(competition, updatedCompetitor));
             updateTree();
         }
     }

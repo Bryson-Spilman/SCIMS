@@ -43,13 +43,16 @@ public class CompetitionTree extends JTree {
 
     private JPopupMenu buildCompetitionPopUpMenu(Competition competition) {
         JPopupMenu popupMenu = new JPopupMenu();
-        JMenuItem menuItem1 = new JMenuItem("Add New Weight Class...");
-        JMenuItem menuItem2 = new JMenuItem("Edit Competition...");
-        popupMenu.add(menuItem1);
+        JMenuItem addWeightClassMenuItem = new JMenuItem("Add New Weight Class...");
+        JMenuItem editCompetitionMenuItem = new JMenuItem("Edit Competition...");
+        JMenuItem removeCompetitionMenuItem = new JMenuItem("Remove Competition");
+        popupMenu.add(addWeightClassMenuItem);
         popupMenu.addSeparator();
-        popupMenu.add(menuItem2);
-        menuItem1.addActionListener(e -> _controller.addNewWeightClassAction(competition));
-        menuItem2.addActionListener(e -> _controller.editCompetitionAction(competition));
+        popupMenu.add(editCompetitionMenuItem);
+        popupMenu.add(removeCompetitionMenuItem);
+        addWeightClassMenuItem.addActionListener(e -> _controller.addNewWeightClassAction(competition));
+        editCompetitionMenuItem.addActionListener(e -> _controller.editCompetitionAction(competition));
+        removeCompetitionMenuItem.addActionListener(e -> _controller.removeCompetition(competition));
         return popupMenu;
     }
 
@@ -57,19 +60,25 @@ public class CompetitionTree extends JTree {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItem1 = new JMenuItem("Add New Competitor...");
         JMenuItem menuItem2 = new JMenuItem("Edit Weight Class...");
+        JMenuItem menuItem3 = new JMenuItem("Remove Weight Class");
         popupMenu.add(menuItem1);
         popupMenu.addSeparator();
         popupMenu.add(menuItem2);
-        menuItem1.addActionListener(e -> _controller.addNewCompetitorAction(competition, weightClass));
+        popupMenu.add(menuItem3);
+        menuItem1.addActionListener(e -> _controller.addNewCompetitorAction(weightClass));
         menuItem2.addActionListener(e -> _controller.editWeightClassAction(weightClass));
+        menuItem3.addActionListener(e -> _controller.removeWeightClass(weightClass));
         return popupMenu;
     }
 
-    private JPopupMenu buildCompetitorPopUpMenu(Competition competition, Competitor competitor) {
+    private JPopupMenu buildCompetitorPopUpMenu(Competitor competitor) {
         JPopupMenu jPopupMenu = new JPopupMenu();
         JMenuItem menuItem1 = new JMenuItem("Edit Competitor...");
+        JMenuItem menuItem2 = new JMenuItem("Remove Competitor");
         jPopupMenu.add(menuItem1);
+        jPopupMenu.add(menuItem2);
         menuItem1.addActionListener(e -> _controller.editCompetitorAction(competitor));
+        menuItem2.addActionListener(e -> _controller.removeCompetitor(competitor));
         return jPopupMenu;
     }
 
@@ -94,20 +103,6 @@ public class CompetitionTree extends JTree {
                 }
             }
         });
-    }
-
-    public void removeCompetition(Competition competition)
-    {
-        int removeIndex = -1;
-        for(int i=0; i < _root.getChildCount(); i++)
-        {
-            if(((DefaultMutableTreeNode)_root.getChildAt(i)).getUserObject() == competition)
-            {
-                removeIndex = 0;
-            }
-        }
-        _root.remove(removeIndex);
-        updateTree();
     }
 
     public IconMutableTreeNode getCompetitorNode(Competition competition, WeightClass weightClass, Competitor competitor) {
@@ -162,7 +157,7 @@ public class CompetitionTree extends JTree {
         IconMutableTreeNode weightClassNode = getWeightClassNode(competition, weightClass);
         if(weightClassNode != null) {
             IconMutableTreeNode competitorNode = new IconMutableTreeNode(competitor, COMPETITOR_IMG_URL);
-            competitorNode.setPopUpMenu(buildCompetitorPopUpMenu(competition, competitor));
+            competitorNode.setPopUpMenu(buildCompetitorPopUpMenu(competitor));
             weightClassNode.add(competitorNode);
             expandPath(new TreePath(competitorNode.getPath()));
         }
@@ -204,7 +199,7 @@ public class CompetitionTree extends JTree {
         IconMutableTreeNode oldCompetitorNode = getCompetitorNode(competition, weightClass, oldCompetitor);
         if(oldCompetitorNode != null) {
             oldCompetitorNode.setUserObject(new IconNode(updatedCompetitor, COMPETITOR_IMG_URL));
-            oldCompetitorNode.setPopUpMenu(buildCompetitorPopUpMenu(competition, updatedCompetitor));
+            oldCompetitorNode.setPopUpMenu(buildCompetitorPopUpMenu(updatedCompetitor));
             updateTree();
         }
     }
@@ -240,4 +235,39 @@ public class CompetitionTree extends JTree {
         }
     }
 
+    public void removeWeightClass(Competition competition, WeightClass weightClass) {
+        IconMutableTreeNode competitionNode = getCompetitionNode(competition);
+        if(competitionNode != null) {
+            IconMutableTreeNode weightClassNode = getWeightClassNode(competition, weightClass);
+            if(weightClassNode != null) {
+                competitionNode.remove(weightClassNode);
+                updateTree();
+            }
+        }
+    }
+
+    public void removeCompetitor(Competition competition, WeightClass weightClass, Competitor competitor) {
+        IconMutableTreeNode weightClassNode = getWeightClassNode(competition, weightClass);
+        if(weightClassNode != null) {
+            IconMutableTreeNode competitorNode = getCompetitorNode(competition, weightClass, competitor);
+            if(competitorNode != null) {
+                weightClassNode.remove(competitorNode);
+                updateTree();
+            }
+        }
+    }
+
+    public void removeCompetition(Competition competition)
+    {
+        int removeIndex = -1;
+        for(int i=0; i < _root.getChildCount(); i++)
+        {
+            if(((DefaultMutableTreeNode)_root.getChildAt(i)).getUserObject() == competition)
+            {
+                removeIndex = 0;
+            }
+        }
+        _root.remove(removeIndex);
+        updateTree();
+    }
 }

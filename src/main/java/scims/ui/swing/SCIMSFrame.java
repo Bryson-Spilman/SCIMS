@@ -16,6 +16,8 @@ import scims.ui.swing.tree.IconTreeCellRenderer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.net.URL;
 import java.util.*;
 import java.util.List;

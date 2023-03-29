@@ -25,7 +25,7 @@ public class CompetitorDialog extends JDialog implements Modifiable {
 
     public CompetitorDialog(Window parent, Consumer<Competitor> createAction) {
         super(parent, "New Competitor");
-        setModal(true);
+        setModal(false);
         setLayout(new GridBagLayout());
         setSize(400,250);
         setMinimumSize(new Dimension(Integer.MIN_VALUE, 175));

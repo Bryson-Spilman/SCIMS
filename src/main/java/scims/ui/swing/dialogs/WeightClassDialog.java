@@ -32,7 +32,7 @@ public class WeightClassDialog extends JDialog implements Modifiable {
 
     public WeightClassDialog(Window parent, Consumer<WeightClass> createAction) {
         super(parent, "New Weight Class");
-        setModal(true);
+        setModal(false);
         setLayout(new GridBagLayout());
         setSize(400,175);
         setMinimumSize(new Dimension(Integer.MIN_VALUE, 175));

@@ -8,6 +8,7 @@ import scims.ui.swing.SCIMSFrame;
 import scims.ui.swing.tree.CompetitionTree;
 import scims.ui.swing.tree.IconNode;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
@@ -49,8 +50,22 @@ public class CompetitionModelController {
                             Object userObj = ((IconNode) obj).getUserObject();
                             if(userObj instanceof Competition) {
                                 Competition competition = (Competition) userObj;
+                                if(!_treeTableInView.isShowingCompetition(competition)) {
+                                    _treeTableInView.refresh(competition);
+                                }
                                 _parentFrame.updateFxPanelTitle(competition.getName());
-                                _treeTableInView.refresh(competition);
+                            } else if (userObj instanceof WeightClass) {
+                                Competition competition = getParentCompetition((WeightClass) userObj);
+                                if(!_treeTableInView.isShowingCompetition(competition)) {
+                                    _treeTableInView.refresh(competition);
+                                }
+                                _parentFrame.updateFxPanelTitle(competition.getName());
+                            } else if(userObj instanceof Competitor) {
+                                Competition competition = getParentCompetition((Competitor) userObj);
+                                if(!_treeTableInView.isShowingCompetition(competition)) {
+                                    _treeTableInView.refresh(competition);
+                                }
+                                _parentFrame.updateFxPanelTitle(competition.getName());
                             }
                         }
                     }
@@ -59,22 +74,107 @@ public class CompetitionModelController {
         };
     }
 
-    public void competitionRemoved(Competition competition)
-    {
-        _competitionTree.removeCompetition(competition);
-        Platform.runLater(() -> {
-            if(_treeTableInView.isShowingCompetition(competition)) {
-                _treeTableInView.clear();
+    private Competition getParentCompetition(WeightClass weightClass) {
+        Competition retVal = null;
+        for(Competition competition : _competitions) {
+            if(competition.getWeightClasses().contains(weightClass)) {
+                retVal = competition;
+                break;
             }
-        });
+        }
+        return retVal;
+    }
+
+    private Competition getParentCompetition(Competitor competitor) {
+        Competition retVal = null;
+        for(Competition competition : _competitions) {
+            boolean found = false;
+            for(WeightClass weightClass : competition.getWeightClasses()) {
+                if(weightClass.getCompetitors().contains(competitor)) {
+                    retVal = competition;
+                    found = true;
+                    break;
+                }
+            }
+            if(found) {
+                break;
+            }
+        }
+        return retVal;
+    }
+
+    public void removeCompetition(Competition competition) {
+        int opt = JOptionPane.showConfirmDialog(_parentFrame, "Are you sure you want to remove " + competition.getName() + "?",
+                "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if(opt == JOptionPane.YES_OPTION) {
+            _competitionTree.removeCompetition(competition);
+            _treeTableInView.removeCompetition(competition);
+            _competitions.remove(competition);
+        }
+    }
+
+    public void removeWeightClass(WeightClass weightClass) {
+        int opt = JOptionPane.showConfirmDialog(_parentFrame, "Are you sure you want to remove " + weightClass.getName() + "?",
+                "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if(opt == JOptionPane.YES_OPTION) {
+            Competition updatedCompetition = null;
+            Competition oldCompetition = null;
+            for(Competition competitionInList : _competitions) {
+                if(competitionInList.getWeightClasses().contains(weightClass)) {
+                    List<WeightClass> weightClasses = competitionInList.getWeightClasses();
+                    _competitionTree.removeWeightClass(competitionInList, weightClass);
+                    _treeTableInView.removeWeightClass(weightClass);
+                    weightClasses.remove(weightClass);
+                    updatedCompetition = new StrengthCompetitionBuilder()
+                            .fromExistingCompetition(competitionInList)
+                            .withUpdatedWeightClasses(weightClasses)
+                            .build();
+                    oldCompetition = competitionInList;
+                }
+            }
+            if(updatedCompetition != null) {
+                int index = _competitions.indexOf(oldCompetition);
+                _competitions.add(index, updatedCompetition);
+                _competitions.remove(oldCompetition);
+            }
+        }
+    }
+
+    public void removeCompetitor(Competitor competitor) {
+        int opt = JOptionPane.showConfirmDialog(_parentFrame, "Are you sure you want to remove " + competitor.getName() + "?",
+                "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if(opt == JOptionPane.YES_OPTION) {
+            Competition updatedCompetition = null;
+            Competition oldCompetition = null;
+            for(Competition competitionInList : _competitions) {
+                List<WeightClass> weightClasses = competitionInList.getWeightClasses();
+                for(WeightClass weightClassInList : weightClasses) {
+                    if(weightClassInList.getCompetitors().contains(competitor)) {
+                        _competitionTree.removeCompetitor(competitionInList, weightClassInList, competitor);
+                        _treeTableInView.removeCompetitor(weightClassInList, competitor);
+                        weightClassInList.removeCompetitor(competitor);
+                        updatedCompetition = new StrengthCompetitionBuilder()
+                                .fromExistingCompetition(competitionInList)
+                                .withUpdatedWeightClasses(weightClasses)
+                                .build();
+                        oldCompetition = competitionInList;
+                    }
+                }
+            }
+            if(oldCompetition != null) {
+                int index = _competitions.indexOf(oldCompetition);
+                _competitions.add(index, updatedCompetition);
+                _competitions.remove(oldCompetition);
+            }
+        }
     }
 
     public void addNewCompetitionAction() {
         new NewCompetitionAction(_parentFrame, this::addCompetition).actionPerformed(null);
     }
 
-    public void addNewCompetitorAction(Competition competition, WeightClass weightClass) {
-        new NewCompetitorAction(_parentFrame, competitor -> addCompetitor(competitor, weightClass, competition)).actionPerformed(null);
+    public void addNewCompetitorAction(WeightClass weightClass) {
+        new NewCompetitorAction(_parentFrame, competitor -> addCompetitor(competitor, weightClass)).actionPerformed(null);
     }
 
     public void addNewWeightClassAction(Competition competition) {
@@ -99,21 +199,31 @@ public class CompetitionModelController {
 
     }
 
-    private void addCompetitor(Competitor competitor, WeightClass weightClass, Competition competition) {
-        List<WeightClass> weightClasses = competition.getWeightClasses();
-        for(WeightClass wc : weightClasses) {
-            if(wc.equals(weightClass)) {
-                wc.addCompetitor(competitor);
-                StrengthCompetition updatedCompetition = new StrengthCompetitionBuilder().fromExistingCompetition(competition)
-                        .withUpdatedWeightClasses(weightClasses)
-                        .build();
-                _competitionTree.addNewCompetitor(competition, wc, competitor);
-                _treeTableInView.addNewCompetitor(competition, wc, competitor);
-                int index = _competitions.indexOf(competition);
-                _competitions.add(index, updatedCompetition);
-                _competitions.remove(competition);
+    private void addCompetitor(Competitor competitor, WeightClass weightClass) {
+        Competition oldCompetition = null;
+        Competition updatedCompetition = null;
+        for(Competition competition : _competitions) {
+            List<WeightClass> weightClasses = competition.getWeightClasses();
+            for(WeightClass wc : weightClasses) {
+                if(wc.equals(weightClass)) {
+                    wc.addCompetitor(competitor);
+                    oldCompetition = competition;
+                    updatedCompetition = new StrengthCompetitionBuilder().fromExistingCompetition(competition)
+                            .withUpdatedWeightClasses(weightClasses)
+                            .build();
+                    _competitionTree.addNewCompetitor(competition, wc, competitor);
+                    _treeTableInView.addNewCompetitor(competition, wc, competitor);
+                    break;
+                }
+            }
+            if(oldCompetition != null) {
                 break;
             }
+        }
+        if(updatedCompetition != null) {
+            int index = _competitions.indexOf(oldCompetition);
+            _competitions.add(index, updatedCompetition);
+            _competitions.remove(oldCompetition);
         }
     }
 

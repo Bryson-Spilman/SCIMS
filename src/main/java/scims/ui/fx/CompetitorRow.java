@@ -22,7 +22,7 @@ import java.util.Map;
 public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRow {
 
     private final Competitor _competitor;
-    private final Map<EventColumn, ObservableValue<String>> _columnToValueMap = new HashMap<>();
+    private final Map<EventColumn, SimpleObjectProperty<Object>> _columnToValueMap = new HashMap<>();
     private final SimpleStringProperty _nameProperty;
     private final CompetitionModelController _controller;
 
@@ -46,8 +46,8 @@ public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRo
         return _competitor;
     }
 
-    public ObservableValue<String> getObservableValue(EventColumn eventColumn) {
-        ObservableValue<String> retVal = _columnToValueMap.get(eventColumn);
+    public SimpleObjectProperty<Object> getObservableValue(EventColumn eventColumn) {
+        SimpleObjectProperty<Object> retVal = _columnToValueMap.get(eventColumn);
         if(retVal == null)
         {
             retVal = new SimpleObjectProperty<>();

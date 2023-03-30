@@ -1,14 +1,12 @@
 package scims.ui.fx;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
-import javafx.util.converter.IntegerStringConverter;
 import scims.model.data.Event;
 
-public class EventColumn extends TreeTableColumn<Object, String> {
+public class EventColumn extends TreeTableColumn<Object, Object> {
 
     private final Event _event;
 
@@ -23,15 +21,15 @@ public class EventColumn extends TreeTableColumn<Object, String> {
                 CompetitorRow competitor = (CompetitorRow) value;
                 return competitor.getObservableValue(this);
             }
-            return new SimpleStringProperty("");
+            return new SimpleObjectProperty<>();
         });
 
-        setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+        setCellFactory(col -> TableCellFactory.getTreeCell(event.getScoring()));
     }
 
-    public ObservableValue<String> getInitialProperty()
+    public SimpleObjectProperty<Object> getInitialProperty()
     {
-        return new SimpleStringProperty("");
+        return new SimpleObjectProperty<>("");
     }
 
     public Event getEvent()

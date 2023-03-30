@@ -1,12 +1,10 @@
 package scims.ui.fx;
 
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import scims.controllers.CompetitionModelController;
 import scims.model.data.*;
 import scims.model.data.Event;
@@ -15,9 +13,6 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CompetitionTreeTable extends TreeTableView<Object> {
 
@@ -111,7 +106,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                     if(treeItem.getValue() instanceof CompetitorRow)
                     {
                         CompetitorRow competitorRow = (CompetitorRow) treeItem.getValue();
-                        SimpleStringProperty obsValue = (SimpleStringProperty) competitorRow.getObservableValue((EventColumn) event1.getTableColumn());
+                        SimpleObjectProperty<Object> obsValue = competitorRow.getObservableValue((EventColumn) event1.getTableColumn());
                         obsValue.setValue(event1.getNewValue());
                     }
                 });

@@ -2,15 +2,15 @@ package scims.ui.fx;
 
 import javafx.scene.control.TextField;
 
-class IntegerCellEditor<T> extends TextCellEditor<T, Integer> {
+class DoubleCellEditor<T> extends TextCellEditor<T, Double> {
 
     @Override
     void createTextField() {
-        TextField textField = new IntegerTextField();
+        TextField textField = new DoubleTextField();
         textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
         textField.setOnAction(evt -> {
             try {
-                int newValue = Integer.parseInt(textField.getText());
+                Double newValue = Double.parseDouble(textField.getText());
                 commitEdit(newValue);
             } catch (NumberFormatException e) {
                 cancelEdit();
@@ -19,7 +19,7 @@ class IntegerCellEditor<T> extends TextCellEditor<T, Integer> {
         textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal) {
                 try {
-                    int newValue = Integer.parseInt(textField.getText());
+                    Double newValue = Double.parseDouble(textField.getText());
                     commitEdit(newValue);
                 } catch (NumberFormatException e) {
                     cancelEdit();

@@ -1,5 +1,9 @@
 package scims.model.data.scoring;
 
+import scims.model.data.Competitor;
+
+import java.util.*;
+
 public class RepsScoring implements EventScoring<Integer> {
 
     private Integer _score = 0;
@@ -12,6 +16,11 @@ public class RepsScoring implements EventScoring<Integer> {
     @Override
     public Integer getScore() {
         return _score;
+    }
+
+    @Override
+    public Comparator<Map.Entry<Competitor, Integer>> getComparator() {
+        return (e1, e2) -> Integer.compare(e2.getValue(), e1.getValue());
     }
 
     @Override

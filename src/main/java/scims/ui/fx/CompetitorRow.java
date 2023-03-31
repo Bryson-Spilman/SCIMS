@@ -4,16 +4,14 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
+import javafx.scene.control.TreeTableColumn;
 import scims.controllers.CompetitionModelController;
 import scims.model.data.Competitor;
-import scims.ui.actions.EditCompetitorAction;
 
-import javax.swing.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +20,11 @@ import java.util.Map;
 public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRow {
 
     private final Competitor _competitor;
-    private final Map<EventColumn, SimpleObjectProperty<Object>> _columnToValueMap = new HashMap<>();
+    private final Map<TreeTableColumn<?,?>, SimpleObjectProperty<Object>> _columnToValueMap = new HashMap<>();
     private final SimpleStringProperty _nameProperty;
     private final CompetitionModelController _controller;
 
-    public CompetitorRow(Competitor competitor, List<EventColumn> eventColumns, CompetitionModelController controller) {
+    public CompetitorRow(Competitor competitor, List<EventColumn<?,?>> eventColumns, CompetitionModelController controller) {
         _competitor = competitor;
         _controller = controller;
         _nameProperty = new SimpleStringProperty(competitor.getName());
@@ -34,11 +32,19 @@ public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRo
         initializeValues(eventColumns);
     }
 
-    private void initializeValues(List<EventColumn> eventColumns)
+    private void initializeValues(List<EventColumn<?,?>> eventColumns)
     {
-        for(EventColumn eventColumn : eventColumns)
-        {
-            _columnToValueMap.put(eventColumn, eventColumn.getInitialProperty());
+        for(EventColumn<?,?> eventColumn : eventColumns) {
+            ObservableList<TreeTableColumn<Object, ?>> columns = eventColumn.getColumns();
+            for(TreeTableColumn<Object,?> column : columns) {
+                if(column instanceof ScoringColumn) {
+                    ScoringColumn<?,?> scoringColumn = (ScoringColumn<?,?>) column;
+                    _columnToValueMap.put(scoringColumn, scoringColumn.getInitialProperty());
+                } else if(column instanceof EventPointsColumn) {
+                    EventPointsColumn pointsColumn = (EventPointsColumn) column;
+                    _columnToValueMap.put(pointsColumn, pointsColumn.getInitialProperty());
+                }
+            }
         }
     }
 
@@ -46,8 +52,8 @@ public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRo
         return _competitor;
     }
 
-    public SimpleObjectProperty<Object> getObservableValue(EventColumn eventColumn) {
-        SimpleObjectProperty<Object> retVal = _columnToValueMap.get(eventColumn);
+    public SimpleObjectProperty<Object> getObservableValue(TreeTableColumn<?,?> scoringColumn) {
+        SimpleObjectProperty<Object> retVal = _columnToValueMap.get(scoringColumn);
         if(retVal == null)
         {
             retVal = new SimpleObjectProperty<>();
@@ -71,7 +77,6 @@ public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRo
             Platform.runLater(() -> menuItem2.getParentPopup().hide());
             _controller.removeCompetitor(_competitor);
         });
-        ContextMenu retVal = new ContextMenu(menuItem1, menuItem2);
-        return retVal;
+        return new ContextMenu(menuItem1, menuItem2);
     }
 }

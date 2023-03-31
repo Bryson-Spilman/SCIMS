@@ -1,8 +1,14 @@
 package scims.model.data.scoring;
 
+import scims.model.data.Competitor;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 public interface EventScoring<T> {
     void setScore(T score);
     T getScore();
+    Comparator<Map.Entry<Competitor, T>> getComparator();
 
     default String getScoreType() {
         String className = this.getClass().getSimpleName();
@@ -18,6 +24,14 @@ public interface EventScoring<T> {
         retVal = sb.toString();
         return retVal;
 
+    }
+
+    default List<Competitor> sortCompetitorScores(Map<Competitor, T> competitorsMap) {
+        return new ArrayList<>(competitorsMap.entrySet()
+                .stream()
+                .sorted(getComparator())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new))
+                .keySet());
     }
 
 }

@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseButton;
 import scims.controllers.CompetitionModelController;
 import scims.model.data.*;
 import scims.model.data.Event;
@@ -19,8 +18,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
     private Competition _competition;
     TreeItem<Object> _root;
     private CompetitionModelController _controller;
-    private final List<EventColumn> _eventsColumns = new ArrayList<>();
-    private MouseButton _buttonPress;
+    private final List<EventColumn<?,?>> _eventsColumns = new ArrayList<>();
     public CompetitionTreeTable() {
         setRoot(new TreeItem<>());
         _root = getRoot();
@@ -74,7 +72,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
         });
     }
 
-    private void addWeightClassRow(WeightClass weightClass, List<EventColumn> eventColumns) {
+    private void addWeightClassRow(WeightClass weightClass, List<EventColumn<?,?>> eventColumns) {
         TreeItem<Object> weightClassRow = new TreeItem<>(new WeightClassRow(weightClass, _controller));
         for(Competitor competitor : weightClass.getCompetitors())
         {
@@ -83,7 +81,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
         getRoot().getChildren().add(weightClassRow);
     }
 
-    private void addWeightClassRow(WeightClass weightClass, List<EventColumn> eventColumns, int index) {
+    private void addWeightClassRow(WeightClass weightClass, List<EventColumn<?,?>> eventColumns, int index) {
         TreeItem<Object> weightClassRow = new TreeItem<>(new WeightClassRow(weightClass, _controller));
         for(Competitor competitor : weightClass.getCompetitors())
         {
@@ -92,24 +90,27 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
         getRoot().getChildren().add(index, weightClassRow);
     }
 
-    private List<EventColumn> addNewEventsFromWeightClass(WeightClass weightClass) {
-        List<EventColumn> eventColumns = new ArrayList<>();
+    private List<EventColumn<?,?>> addNewEventsFromWeightClass(WeightClass weightClass) {
+        List<EventColumn<?,?>> eventColumns = new ArrayList<>();
         for(Event event : weightClass.getEventsInOrder())
         {
             if(_eventsColumns.stream().noneMatch(ec -> ec.getEvent().getName().equalsIgnoreCase(event.getName())))
             {
-                EventColumn eventColumn = new EventColumn(event);
+                EventColumn<?,?> eventColumn = new EventColumn<>(event);
                 eventColumns.add(eventColumn);
                 getColumns().add(eventColumn);
-                eventColumn.setOnEditCommit(event1 -> {
-                    TreeItem<Object> treeItem = getTreeItem(event1.getTreeTablePosition().getRow());
-                    if(treeItem.getValue() instanceof CompetitorRow)
-                    {
-                        CompetitorRow competitorRow = (CompetitorRow) treeItem.getValue();
-                        SimpleObjectProperty<Object> obsValue = competitorRow.getObservableValue((EventColumn) event1.getTableColumn());
-                        obsValue.setValue(event1.getNewValue());
-                    }
-                });
+                ObservableList<TreeTableColumn<Object, ?>> scoreColumns = eventColumn.getColumns();
+                for(TreeTableColumn<Object, ?> scoreColumn : scoreColumns) {
+                    scoreColumn.setOnEditCommit(score -> {
+                        TreeItem<Object> treeItem = getTreeItem(score.getTreeTablePosition().getRow());
+                        if(treeItem.getValue() instanceof CompetitorRow)
+                        {
+                            CompetitorRow competitorRow = (CompetitorRow) treeItem.getValue();
+                            SimpleObjectProperty<Object> obsValue = competitorRow.getObservableValue((ScoringColumn<?,?>) score.getTableColumn());
+                            obsValue.setValue(score.getNewValue());
+                        }
+                    });
+                }
             }
         }
         return eventColumns;
@@ -134,7 +135,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
     public void addNewWeightClass(Competition competition, WeightClass wc) {
         if(competition.equals(_competition)) {
             Platform.runLater(() -> {
-                List<EventColumn> newEventColumns = addNewEventsFromWeightClass(wc);
+                List<EventColumn<?,?>> newEventColumns = addNewEventsFromWeightClass(wc);
                 _eventsColumns.addAll(newEventColumns);
                 addWeightClassRow(wc, newEventColumns);
             });

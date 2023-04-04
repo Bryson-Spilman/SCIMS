@@ -6,8 +6,11 @@ import scims.model.enums.WeightUnitSystem;
 import scims.ui.swing.JChooserField;
 
 import javax.swing.*;
+import javax.swing.JPopupMenu.Separator;
 import javax.swing.event.TableModelEvent;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +18,11 @@ public class WeightClassTable extends SCIMSTable {
 
     private final WeightClassTableModel _model;
     private JChooserField<Event> _chooserField;
+    private JPopupMenu _popUpMenu;
+    private JMenuItem _selectAllMenuItem;
+    private JMenuItem _selectHighlightedMenuItem;
+    private JMenuItem _deselectHighlightedMenuItem;
+    private JMenuItem _deselectAllMenuItem;
 
     public WeightClassTable() {
         _model = new WeightClassTableModel();
@@ -31,9 +39,46 @@ public class WeightClassTable extends SCIMSTable {
                 tableModel.fireTableChanged(new TableModelEvent(tableModel));
             }
         });
+        addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                // Check if right-clicked
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    // Show the popup menu
+                    _popUpMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+        _selectHighlightedMenuItem.addActionListener(e -> setHighlightedSelected(true));
+        _selectAllMenuItem.addActionListener(e -> setAllRowsSelected(true));
+        _deselectHighlightedMenuItem.addActionListener(e -> setHighlightedSelected(false));
+        _deselectAllMenuItem.addActionListener(e -> setAllRowsSelected(false));
+    }
+
+    private void setHighlightedSelected(boolean selected) {
+        for(int row : getSelectedRows())
+        {
+            _model.setValueAt(selected, row, WeightClassTableModel.CHECK_BOX_COL);
+        }
+    }
+
+    private void setAllRowsSelected(boolean selected) {
+        for(int row =0; row < _model.getRowCount(); row++)
+        {
+            _model.setValueAt(selected, row, WeightClassTableModel.CHECK_BOX_COL);
+        }
     }
 
     private void initTable() {
+        _popUpMenu = new JPopupMenu();
+        _selectHighlightedMenuItem = new JMenuItem("Select Highlighted");
+        _selectAllMenuItem = new JMenuItem("Select All");
+        _deselectHighlightedMenuItem = new JMenuItem("Deselect Highlighted");
+        _deselectAllMenuItem = new JMenuItem("Deselect All");
+        _popUpMenu.add(_selectHighlightedMenuItem);
+        _popUpMenu.add(_selectAllMenuItem);
+        _popUpMenu.add(new Separator());
+        _popUpMenu.add(_deselectHighlightedMenuItem);
+        _popUpMenu.add(_deselectAllMenuItem);
         setCheckBoxColumn(WeightClassTableModel.CHECK_BOX_COL);
         setIntegerFieldColumn(WeightClassTableModel.MAX_NUM_COMPETITORS_COL);
         _chooserField = setChooserFieldColumn(WeightClassTableModel.EVENTS_COL);

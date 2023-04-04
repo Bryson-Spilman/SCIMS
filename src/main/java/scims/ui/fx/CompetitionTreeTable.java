@@ -69,6 +69,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
             {
                 addWeightClassRow(weightClass, _eventsColumns);
             }
+            getColumns().add(new TotalPointsColumn());
         });
     }
 
@@ -76,7 +77,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
         TreeItem<Object> weightClassRow = new TreeItem<>(new WeightClassRow(weightClass, _controller));
         for(Competitor competitor : weightClass.getCompetitors())
         {
-            weightClassRow.getChildren().add(new TreeItem<>(new CompetitorRow(competitor, eventColumns, _controller)));
+            weightClassRow.getChildren().add(new TreeItem<>(new CompetitorRow(weightClassRow, competitor, eventColumns, _controller)));
         }
         getRoot().getChildren().add(weightClassRow);
     }
@@ -85,7 +86,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
         TreeItem<Object> weightClassRow = new TreeItem<>(new WeightClassRow(weightClass, _controller));
         for(Competitor competitor : weightClass.getCompetitors())
         {
-            weightClassRow.getChildren().add(new TreeItem<>(new CompetitorRow(competitor, eventColumns, _controller)));
+            weightClassRow.getChildren().add(new TreeItem<>(new CompetitorRow(weightClassRow, competitor, eventColumns, _controller)));
         }
         getRoot().getChildren().add(index, weightClassRow);
     }
@@ -147,7 +148,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
             Platform.runLater(() -> {
                 TreeItem<Object> weightClassRow = getWeightClassRow(weightClass);
                 if(weightClassRow != null) {
-                    weightClassRow.getChildren().add(new TreeItem<>(new CompetitorRow(competitor, _eventsColumns, _controller)));
+                    weightClassRow.getChildren().add(new TreeItem<>(new CompetitorRow(weightClassRow, competitor, _eventsColumns, _controller)));
                 }
             });
         }
@@ -187,7 +188,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                 TreeItem<Object> competitorRow = getCompetitorRow(oldCompetitor, weightClass);
                 ObservableList<TreeItem<Object>> competitorRows = competitorRow.getParent().getChildren();
                 int index = competitorRows.indexOf(competitorRow);
-                competitorRows.add(index, new TreeItem<>(new CompetitorRow(updatedCompetitor, _eventsColumns, _controller)));
+                competitorRows.add(index, new TreeItem<>(new CompetitorRow(competitorRow.getParent(), updatedCompetitor, _eventsColumns, _controller)));
                 competitorRows.remove(competitorRow);
             });
         }

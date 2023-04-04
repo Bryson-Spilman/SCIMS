@@ -21,7 +21,19 @@ public class LastManStandingEliminationScoring implements EventScoring<Boolean> 
 
     @Override
     public Comparator<Map.Entry<Competitor, Boolean>> getComparator() {
-        return Map.Entry.<Competitor, Boolean>comparingByValue().reversed();
+        return (e1, e2) -> Boolean.compare(parseValueForComparing(e2.getValue()), parseValueForComparing(e1.getValue()));
+    }
+
+    @Override
+    public Boolean parseValueForComparing(Object value) {
+        Boolean retVal = false;
+        if(value instanceof Boolean) {
+            retVal = (Boolean) value;
+        }
+        else if(value != null && !value.toString().trim().isEmpty()) {
+            retVal = Boolean.parseBoolean(value.toString());
+        }
+        return retVal;
     }
 
     @Override

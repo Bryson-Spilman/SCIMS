@@ -20,7 +20,19 @@ public class LastManStandingWithPointsScoring implements EventScoring<Integer> {
 
     @Override
     public Comparator<Map.Entry<Competitor, Integer>> getComparator() {
-        return (e1, e2) -> Integer.compare(e2.getValue(), e1.getValue());
+        return (e1, e2) -> Integer.compare(parseValueForComparing(e2.getValue()), parseValueForComparing(e1.getValue()));
+    }
+
+    @Override
+    public Integer parseValueForComparing(Object value) {
+        Integer retVal = Integer.MIN_VALUE;
+        if(value instanceof Integer) {
+            retVal = (Integer) value;
+        }
+        else if(value != null && !value.toString().trim().isEmpty()) {
+            retVal = Integer.parseInt(value.toString());
+        }
+        return retVal;
     }
 
     @Override

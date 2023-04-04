@@ -11,11 +11,13 @@ import scims.model.data.scoring.EventScoring;
 
 import java.util.*;
 
-class ScoringColumn<T extends EventScoring<S>, S> extends TreeTableColumn<Object, Object> {
+class ScoringColumn<T extends EventScoring<S>, S> extends LinkedTreeTableColumn {
     private final T _scoring;
+    private final EventColumn<?, ?> _parent;
 
     public ScoringColumn(EventColumn<?,?> parent, T scoring) {
         super(scoring.toString());
+        _parent = parent;
         setEditable(true);
         _scoring = scoring;
         setCellValueFactory(param -> {
@@ -23,12 +25,11 @@ class ScoringColumn<T extends EventScoring<S>, S> extends TreeTableColumn<Object
             if (value instanceof CompetitorRow) {
                 // Retrieve the score for the corresponding event
                 CompetitorRow competitor = (CompetitorRow) value;
-                parent.updateEventPoints(competitor);
                 return competitor.getObservableValue(this);
             }
             return new SimpleObjectProperty<>();
         });
-        setCellFactory(col -> TableCellFactory.getTreeCell(scoring));
+        setCellFactory(col -> TableCellFactory.getTreeCell(col, scoring));
     }
 
     public SimpleObjectProperty<Object> getInitialProperty()
@@ -42,7 +43,7 @@ class ScoringColumn<T extends EventScoring<S>, S> extends TreeTableColumn<Object
     }
 
     @SuppressWarnings("unchecked")
-    public List<Competitor> sortCompetitorsByScore(ObservableList<TreeItem<Competitor>> competitorRows) {
+    public Map<Competitor, Double> sortCompetitorsByScore(ObservableList<TreeItem<Competitor>> competitorRows) {
         Map<Competitor, S> sortedCompetitors = new LinkedHashMap<>();
         for(TreeItem<Competitor> competitorTreeItem : competitorRows) {
             if(competitorTreeItem instanceof CompetitorRow) {
@@ -52,5 +53,10 @@ class ScoringColumn<T extends EventScoring<S>, S> extends TreeTableColumn<Object
             }
         }
         return _scoring.sortCompetitorScores(sortedCompetitors);
+    }
+
+    @Override
+    void updateLinkedCells(TreeItem<Object> rowObject) {
+        _parent.updateLinkedCells(rowObject);
     }
 }

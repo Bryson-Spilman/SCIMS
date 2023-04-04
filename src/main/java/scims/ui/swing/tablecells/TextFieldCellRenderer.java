@@ -29,6 +29,7 @@ public class TextFieldCellRenderer extends JLabel implements TableCellRenderer, 
         } else {
             retVal.setBackground(null);
         }
+        applySelectedHighlighting(retVal, table, column, row);
         if(!table.isCellEditable(row,column)) {
             retVal.setEnabled(false);
         }

@@ -15,4 +15,8 @@ class DoubleTextField extends TextField {
             return null;
         }));
     }
+
+    public static void setValue(String s) {
+
+    }
 }

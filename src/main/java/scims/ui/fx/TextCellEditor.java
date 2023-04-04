@@ -1,17 +1,22 @@
 package scims.ui.fx;
 
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.*;
 
 class TextCellEditor<T, S> extends TreeTableCell<T, S> {
 
 
-    public TextCellEditor() {
+    public TextCellEditor(TreeTableColumn<Object, Object> col) {
+        itemProperty().addListener((observable, oldValue, newValue) -> {
+           if(col instanceof LinkedTreeTableColumn) {
+               TreeTableRow<T> row = getTreeTableRow();
+               ((LinkedTreeTableColumn)col).updateLinkedCells((TreeItem<Object>) row.getTreeItem());
+           }
+        });
     }
 
     @Override
     public void startEdit() {
-        if (!isEmpty()) {
+        if (!isEmpty() && isCellEditable(getTreeTableRow())) {
             super.startEdit();
             createTextField();
             setText(null);
@@ -49,6 +54,7 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
         setGraphic(textField);
         textField.selectAll();
         textField.requestFocus();
+        textField.setEditable(isCellEditable(getTreeTableRow()));
     }
 
     @Override
@@ -56,4 +62,9 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
         super.commitEdit(newValue);
         setGraphic(null);
     }
+
+    boolean isCellEditable(TreeTableRow<?> row) {
+       return true;
+    }
+
 }

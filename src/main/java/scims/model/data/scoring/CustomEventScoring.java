@@ -79,6 +79,15 @@ public class CustomEventScoring<T,S> implements EventScoring<CustomScore<T,S>>{
     }
 
     @Override
+    public CustomScore<T,S> parseValueForComparing(Object value) {
+        CustomScore<T,S> retVal = new CustomScore<>(_score.getPrimaryScoring(), _score.getSecondaryScoring());
+        if(value instanceof CustomScore) {
+            retVal = (CustomScore<T,S>) value;
+        }
+        return retVal;
+    }
+
+    @Override
     public String getScoreType() {
         return "Custom";
     }

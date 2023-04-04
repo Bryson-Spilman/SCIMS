@@ -24,7 +24,7 @@ class ComboBoxCellRenderer<T> extends JComboBox<T> implements TableCellRenderer,
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        Component retVal;
+        JComboBox<Object> retVal;
         if(value == null) {
             retVal = new JComboBox<>(new Object[]{getModel().getSelectedItem()});
         } else {
@@ -35,6 +35,7 @@ class ComboBoxCellRenderer<T> extends JComboBox<T> implements TableCellRenderer,
         } else {
             retVal.setBackground(null);
         }
+        applySelectedHighlighting(retVal, table, column, row);
         retVal.setEnabled(table.isCellEditable(row,column));
 
         return retVal;

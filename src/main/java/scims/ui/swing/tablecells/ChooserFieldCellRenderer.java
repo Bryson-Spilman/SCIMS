@@ -39,6 +39,7 @@ class ChooserFieldCellRenderer<T> extends JChooserField<T> implements TableCellR
         if (_highlightRow != null && _highlightRow.apply(row)) {
             retVal.setBackground(_highlightColor);
         }
+        applySelectedHighlighting(retVal, table, column, row);
         if(!table.isCellEditable(row,column)) {
             retVal.setEnabled(false);
         }

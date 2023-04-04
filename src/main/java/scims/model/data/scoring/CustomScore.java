@@ -1,5 +1,7 @@
 package scims.model.data.scoring;
 
+import java.util.Objects;
+
 public class CustomScore<T,S> {
 
     private final EventScoring<T> _primaryScoring;
@@ -24,5 +26,22 @@ public class CustomScore<T,S> {
 
     public EventScoring<S> getSecondaryScoring() {
         return _secondaryScoring;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CustomScore<?, ?> that = (CustomScore<?, ?>) o;
+        return Objects.equals(_primaryScoring.getScore(), that._primaryScoring.getScore()) && Objects.equals(_secondaryScoring.getScore(), that._secondaryScoring.getScore());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_primaryScoring.getScore(), _secondaryScoring.getScore());
     }
 }

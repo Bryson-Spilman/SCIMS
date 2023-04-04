@@ -22,16 +22,22 @@ class CheckBoxCellRenderer extends JCheckBox implements TableCellRenderer, Highl
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        JCheckBox retVal = new JCheckBox();
-        retVal.setSelected(value != null && Boolean.parseBoolean(value.toString()));
+        JPanel checkBoxPanel = new JPanel();
+        JCheckBox checkBox = new JCheckBox();
+        checkBoxPanel.add(checkBox);
+        checkBox.setSelected(value != null && Boolean.parseBoolean(value.toString()));
         if(_highlightRow != null && _highlightRow.apply(row)) {
-            retVal.setBackground(_highlightColor);
+            checkBoxPanel.setBackground(_highlightColor);
+            checkBox.setBackground(_highlightColor);
         } else {
-            retVal.setBackground(null);
+            checkBoxPanel.setBackground(null);
+            checkBox.setBackground(null);
         }
         if(!table.isCellEditable(row,column)) {
-            retVal.setEnabled(false);
+            checkBox.setEnabled(false);
+            checkBoxPanel.setEnabled(false);
         }
-        return retVal;
+        applySelectedHighlighting(checkBoxPanel, table, column, row);
+        return checkBoxPanel;
     }
 }

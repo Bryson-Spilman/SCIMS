@@ -1,6 +1,7 @@
 package scims.ui.swing.tablecells;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 class CheckBoxCellEditor extends DefaultCellEditor {

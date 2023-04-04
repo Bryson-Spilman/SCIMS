@@ -26,12 +26,46 @@ public interface EventScoring<T> {
 
     }
 
-    default List<Competitor> sortCompetitorScores(Map<Competitor, T> competitorsMap) {
-        return new ArrayList<>(competitorsMap.entrySet()
+    T parseValueForComparing(Object value);
+
+    default Map<Competitor, Double> sortCompetitorScores(Map<Competitor, T> competitorsMap) {
+        Map<Competitor, Double> retVal = new LinkedHashMap<>();
+        ArrayList<Competitor> sortedList = new ArrayList<>(competitorsMap.entrySet()
                 .stream()
                 .sorted(getComparator())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new))
+                .collect(Collectors.toMap(Map.Entry::getKey, competitorTEntry -> parseValueForComparing(competitorTEntry.getValue()), (v1, v2) -> v1, LinkedHashMap::new))
                 .keySet());
+        double pointsPossible = sortedList.size();
+        int numWithThisScore = 1;
+        for(int i=0; i < sortedList.size(); i+= numWithThisScore) {
+            Competitor competitor = sortedList.get(i);
+            T score = competitorsMap.get(competitor);
+            numWithThisScore = getNumberOfCompetitorsWithSameScore(score, sortedList.subList(i+1, sortedList.size()), competitorsMap) + 1;
+            double totalPointsForPlacing = pointsPossible;
+            double localPointsPossible = pointsPossible -1;
+            for(int n=1; n < numWithThisScore; n++) { //start at 1 since we already account for the first person with this score
+                totalPointsForPlacing += (localPointsPossible);
+                localPointsPossible --;
+            }
+            double points = totalPointsForPlacing / numWithThisScore;
+            retVal.put(competitor, points);
+            for(int j=i+1; j < numWithThisScore; j++) {
+                retVal.put(sortedList.get(j), points);
+            }
+            pointsPossible -= numWithThisScore;
+        }
+        return retVal;
+    }
+
+    default int getNumberOfCompetitorsWithSameScore(T score, List<Competitor> subList, Map<Competitor, T> scoreMap)
+    {
+        int num = 0;
+        for(Competitor competitor : subList) {
+            if(scoreMap.get(competitor).equals(score)) {
+                num++;
+            }
+        }
+        return num;
     }
 
 }

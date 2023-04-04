@@ -9,6 +9,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.util.Callback;
 import scims.controllers.CompetitionModelController;
 import scims.model.data.Competitor;
 
@@ -23,13 +24,20 @@ public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRo
     private final Map<TreeTableColumn<?,?>, SimpleObjectProperty<Object>> _columnToValueMap = new HashMap<>();
     private final SimpleStringProperty _nameProperty;
     private final CompetitionModelController _controller;
+    private final TreeItem<Object> _parent;
 
-    public CompetitorRow(Competitor competitor, List<EventColumn<?,?>> eventColumns, CompetitionModelController controller) {
+    public CompetitorRow(TreeItem<Object> parent, Competitor competitor, List<EventColumn<?,?>> eventColumns, CompetitionModelController controller) {
+        _parent = parent;
         _competitor = competitor;
         _controller = controller;
         _nameProperty = new SimpleStringProperty(competitor.getName());
         setValue(competitor);
         initializeValues(eventColumns);
+    }
+
+    public TreeItem<Object> getParentRow()
+    {
+        return _parent;
     }
 
     private void initializeValues(List<EventColumn<?,?>> eventColumns)
@@ -78,5 +86,9 @@ public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRo
             _controller.removeCompetitor(_competitor);
         });
         return new ContextMenu(menuItem1, menuItem2);
+    }
+
+    public void setObservableValue(TreeTableColumn<?,?> col, Object val) {
+        _columnToValueMap.get(col).setValue(val);
     }
 }

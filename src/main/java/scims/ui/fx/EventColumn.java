@@ -8,17 +8,14 @@ import scims.model.data.scoring.CustomEventScoring;
 import scims.model.data.scoring.CustomScore;
 import scims.model.data.scoring.EventScoring;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
-public class EventColumn<T extends EventScoring<S>, S> extends TreeTableColumn<Object, Object> {
+public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableColumn {
 
     private final Event _event;
     private final List<ScoringColumn<?,?>> _scoringColumns = new ArrayList<>();
-    private final EventPointsColumn _pointsColumns;
+    private final EventPointsColumn _pointsColumn;
 
     public EventColumn(Event event) {
         super(event.getName());
@@ -29,27 +26,29 @@ public class EventColumn<T extends EventScoring<S>, S> extends TreeTableColumn<O
         } else {
             CustomScore<?,?> customScore = ((CustomEventScoring<?,?>) event.getScoring()).getScore();
             ScoringColumn<? extends EventScoring<?>, ?> primaryScoreCol = ScoringColumnFactory.buildScoringColumn(this, customScore.getPrimaryScoring());
-            ScoringColumn<? extends EventScoring<?>, ?> secondaryScoreCol = ScoringColumnFactory.buildScoringColumn(this, customScore.getPrimaryScoring());
+            ScoringColumn<? extends EventScoring<?>, ?> secondaryScoreCol = ScoringColumnFactory.buildScoringColumn(this, customScore.getSecondaryScoring());
             _scoringColumns.add(primaryScoreCol);
             _scoringColumns.add(secondaryScoreCol);
             getColumns().add(primaryScoreCol);
             getColumns().add(secondaryScoreCol);
         }
-        _pointsColumns = new EventPointsColumn(_scoringColumns);
-        getColumns().add(_pointsColumns);
+        _pointsColumn = new EventPointsColumn(_scoringColumns);
+        getColumns().add(_pointsColumn);
         setEditable(true);
         _event = event;
     }
 
     void updateEventPoints(CompetitorRow row) {
         T scoring = (T) _event.getScoring();
-        Map<Competitor, S> sortedCompetitors = new LinkedHashMap<>();
+        Map<Competitor, S> competitorScoreMap = new LinkedHashMap<>();
         //TODO figure out why this parent is null and fix it
         //Try just setting the parent when created, or set custom parent method on competitor row to get weight class
-        ObservableList<TreeItem<Competitor>> competitorRows = row.getParent().getChildren();
-        for(TreeItem<Competitor> competitorTreeItem : competitorRows) {
-            if(competitorTreeItem instanceof CompetitorRow) {
-                CompetitorRow competitorRow = (CompetitorRow) competitorTreeItem;
+        ObservableList<TreeItem<Object>> competitorRows = row.getParentRow().getChildren();
+        Map<Competitor, CompetitorRow> competitorRowMap = new HashMap<>();
+        for(TreeItem<Object> competitorTreeItem : competitorRows) {
+            if(competitorTreeItem.getValue() instanceof CompetitorRow) {
+                CompetitorRow competitorRow = (CompetitorRow) competitorTreeItem.getValue();
+                competitorRowMap.put(competitorRow.getCompetitor(), competitorRow);
                 TreeTableColumn<Object, ?> primaryScoreCol = getColumns().get(0);
                 if(scoring instanceof CustomEventScoring) {
                     TreeTableColumn<Object, ?> secondaryScoreCol = getColumns().get(1);
@@ -57,17 +56,49 @@ public class EventColumn<T extends EventScoring<S>, S> extends TreeTableColumn<O
                     CustomScore customScore = customScoring.getScore();
                     customScore.setPrimaryScore(row.getObservableValue(primaryScoreCol).getValue());
                     customScore.setSecondaryScore(row.getObservableValue(secondaryScoreCol).getValue());
-                    sortedCompetitors.put(competitorRow.getCompetitor(),(S) customScore);
+                    competitorScoreMap.put(competitorRow.getCompetitor(),(S) customScore);
                 } else {
                     S changedVal = (S) competitorRow.getObservableValue(primaryScoreCol).getValue();
-                    sortedCompetitors.put(competitorRow.getCompetitor(),changedVal);
+                    competitorScoreMap.put(competitorRow.getCompetitor(),changedVal);
                 }
             }
+        }
+        if(competitorScoreMap.values().stream().anyMatch(v -> v != null && !v.toString().trim().isEmpty())) {
+            Map<Competitor, Double> competitorScores = scoring.sortCompetitorScores(competitorScoreMap);
+            applyPointsForCompetitors(competitorScores, competitorRowMap);
+        } else {
+            resetPointsForCompetitors(competitorRowMap);
+        }
+        getTreeTableView().refresh();
+    }
+
+    private void resetPointsForCompetitors(Map<Competitor, CompetitorRow> competitorRowMap) {
+        for(CompetitorRow row : competitorRowMap.values()) {
+            row.setObservableValue(_pointsColumn, "");
+        }
+    }
+
+    private void applyPointsForCompetitors(Map<Competitor, Double> sortedCompetitorsList, Map<Competitor, CompetitorRow> competitorRowsMap) {
+        //1st competitor did best
+        for(Map.Entry<Competitor, Double> entry : sortedCompetitorsList.entrySet()) {
+            CompetitorRow row = competitorRowsMap.get(entry.getKey());
+            row.setObservableValue(_pointsColumn, entry.getValue());
         }
     }
 
     public Event getEvent()
     {
         return _event;
+    }
+
+    public EventPointsColumn getPointsColumn() {
+        return _pointsColumn;
+    }
+
+    @Override
+    void updateLinkedCells(TreeItem<Object> rowObject) {
+        if(rowObject != null && rowObject.getValue() instanceof CompetitorRow) {
+            updateEventPoints((CompetitorRow) rowObject.getValue());
+        }
     }
 }

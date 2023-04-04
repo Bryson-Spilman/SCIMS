@@ -2,6 +2,7 @@ package scims.ui.fx;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
 import scims.model.data.scoring.EventScoring;
 
 import java.util.List;
@@ -22,7 +23,12 @@ class EventPointsColumn extends TreeTableColumn<Object, Object> {
             }
             return new SimpleObjectProperty<>();
         });
-        setCellFactory(col -> new IntegerCellEditor());
+        setCellFactory(col -> new DoubleCellEditor(this) {
+            @Override
+            boolean isCellEditable(TreeTableRow row) {
+                return TableCellFactory.cellEditable(row);
+            }
+        });
     }
 
     public SimpleObjectProperty<Object> getInitialProperty()

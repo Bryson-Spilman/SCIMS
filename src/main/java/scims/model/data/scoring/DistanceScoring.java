@@ -1,5 +1,6 @@
 package scims.model.data.scoring;
 
+import javafx.application.Platform;
 import scims.model.data.Competitor;
 import scims.model.enums.DistanceUnitSystem;
 
@@ -22,7 +23,19 @@ public class DistanceScoring implements EventScoring<Double>{
 
     @Override
     public Comparator<Map.Entry<Competitor, Double>> getComparator() {
-        return (e1, e2) -> Double.compare(e2.getValue(), e1.getValue());
+        return (e1, e2) -> Double.compare(parseValueForComparing(e2.getValue()), parseValueForComparing(e1.getValue()));
+    }
+
+    @Override
+    public Double parseValueForComparing(Object value) {
+        double retVal = Double.MIN_VALUE;
+        if(value instanceof Double) {
+            retVal = (Double) value;
+        }
+        else if(value != null && !value.toString().trim().isEmpty()) {
+            retVal = Double.parseDouble(value.toString());
+        }
+        return retVal;
     }
 
     @Override

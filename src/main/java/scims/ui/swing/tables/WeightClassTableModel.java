@@ -1,6 +1,7 @@
 package scims.ui.swing.tables;
 
 import scims.model.data.Event;
+import scims.model.data.StrengthEvent;
 import scims.model.data.WeightClass;
 import scims.model.enums.WeightUnitSystem;
 
@@ -114,7 +115,7 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
                 rowData.setMaxNumberCompetitors(aValue == null ? Integer.MAX_VALUE : Integer.parseInt(aValue.toString()));
                 break;
             case EVENTS_COL:
-                rowData.setEvents(aValue == null ? new ArrayList<>() : (List<Event>) aValue);
+                rowData.setEvents(aValue == null ? new ArrayList<>() : (List<StrengthEvent>) aValue);
                 break;
             default:
                 break;

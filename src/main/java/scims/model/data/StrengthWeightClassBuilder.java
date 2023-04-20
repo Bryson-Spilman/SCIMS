@@ -8,7 +8,7 @@ public class StrengthWeightClassBuilder implements FluentWithWeightClassName, Fl
     private String _name;
     private Double _maxCompetitorWeight;
     private Integer _maxNumberOfCompetitors;
-    private List<Event> _eventsInOrder;
+    private List<StrengthEvent> _eventsInOrder;
 
     @Override
     public FluentUpdateWeightClass fromExistingWeightClass(WeightClass weightClass) {
@@ -37,7 +37,7 @@ public class StrengthWeightClassBuilder implements FluentWithWeightClassName, Fl
     private class WithWeightClassEvents implements FluentWithWeightClassEvents {
 
         @Override
-        public FluentWeightClassBuilder withEventsInOrder(List<Event> eventsInOrder) {
+        public FluentWeightClassBuilder withEventsInOrder(List<StrengthEvent> eventsInOrder) {
             _eventsInOrder = eventsInOrder;
             return new WeightClassBuilder();
         }
@@ -72,7 +72,7 @@ public class StrengthWeightClassBuilder implements FluentWithWeightClassName, Fl
         }
 
         @Override
-        public FluentUpdateWeightClass withUpdatedEvents(List<Event> events) {
+        public FluentUpdateWeightClass withUpdatedEvents(List<StrengthEvent> events) {
             _eventsInOrder = events;
             return this;
         }

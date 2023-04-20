@@ -5,7 +5,7 @@ import scims.model.data.Competitor;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public interface EventScoring<T> {
+public interface EventScoring<T> extends Scoring{
     void setScore(T score);
     T getScore();
     Comparator<Map.Entry<Competitor, T>> getComparator();

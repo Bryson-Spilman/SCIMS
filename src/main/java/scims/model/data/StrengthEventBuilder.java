@@ -12,7 +12,7 @@ public class StrengthEventBuilder implements FluentWithEventName, FluentFromExis
     @Override
     public FluentUpdateEvent fromExistingEvent(Event event) {
         _name = event.getName();
-        _scoring = event.getScoring();
+        _scoring = (EventScoring<?>) event.getScoring();
         _timeLimit = event.getTimeLimit();
         return new UpdateEvent();
     }

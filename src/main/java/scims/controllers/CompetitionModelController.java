@@ -1,6 +1,5 @@
 package scims.controllers;
 
-import javafx.application.Platform;
 import scims.model.data.*;
 import scims.ui.actions.*;
 import scims.ui.fx.CompetitionTreeTable;
@@ -11,18 +10,17 @@ import scims.ui.swing.tree.IconNode;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CompetitionModelController {
     private final CompetitionTree _competitionTree;
     private final SCIMSFrame _parentFrame;
-    private CompetitionTreeTable _treeTableInView;
+    private final CompetitionTreeTable _treeTableInView;
     private final List<Competition> _competitions = new ArrayList<>();
 
     public CompetitionModelController(SCIMSFrame parentFrame, CompetitionTree competitionTree, CompetitionTreeTable treeTableInView)
@@ -120,8 +118,8 @@ public class CompetitionModelController {
             Competition updatedCompetition = null;
             Competition oldCompetition = null;
             for(Competition competitionInList : _competitions) {
-                if(competitionInList.getWeightClasses().contains(weightClass)) {
-                    List<WeightClass> weightClasses = competitionInList.getWeightClasses();
+                if(competitionInList.getWeightClasses().contains((StrengthWeightClass)weightClass)) {
+                    List<StrengthWeightClass> weightClasses = competitionInList.getWeightClasses();
                     _competitionTree.removeWeightClass(competitionInList, weightClass);
                     _treeTableInView.removeWeightClass(weightClass);
                     weightClasses.remove(weightClass);
@@ -147,12 +145,12 @@ public class CompetitionModelController {
             Competition updatedCompetition = null;
             Competition oldCompetition = null;
             for(Competition competitionInList : _competitions) {
-                List<WeightClass> weightClasses = competitionInList.getWeightClasses();
+                List<StrengthWeightClass> weightClasses = competitionInList.getWeightClasses();
                 for(WeightClass weightClassInList : weightClasses) {
                     if(weightClassInList.getCompetitors().contains(competitor)) {
                         _competitionTree.removeCompetitor(competitionInList, weightClassInList, competitor);
                         _treeTableInView.removeCompetitor(weightClassInList, competitor);
-                        weightClassInList.removeCompetitor(competitor);
+                        weightClassInList.removeCompetitor((StrengthCompetitor) competitor);
                         updatedCompetition = new StrengthCompetitionBuilder()
                                 .fromExistingCompetition(competitionInList)
                                 .withUpdatedWeightClasses(weightClasses)
@@ -170,7 +168,7 @@ public class CompetitionModelController {
     }
 
     public void addNewCompetitionAction() {
-        new NewCompetitionAction(_parentFrame, this::addCompetition).actionPerformed(null);
+        new NewCompetitionAction(_parentFrame, this::setCompetition).actionPerformed(null);
     }
 
     public void addNewCompetitorAction(WeightClass weightClass) {
@@ -184,8 +182,8 @@ public class CompetitionModelController {
     private void addWeightClass(WeightClass wc, Competition competition) {
         for(Competition competitionInList : _competitions) {
             if(competitionInList.equals(competition)) {
-                List<WeightClass> weightClasses = competitionInList.getWeightClasses();
-                weightClasses.add(wc);
+                List<StrengthWeightClass> weightClasses = competitionInList.getWeightClasses();
+                weightClasses.add((StrengthWeightClass) wc);
                 StrengthCompetition updatedCompetition = new StrengthCompetitionBuilder().fromExistingCompetition(competition)
                         .withUpdatedWeightClasses(weightClasses)
                         .build();
@@ -203,10 +201,10 @@ public class CompetitionModelController {
         Competition oldCompetition = null;
         Competition updatedCompetition = null;
         for(Competition competition : _competitions) {
-            List<WeightClass> weightClasses = competition.getWeightClasses();
+            List<StrengthWeightClass> weightClasses = competition.getWeightClasses();
             for(WeightClass wc : weightClasses) {
                 if(wc.equals(weightClass)) {
-                    wc.addCompetitor(competitor);
+                    wc.addCompetitor((StrengthCompetitor)competitor);
                     oldCompetition = competition;
                     updatedCompetition = new StrengthCompetitionBuilder().fromExistingCompetition(competition)
                             .withUpdatedWeightClasses(weightClasses)
@@ -227,9 +225,11 @@ public class CompetitionModelController {
         }
     }
 
-    private void addCompetition(Competition competition)
+    public void setCompetition(Competition competition)
     {
+        _competitions.clear();
         _competitions.add(competition);
+        _competitionTree.removeAllNodes();
         _competitionTree.addNewCompetition(competition);
         _treeTableInView.refresh(competition);
     }
@@ -259,12 +259,12 @@ public class CompetitionModelController {
         Competition oldCompetition = null;
         WeightClass weightClassForCompetitor = null;
         for(Competition competition : _competitions) {
-            List<WeightClass> weightClasses = competition.getWeightClasses();
+            List<StrengthWeightClass> weightClasses = competition.getWeightClasses();
             for(WeightClass weightClass : weightClasses) {
                 List<Competitor> competitors = weightClass.getCompetitors();
                 if(competitors.contains(oldCompetitor)) {
                     int index = competitors.indexOf(oldCompetitor);
-                    weightClass.removeCompetitor(oldCompetitor);
+                    weightClass.removeCompetitor((StrengthCompetitor)oldCompetitor);
                     weightClass.addCompetitor(index, updatedCompetitor);
                     weightClassForCompetitor = weightClass;
                     oldCompetition = competition;
@@ -291,10 +291,10 @@ public class CompetitionModelController {
         Competition updatedCompetition = null;
         Competition oldCompetition = null;
         for(Competition competition : _competitions) {
-            List<WeightClass> weightClasses = competition.getWeightClasses();
-            if(weightClasses.contains(oldWeightClass)) {
+            List<StrengthWeightClass> weightClasses = competition.getWeightClasses();
+            if(weightClasses.contains((StrengthWeightClass)oldWeightClass)) {
                 int index = weightClasses.indexOf(oldWeightClass);
-                weightClasses.add(index, weightClass);
+                weightClasses.add(index, (StrengthWeightClass) weightClass);
                 weightClasses.remove(oldWeightClass);
                 oldCompetition = competition;
                 updatedCompetition = new StrengthCompetitionBuilder().fromExistingCompetition(competition)
@@ -310,5 +310,13 @@ public class CompetitionModelController {
             _competitions.add(index, updatedCompetition);
             _competitions.remove(oldCompetition);
         }
+    }
+
+    public List<Competition> getCompetitions() {
+        return new ArrayList<>(_competitions);
+    }
+
+    public Window getFrame() {
+        return _parentFrame;
     }
 }

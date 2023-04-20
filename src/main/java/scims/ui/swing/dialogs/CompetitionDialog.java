@@ -143,9 +143,9 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         _okCancelPanel.setOkText("Update");
         _otherRadioButton.setSelected(true);
         _sameEventsForAllWeightsClassesCheckbox.setSelected(competition.isSameNumberOfEventsForAllWeightClasses());
-        List<WeightClass> weightClasses = competition.getWeightClasses();
+        List<StrengthWeightClass> weightClasses = competition.getWeightClasses();
         for(WeightClass wc : weightClasses) {
-            List<Event> events = wc.getEventsInOrder();
+            List<StrengthEvent> events = wc.getEventsInOrder();
             _weightClassTable.setSelectedEvents(events);
             _eventsTable.setSelectedEvents(events);
         }
@@ -333,7 +333,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         return retVal;
     }
 
-    private boolean containsOnlyStrongmanCorpWeightClasses(List<WeightClass> weightClasses) {
+    private boolean containsOnlyStrongmanCorpWeightClasses(List<StrengthWeightClass> weightClasses) {
         boolean retVal = true;
         for(WeightClass wc : weightClasses)
         {
@@ -350,7 +350,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         boolean retVal = true;
         if(_weightClassTable.getModel().getRowCount() > 0)
         {
-            List<WeightClass> weightClasses = _weightClassTable.getAllWeightClasses();
+            List<StrengthWeightClass> weightClasses = _weightClassTable.getAllWeightClasses();
             for(WeightClass wc : weightClasses)
             {
                 if(!USSWeightClasses.getValues().contains(wc))
@@ -363,7 +363,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         return retVal;
     }
 
-    private boolean containsOnlyUSSWeightClasses(List<WeightClass> weightClasses) {
+    private boolean containsOnlyUSSWeightClasses(List<StrengthWeightClass> weightClasses) {
         boolean retVal = true;
         for(WeightClass wc : weightClasses)
         {

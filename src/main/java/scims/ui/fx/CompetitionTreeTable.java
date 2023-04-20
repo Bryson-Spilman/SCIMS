@@ -56,7 +56,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
             _eventsColumns.clear();
             _competition = competition;
             clear();
-            List<WeightClass> weightClasses = competition.getWeightClasses();
+            List<StrengthWeightClass> weightClasses = competition.getWeightClasses();
             //add columns
             CompetitorsColumn competitorColumns = new CompetitorsColumn();
             getColumns().add(competitorColumns);

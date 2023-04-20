@@ -17,10 +17,11 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
     private final List<ScoringColumn<?,?>> _scoringColumns = new ArrayList<>();
     private final EventPointsColumn _pointsColumn;
 
+    @SuppressWarnings("unchecked")
     public EventColumn(Event event) {
         super(event.getName());
         if(!(event.getScoring() instanceof CustomEventScoring)) {
-            ScoringColumn<? extends EventScoring<?>, ?> scoreCol = ScoringColumnFactory.buildScoringColumn(this, event.getScoring());
+            ScoringColumn<? extends EventScoring<?>, ?> scoreCol = ScoringColumnFactory.buildScoringColumn(this, (T) event.getScoring());
             _scoringColumns.add(scoreCol);
             getColumns().add(scoreCol);
         } else {

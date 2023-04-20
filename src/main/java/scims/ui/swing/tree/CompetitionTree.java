@@ -23,7 +23,7 @@ public class CompetitionTree extends JTree {
     private CompetitionModelController _controller;
     public CompetitionTree()
     {
-        super(new IconMutableTreeNode("Competitions", null));
+        super(new IconMutableTreeNode("Competition", COMPETITION_IMG_URL));
         _root = (IconMutableTreeNode) getModel().getRoot();
         _root.setPopUpMenu(buildRootPopUpMenu());
         addListeners();
@@ -192,6 +192,7 @@ public class CompetitionTree extends JTree {
             competitionNode.add(weightClassNode);
         }
         expandPath(new TreePath(competitionNode.getPath()));
+        setRootVisible(false);
         updateTree();
     }
 
@@ -268,6 +269,11 @@ public class CompetitionTree extends JTree {
             }
         }
         _root.remove(removeIndex);
+        setRootVisible(_root.getChildCount() <= 0);
         updateTree();
+    }
+
+    public void removeAllNodes() {
+        _root.removeAllChildren();
     }
 }

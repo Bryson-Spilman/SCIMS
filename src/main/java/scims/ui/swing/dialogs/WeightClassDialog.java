@@ -2,10 +2,7 @@ package scims.ui.swing.dialogs;
 
 
 import scims.main.CustomWeightClassRegistry;
-import scims.model.data.Competitor;
-import scims.model.data.StrengthWeightClass;
-import scims.model.data.StrengthWeightClassBuilder;
-import scims.model.data.WeightClass;
+import scims.model.data.*;
 import scims.ui.Modifiable;
 import scims.ui.swing.MissingRequiredValueException;
 import scims.ui.swing.OkCancelPanel;
@@ -113,7 +110,7 @@ public class WeightClassDialog extends JDialog implements Modifiable {
                 .withMaxNumberOfCompetitors(maxNumberOfCompetitors)
                 .build();
         for(Competitor competitor : _competitors) {
-            retVal.addCompetitor(competitor);
+            retVal.addCompetitor((StrengthCompetitor) competitor);
         }
         return retVal;
     }

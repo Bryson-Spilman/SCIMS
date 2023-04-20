@@ -1,6 +1,8 @@
 package scims.ui.swing.tables;
 
 import scims.model.data.Event;
+import scims.model.data.StrengthEvent;
+import scims.model.data.StrengthWeightClass;
 import scims.model.data.WeightClass;
 import scims.model.enums.WeightUnitSystem;
 import scims.ui.swing.JChooserField;
@@ -17,13 +19,12 @@ import java.util.List;
 public class WeightClassTable extends SCIMSTable {
 
     private final WeightClassTableModel _model;
-    private JChooserField<Event> _chooserField;
+    private JChooserField<StrengthEvent> _chooserField;
     private JPopupMenu _popUpMenu;
     private JMenuItem _selectAllMenuItem;
     private JMenuItem _selectHighlightedMenuItem;
     private JMenuItem _deselectHighlightedMenuItem;
     private JMenuItem _deselectAllMenuItem;
-
     public WeightClassTable() {
         _model = new WeightClassTableModel();
         setModel(_model);
@@ -67,7 +68,6 @@ public class WeightClassTable extends SCIMSTable {
             _model.setValueAt(selected, row, WeightClassTableModel.CHECK_BOX_COL);
         }
     }
-
     private void initTable() {
         _popUpMenu = new JPopupMenu();
         _selectHighlightedMenuItem = new JMenuItem("Select Highlighted");
@@ -108,7 +108,7 @@ public class WeightClassTable extends SCIMSTable {
         return checkedRows.contains(row);
     }
 
-    public void setSelectedEvents(List<Event> selectedEvents) {
+    public void setSelectedEvents(List<StrengthEvent> selectedEvents) {
         for(WeightClassRowData rowData : _model.getRowData()) {
             rowData.setEvents(selectedEvents);
         }
@@ -116,7 +116,7 @@ public class WeightClassTable extends SCIMSTable {
         _model.fireTableDataChanged();
     }
 
-    public void setAvailableEvents(List<Event> availableEvents) {
+    public void setAvailableEvents(List<StrengthEvent> availableEvents) {
         _chooserField.setObjects(availableEvents);
     }
 
@@ -127,8 +127,8 @@ public class WeightClassTable extends SCIMSTable {
         }
     }
 
-    public List<WeightClass> getAllWeightClasses() {
-        List<WeightClass> retVal = new ArrayList<>();
+    public List<StrengthWeightClass> getAllWeightClasses() {
+        List<StrengthWeightClass> retVal = new ArrayList<>();
         for(WeightClassRowData weightClassData : _model.getRowData()) {
             retVal.add(weightClassData.getWeightClass());
         }

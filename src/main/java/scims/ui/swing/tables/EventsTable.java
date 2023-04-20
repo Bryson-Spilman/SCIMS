@@ -1,6 +1,7 @@
 package scims.ui.swing.tables;
 
 import scims.model.data.Event;
+import scims.model.data.StrengthEvent;
 import scims.model.data.StrengthEventBuilder;
 import scims.model.data.scoring.EventScoring;
 import scims.model.enums.DistanceUnitSystem;
@@ -123,9 +124,9 @@ public class EventsTable extends SCIMSTable {
         ((EventsTableModel)getModel()).setEventOrderColumnEnabled(false);
     }
 
-    public List<Event> getSelectedEvents() {
+    public List<StrengthEvent> getSelectedEvents() {
         List<Integer> checkedRows = _model.getCheckedRows();
-        Map<Integer, Event> sortedMap = new TreeMap<>();
+        Map<Integer, StrengthEvent> sortedMap = new TreeMap<>();
         for(int checkedRow : checkedRows) {
             String name = (String) getValueAt(checkedRow, EventsTableModel.NAME_COL);
             EventScoring<?> scoreType = (EventScoring<?>) getValueAt(checkedRow, EventsTableModel.SCORE_TYPE_COL);
@@ -153,7 +154,7 @@ public class EventsTable extends SCIMSTable {
     }
 
     public void addEvent(Event event) {
-        _model.addRow(new EventsRowData(true, event.getName(), event.getScoring(), event.getTimeLimit(), null));
+        _model.addRow(new EventsRowData(true, event.getName(), (EventScoring<?>) event.getScoring(), event.getTimeLimit(), null));
     }
 
     public void applyDistanceUnitsChange(DistanceUnitSystem selected) {
@@ -168,11 +169,11 @@ public class EventsTable extends SCIMSTable {
         _eventOrderComboBox.addActionListener(e -> action.run());
     }
 
-    public void setSelectedEvents(List<Event> events) {
+    public void setSelectedEvents(List<StrengthEvent> events) {
         _model.setSelectedEvents(events);
     }
 
-    public void setOrdersByListOrder(List<Event> events) {
+    public void setOrdersByListOrder(List<StrengthEvent> events) {
         _model.setOrdersByListOrder(events);
     }
 

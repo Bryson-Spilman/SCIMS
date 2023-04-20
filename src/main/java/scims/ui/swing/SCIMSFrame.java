@@ -10,14 +10,14 @@ import scims.main.CustomEventClassRegistry;
 import scims.model.data.Event;
 import scims.model.data.StrengthEventBuilder;
 import scims.model.data.scoring.*;
+import scims.ui.actions.OpenCompetitionAction;
+import scims.ui.actions.SaveCompetitionAction;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.tree.CompetitionTree;
 import scims.ui.swing.tree.IconTreeCellRenderer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -28,6 +28,8 @@ public class SCIMSFrame extends JFrame {
     private final CompetitionModelController _controller;
     private CompetitionTreeTable _competitionTreeTable;
     private TitledPane _titledPane;
+    private JMenuItem _saveProjectMenuItem;
+    private JMenuItem _openCompetitionMenuItem;
 
     public SCIMSFrame() {
         super("SCIMS");
@@ -56,7 +58,7 @@ public class SCIMSFrame extends JFrame {
 
     private List<Event> buildTestEvents() {
         List<Event> retVal = new ArrayList<>();
-        Map<Integer, EventScoring> randomScoring = new HashMap<>();
+        Map<Integer, EventScoring<?>> randomScoring = new HashMap<>();
         randomScoring.put(1, new RepsScoring());
         randomScoring.put(2, new TimeScoring());
         randomScoring.put(3, new DistanceScoring());
@@ -76,6 +78,8 @@ public class SCIMSFrame extends JFrame {
     private void addListeners()
     {
         _newCompetitionMenuItem.addActionListener(e -> _controller.addNewCompetitionAction());
+        _saveProjectMenuItem.addActionListener(new SaveCompetitionAction(_controller));
+        _openCompetitionMenuItem.addActionListener(new OpenCompetitionAction(_controller));
     }
 
     private void buildComponents() {
@@ -106,6 +110,10 @@ public class SCIMSFrame extends JFrame {
         JMenu editMenu = new JMenu("Edit");
         _newCompetitionMenuItem = new JMenuItem("New Competition...");
         editMenu.add(_newCompetitionMenuItem);
+        _openCompetitionMenuItem = new JMenuItem("Open Competition...");
+        _saveProjectMenuItem = new JMenuItem("Save Competition");
+        fileMenu.add(_saveProjectMenuItem);
+        fileMenu.add(_openCompetitionMenuItem);
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
 

@@ -5,9 +5,9 @@ import java.util.List;
 public interface WeightClass {
 
     Double NO_WEIGHT_LIMIT = null;
-    void addCompetitor(Competitor competitor);
-    void removeCompetitor(Competitor competitor);
-    List<Event> getEventsInOrder();
+    void addCompetitor(StrengthCompetitor competitor);
+    void removeCompetitor(StrengthCompetitor competitor);
+    List<StrengthEvent> getEventsInOrder();
     Integer getMaxNumberOfCompetitors();
     int getOrderOfEvent(Event event);
     int getCompetitorsPointsForEvent(Competitor competitor, Event event);

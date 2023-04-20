@@ -1,6 +1,6 @@
 package scims.model.fluentbuilders.competition;
 
-import scims.model.data.WeightClass;
+import scims.model.data.StrengthWeightClass;
 import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.WeightUnitSystem;
 
@@ -11,7 +11,7 @@ public interface FluentUpdateCompetition extends FluentCompetitionBuilder {
     FluentUpdateCompetition withUpdatedName(String name);
     FluentUpdateCompetition withUpdatedDateTime(ZonedDateTime name);
     FluentUpdateCompetition withIsSameNumberOfEventsForAllWeightClasses(boolean isSameNumberOfEventsForAllWeightClasses);
-    FluentUpdateCompetition withUpdatedWeightClasses(List<WeightClass> weightClasses);
+    FluentUpdateCompetition withUpdatedWeightClasses(List<StrengthWeightClass> weightClasses);
     FluentUpdateCompetition withUpdatedWeightUnitSystem(WeightUnitSystem unitSystem);
     FluentUpdateCompetition withUpdatedDistanceUnitSystem(DistanceUnitSystem unitSystem);
 }

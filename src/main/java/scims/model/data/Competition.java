@@ -11,7 +11,7 @@ public interface Competition {
     String getName();
     ZonedDateTime getDateTime();
     boolean isSameNumberOfEventsForAllWeightClasses();
-    List<WeightClass> getWeightClasses();
+    List<StrengthWeightClass> getWeightClasses();
     WeightUnitSystem getWeightUnitSystem();
     DistanceUnitSystem getDistanceUnitSystem();
 }

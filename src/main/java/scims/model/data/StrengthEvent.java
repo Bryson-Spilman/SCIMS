@@ -1,18 +1,27 @@
 package scims.model.data;
 
-import scims.model.data.scoring.EventScoring;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import scims.model.data.scoring.Scoring;
 
 import java.time.Duration;
 
 public class StrengthEvent implements Event {
+    @JacksonXmlProperty(isAttribute = true, localName = "name")
     private final String _name;
-    private final EventScoring<?> _scoring;
+    @JacksonXmlProperty(localName = "scoring")
+    private final Scoring _scoring;
+    @JacksonXmlProperty(localName = "timeLimit")
     private final Duration _timeLimit;
 
-    StrengthEvent(String name, EventScoring<?> scoring, Duration timeLimit) {
+    public StrengthEvent(String name, Scoring scoring, Duration timeLimit) {
         _name = name;
         _scoring = scoring;
         _timeLimit = timeLimit;
+    }
+
+    public StrengthEvent()
+    {
+        this(null, null, null);
     }
 
     @Override
@@ -21,7 +30,7 @@ public class StrengthEvent implements Event {
     }
 
     @Override
-    public EventScoring<?> getScoring() {
+    public Scoring getScoring() {
         return _scoring;
     }
 

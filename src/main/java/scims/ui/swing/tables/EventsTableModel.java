@@ -1,6 +1,7 @@
 package scims.ui.swing.tables;
 
 import scims.model.data.Event;
+import scims.model.data.StrengthEvent;
 import scims.model.data.scoring.*;
 import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.WeightUnitSystem;
@@ -206,7 +207,7 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
         fireTableDataChanged();
     }
 
-    public void setSelectedEvents(List<Event> events) {
+    public void setSelectedEvents(List<StrengthEvent> events) {
         for(EventsRowData rowData : getRowData()) {
             if(events.stream().anyMatch(event -> event.getName().equalsIgnoreCase(rowData.getName()))) {
                 rowData.setChecked(true);
@@ -215,8 +216,8 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
         fireTableDataChanged();
     }
 
-    public void setOrdersByListOrder(List<Event> events) {
-        for(Event event : events) {
+    public void setOrdersByListOrder(List<StrengthEvent> events) {
+        for(StrengthEvent event : events) {
             Optional<EventsRowData> eventRowDataFound = getRowData().stream()
                     .filter(erd -> event.getName().equalsIgnoreCase(erd.getName()))
                     .findFirst();

@@ -1,18 +1,28 @@
 package scims.model.data;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
 import java.util.Objects;
 
 public class StrengthCompetitor implements Competitor {
 
+    @JacksonXmlProperty(isAttribute = true, localName = "name")
     private final String _name;
+    @JacksonXmlProperty(isAttribute = true, localName = "age")
     private final Integer _age;
+    @JacksonXmlProperty(isAttribute = true, localName = "weight")
     private final Double _weight;
 
-    StrengthCompetitor(String name, Integer age, Double weight)
+    public StrengthCompetitor(String name, Integer age, Double weight)
     {
         _name = name;
         _age = age;
         _weight = weight;
+    }
+
+    public StrengthCompetitor()
+    {
+        this(null, null, null);
     }
     @Override
     public Integer getAge() {

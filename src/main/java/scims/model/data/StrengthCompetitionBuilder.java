@@ -6,12 +6,15 @@ import scims.model.fluentbuilders.competition.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class StrengthCompetitionBuilder implements FluentWithCompetitionName, FluentFromExistingCompetition {
     private String _name;
     private ZonedDateTime _dateTime;
     private WeightUnitSystem _weightunitSystem;
-    private List<WeightClass> _weightClasses;
+    private List<StrengthWeightClass> _weightClasses;
     private boolean _isSameNumberOfEventsForAllWeightClasses;
     private DistanceUnitSystem _distanceUnitSystem;
 
@@ -54,7 +57,7 @@ public class StrengthCompetitionBuilder implements FluentWithCompetitionName, Fl
 
         @Override
         public FluentWithWeightUnitSystem withWeightClasses(List<WeightClass> weightClasses) {
-            _weightClasses = weightClasses;
+            _weightClasses = weightClasses.stream().map(wc -> (StrengthWeightClass)wc).collect(toList());
             return new WithWeightUnitSystem();
         }
     }
@@ -106,7 +109,7 @@ public class StrengthCompetitionBuilder implements FluentWithCompetitionName, Fl
         }
 
         @Override
-        public FluentUpdateCompetition withUpdatedWeightClasses(List<WeightClass> weightClasses) {
+        public FluentUpdateCompetition withUpdatedWeightClasses(List<StrengthWeightClass> weightClasses) {
             _weightClasses = weightClasses;
             return this;
         }

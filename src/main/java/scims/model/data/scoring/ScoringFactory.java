@@ -10,9 +10,10 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+@SuppressWarnings("unchecked")
 public class ScoringFactory {
 
-    private static final Map<String, Class<? extends EventScoring>> SCORING_MAP = new HashMap<>();
+    private static final Map<String, Class<? extends EventScoring<?>>> SCORING_MAP = new HashMap<>();
 
     static {
         try {
@@ -25,11 +26,8 @@ public class ScoringFactory {
                 if(clazz != EventScoring.class) {
                     String scoreType = clazz.getSimpleName().replaceAll("Scoring$", "");
 
-                    // Create a new instance of the scoring class using reflection
-                    EventScoring<?> scoring = (EventScoring<?>) clazz.newInstance();
-
                     // Add the scoring object to the map
-                    SCORING_MAP.put(scoreType, (Class<? extends EventScoring>) clazz);
+                    SCORING_MAP.put(scoreType, (Class<? extends EventScoring<?>>) clazz);
                 }
             }
         } catch (Exception e) {
@@ -38,16 +36,17 @@ public class ScoringFactory {
     }
 
     public static EventScoring<?> createScoring(String scoreType) {
-        Class<? extends EventScoring> scoringClass = SCORING_MAP.get(scoreType);
+        scoreType = scoreType.replace(" ", "");
+        Class<? extends EventScoring<?>> scoringClass = SCORING_MAP.get(scoreType);
 
         EventScoring<?> scoring;
         if (scoringClass == null) {
-            scoring = new CustomEventScoring();
+            scoring = new CustomEventScoring<>();
         } else {
             try {
                 scoring = scoringClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                scoring = new CustomEventScoring();
+                scoring = new CustomEventScoring<>();
             }
         }
 
@@ -56,12 +55,12 @@ public class ScoringFactory {
 
     public static List<EventScoring<?>> createAllScorings()  {
         List<EventScoring<?>> retVal = new ArrayList<>();
-        for(Class<? extends EventScoring> scoringClass : SCORING_MAP.values()) {
+        for(Class<? extends EventScoring<?>> scoringClass : SCORING_MAP.values()) {
             EventScoring<?> scoring;
             try {
                 scoring = scoringClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                scoring = new CustomEventScoring();
+                scoring = new CustomEventScoring<>();
             }
             retVal.add(scoring);
         }
@@ -113,14 +112,17 @@ public class ScoringFactory {
                     String filePath = resource.getFile();
                     filePath = URLDecoder.decode(filePath, "UTF-8");
                     File dir = new File(filePath);
-                    for (File file : dir.listFiles()) {
-                        if (file.isDirectory()) {
-                            classes.addAll(findClasses(file.toURI().toURL(), packageName + DOT + file.getName(), parent));
-                        } else if (file.getName().endsWith(CLASS_SUFFIX)) {
-                            String className = packageName + DOT + file.getName().substring(0, file.getName().length() - CLASS_SUFFIX.length());
-                            Class<?> clazz = Class.forName(className);
-                            if (parent.isAssignableFrom(clazz)) {
-                                classes.add(clazz);
+                    File[] files = dir.listFiles();
+                    if(files != null) {
+                        for (File file : files) {
+                            if (file.isDirectory()) {
+                                classes.addAll(findClasses(file.toURI().toURL(), packageName + DOT + file.getName(), parent));
+                            } else if (file.getName().endsWith(CLASS_SUFFIX)) {
+                                String className = packageName + DOT + file.getName().substring(0, file.getName().length() - CLASS_SUFFIX.length());
+                                Class<?> clazz = Class.forName(className);
+                                if (parent.isAssignableFrom(clazz)) {
+                                    classes.add(clazz);
+                                }
                             }
                         }
                     }

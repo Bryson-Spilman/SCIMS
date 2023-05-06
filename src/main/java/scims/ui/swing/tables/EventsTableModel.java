@@ -1,6 +1,5 @@
 package scims.ui.swing.tables;
 
-import scims.model.data.Event;
 import scims.model.data.StrengthEvent;
 import scims.model.data.scoring.*;
 import scims.model.enums.DistanceUnitSystem;

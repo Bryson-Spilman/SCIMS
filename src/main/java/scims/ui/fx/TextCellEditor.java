@@ -5,6 +5,8 @@ import javafx.scene.control.*;
 class TextCellEditor<T, S> extends TreeTableCell<T, S> {
 
 
+    protected TextField _textField;
+
     public TextCellEditor(TreeTableColumn<Object, Object> col) {
         itemProperty().addListener((observable, oldValue, newValue) -> {
            if(col instanceof LinkedTreeTableColumn) {
@@ -16,51 +18,52 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
 
     @Override
     public void startEdit() {
-        if (!isEmpty() && isCellEditable(getTreeTableRow())) {
-            super.startEdit();
+        super.startEdit();
+        if(_textField == null && isCellEditable(getTreeTableRow()))
+        {
             createTextField();
-            setText(null);
-        } else {
-            setGraphic(null);
         }
+        setText(null);
+        setGraphic(_textField);
+        _textField.requestFocus();
+        _textField.selectAll();
+        _textField.setEditable(isCellEditable(getTreeTableRow()));
     }
 
     @Override
     public void cancelEdit() {
         super.cancelEdit();
-        setText(getItem() == null ? null : getItem().toString());
+        setText(_textField.getText());
         setGraphic(null);
     }
+
 
     @Override
     public void updateItem(S item, boolean empty) {
         super.updateItem(item, empty);
-        if (empty) {
+        if (empty || item == null) {
             setText(null);
+            setGraphic(null);
         } else {
-            setText(item == null ? null : item.toString());
+            setText(item.toString());
+            setGraphic(null);
         }
     }
 
+
     void createTextField() {
-        TextField textField = new TextField(getItem() == null ? null : getItem().toString());
-        textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
-        textField.setOnAction(evt -> commitEdit((S)textField.getText()));
-        textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+        _textField = new TextField(getItem() == null ? null : getItem().toString());
+        _textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
+        _textField.setOnAction(evt -> commitEdit((S)_textField.getText()));
+        _textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal) {
-                commitEdit((S)textField.getText());
+                commitEdit((S)_textField.getText());
             }
         });
-        setGraphic(textField);
-        textField.selectAll();
-        textField.requestFocus();
-        textField.setEditable(isCellEditable(getTreeTableRow()));
-    }
-
-    @Override
-    public void commitEdit(S newValue) {
-        super.commitEdit(newValue);
-        setGraphic(null);
+        setGraphic(_textField);
+        _textField.selectAll();
+        _textField.requestFocus();
+        _textField.setEditable(isCellEditable(getTreeTableRow()));
     }
 
     boolean isCellEditable(TreeTableRow<?> row) {

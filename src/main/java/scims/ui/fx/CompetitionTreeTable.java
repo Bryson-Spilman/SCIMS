@@ -1,5 +1,6 @@
 package scims.ui.fx;
 
+import com.sun.javafx.scene.control.skin.TableViewSkin;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -7,6 +8,7 @@ import javafx.scene.control.*;
 import scims.controllers.CompetitionModelController;
 import scims.model.data.*;
 import scims.model.data.Event;
+import scims.ui.swing.tables.Coloring;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -26,6 +28,62 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
         setShowRoot(false);
         setEditable(true);
         addListeners();
+        setRowFactory(tv -> {
+            TreeTableRow<Object> row = new TreeTableRow<Object>()
+            {
+                @Override
+                protected void updateItem(Object item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (!empty && item != null) {
+                        // Set the background color of the row based on some condition
+                        if (item instanceof CompetitorRow) {
+                            CompetitorRow cr = (CompetitorRow) item;
+                            WeightClassRow wcr = (WeightClassRow) cr.getParentRow().getValue();
+                            int wcIndex = _competition.getWeightClasses().indexOf(wcr.getWeightClass());
+                            StrengthWeightClass wc = _competition.getWeightClasses().get(wcIndex);
+                            int competitorIndex = wc.getCompetitors().indexOf(cr.getCompetitor());
+                            int red = Coloring.FX_COMPETITOR_ROW_COLOR_ODD.getRed();
+                            int green = Coloring.FX_COMPETITOR_ROW_COLOR_ODD.getGreen();
+                            int blue = Coloring.FX_COMPETITOR_ROW_COLOR_ODD.getBlue();
+                            if(competitorIndex % 2 == 0)
+                            {
+                                red = Coloring.FX_COMPETITOR_ROW_COLOR_EVEN.getRed();
+                                green = Coloring.FX_COMPETITOR_ROW_COLOR_EVEN.getGreen();
+                                blue = Coloring.FX_COMPETITOR_ROW_COLOR_EVEN.getBlue();
+                            }
+                            if(isSelected())
+                            {
+                                setStyle("-fx-background-color: -fx-selection-bar;");
+                            } else {
+                                setStyle("-fx-background-color: rgb(" + red + "," + green + "," + blue + ");");
+                            }
+                        } else if (item instanceof WeightClassRow) {
+                            int red = Coloring.FX_WEIGHT_CLASS_ROW_COLOR.getRed();
+                            int green = Coloring.FX_WEIGHT_CLASS_ROW_COLOR.getGreen();
+                            int blue = Coloring.FX_WEIGHT_CLASS_ROW_COLOR.getBlue();
+                            if(isSelected())
+                            {
+                                setStyle("-fx-background-color: -fx-selection-bar;");
+                            } else {
+                                setStyle("-fx-background-color: rgb(" + red + "," + green + "," + blue + ");");
+                            }
+                        } else {
+                            setStyle(null);
+                        }
+                    } else {
+                        setStyle(null);
+                    }
+                }
+            };
+            row.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue && !row.isEmpty()) {
+                    row.setStyle("-fx-background-color: -fx-selection-bar;");
+                } else {
+                    row.setStyle("");
+                }
+            });
+            return row;
+        });
     }
 
     private void addListeners() {
@@ -103,12 +161,16 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                 ObservableList<TreeTableColumn<Object, ?>> scoreColumns = eventColumn.getColumns();
                 for(TreeTableColumn<Object, ?> scoreColumn : scoreColumns) {
                     scoreColumn.setOnEditCommit(score -> {
-                        TreeItem<Object> treeItem = getTreeItem(score.getTreeTablePosition().getRow());
-                        if(treeItem.getValue() instanceof CompetitorRow)
+                        TreeTablePosition<Object, ?> pos = score.getTreeTablePosition();
+                        if(pos != null)
                         {
-                            CompetitorRow competitorRow = (CompetitorRow) treeItem.getValue();
-                            SimpleObjectProperty<Object> obsValue = competitorRow.getObservableValue((ScoringColumn<?,?>) score.getTableColumn());
-                            obsValue.setValue(score.getNewValue());
+                            TreeItem<Object> treeItem = getTreeItem(pos.getRow());
+                            if(treeItem.getValue() instanceof CompetitorRow)
+                            {
+                                CompetitorRow competitorRow = (CompetitorRow) treeItem.getValue();
+                                SimpleObjectProperty<Object> obsValue = competitorRow.getObservableValue(score.getTableColumn());
+                                obsValue.setValue(score.getNewValue());
+                            }
                         }
                     });
                 }

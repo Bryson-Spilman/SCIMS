@@ -28,8 +28,7 @@ public class SelectCompetitionDialog extends JDialog implements Modifiable {
     private OkCancelPanel _okCancelPanel;
     private boolean _isModified;
 
-    public SelectCompetitionDialog(Window parent, Consumer<Competition> selectAction)
-    {
+    public SelectCompetitionDialog(Window parent, Consumer<Competition> selectAction) {
         super(parent, "Select Competition");
         setModal(true);
         setLayout(new GridBagLayout());

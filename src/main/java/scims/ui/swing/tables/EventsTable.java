@@ -89,7 +89,7 @@ public class EventsTable extends SCIMSTable {
 
     @Override
     Color getHighlightColor() {
-        return new Color(205,223,229);
+        return Coloring.SELECTED_COLOR;
     }
 
     @Override

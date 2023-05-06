@@ -1,7 +1,7 @@
 package scims.ui.fx;
 
-import javafx.scene.control.TextField;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.input.KeyCode;
 
 class DoubleCellEditor<T> extends TextCellEditor<T, String> {
 
@@ -11,28 +11,24 @@ class DoubleCellEditor<T> extends TextCellEditor<T, String> {
 
     @Override
     void createTextField() {
-        TextField textField = new DoubleTextField();
-        textField.setText(getItem() == null ? "" : String.valueOf(getItem()));
-        textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
-        textField.setOnAction(evt -> {
-            try {
-                commitEdit(textField.getText());
-            } catch (NumberFormatException e) {
+        _textField = new DoubleTextField();
+        _textField.setText(getItem() == null ? "" : String.valueOf(getItem()));
+        _textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
+        _textField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                commitEdit(_textField.getText());
+                event.consume();
+            } else if (event.getCode() == KeyCode.ESCAPE) {
                 cancelEdit();
+                event.consume();
             }
         });
-        textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) {
-                try {
-                    commitEdit(textField.getText());
-                } catch (NumberFormatException e) {
-                    cancelEdit();
-                }
+
+        _textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused && isEditing()) {
+                commitEdit(_textField.getText());
             }
         });
-        setGraphic(textField);
-        textField.selectAll();
-        textField.requestFocus();
-        textField.setEditable(isCellEditable(getTreeTableRow()));
+        setGraphic(_textField);
     }
 }

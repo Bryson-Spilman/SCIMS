@@ -11,29 +11,29 @@ class IntegerCellEditor<T> extends TextCellEditor<T, String> {
 
     @Override
     void createTextField() {
-        TextField textField = new IntegerTextField();
-        textField.setText(getItem() == null ? "" : String.valueOf(getItem()));
-        textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
-        textField.setOnAction(evt -> {
+        _textField = new IntegerTextField();
+        _textField.setText(getItem() == null ? "" : String.valueOf(getItem()));
+        _textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
+        _textField.setOnAction(evt -> {
             try {
-                commitEdit(textField.getText());
+                commitEdit(_textField.getText());
             } catch (NumberFormatException e) {
                 cancelEdit();
             }
         });
-        textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+        _textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal) {
                 try {
-                    commitEdit(textField.getText());
+                    commitEdit(_textField.getText());
                 } catch (NumberFormatException e) {
                     cancelEdit();
                 }
             }
         });
-        setGraphic(textField);
-        textField.selectAll();
-        textField.requestFocus();
-        textField.setEditable(isCellEditable(getTreeTableRow()));
+        setGraphic(_textField);
+        _textField.selectAll();
+        _textField.requestFocus();
+        _textField.setEditable(isCellEditable(getTreeTableRow()));
     }
 
 }

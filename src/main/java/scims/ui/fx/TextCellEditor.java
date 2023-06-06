@@ -1,22 +1,35 @@
 package scims.ui.fx;
 
+import javafx.application.Platform;
+import javafx.event.Event;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 
 class TextCellEditor<T, S> extends TreeTableCell<T, S> {
 
 
     protected TextField _textField;
+    protected TreeTableColumn<T, ?> _cancelledColumn;
+    protected TreeTableRow<T> _cancelledRow;
 
+    @SuppressWarnings("unchecked")
     public TextCellEditor(TreeTableColumn<Object, Object> col) {
         itemProperty().addListener((observable, oldValue, newValue) -> {
            if(col instanceof LinkedTreeTableColumn) {
                TreeTableRow<T> row = getTreeTableRow();
-               ((LinkedTreeTableColumn)col).updateLinkedCells((TreeItem<Object>) row.getTreeItem());
+               if(row.getTreeItem() != null)
+               {
+                   ((LinkedTreeTableColumn)col).updateLinkedCells((TreeItem<Object>) row.getTreeItem());
+               }
            }
         });
+
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void startEdit() {
         super.startEdit();
         if(_textField == null && isCellEditable(getTreeTableRow()))
@@ -25,18 +38,87 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
         }
         setText(null);
         setGraphic(_textField);
-        _textField.requestFocus();
-        _textField.selectAll();
-        _textField.setEditable(isCellEditable(getTreeTableRow()));
+        if(_textField != null)
+        {
+            _textField.requestFocus();
+            _textField.selectAll();
+            _textField.setEditable(isCellEditable(getTreeTableRow()));
+            _textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                if (!isNowFocused) {
+                    TreeTableColumn<T, S> col = getTableColumn();
+                    @SuppressWarnings("unchecked")
+                    TreeTablePosition<T,S> editingCell = (TreeTablePosition<T, S>) new TreeTablePosition<>(getTreeTableView(), _cancelledRow.getIndex(), _cancelledColumn);
+                    Platform.runLater(() -> {
+                        manualCommitEdit((S)_textField.getText(), editingCell, col);
+                    });
+                }
+            });
+        }
     }
 
     @Override
     public void cancelEdit() {
+        _cancelledColumn = getTreeTableView().getFocusModel().getFocusedCell().getTableColumn();
+        _cancelledRow = getTreeTableRow();
         super.cancelEdit();
-        setText(_textField.getText());
+        if(_textField != null)
+        {
+            String text = _textField.getText();
+            setText(text);
+            _cancelledColumn = null;
+        }
         setGraphic(null);
     }
 
+    public void manualCommitEdit(S newValue, TreeTablePosition<T,S> editingCell, TreeTableColumn<T, S> col)
+    {
+        final TreeTableView<T> table = getTreeTableView();
+        if (table != null) {
+            // Inform the TableView of the edit being ready to be committed.
+            TreeTableColumn.CellEditEvent<T,S> editEvent = new TreeTableColumn.CellEditEvent<>(
+                    table,
+                    editingCell,
+                    TreeTableColumn.editCommitEvent(),
+                    newValue
+            );
+
+            Event.fireEvent(col, editEvent);
+        }
+
+        // inform parent classes of the commit, so that they can switch us
+        // out of the editing state.
+        // This MUST come before the updateItem call below, otherwise it will
+        // call cancelEdit(), resulting in both commit and cancel events being
+        // fired (as identified in RT-29650)
+        super.commitEdit(newValue);
+
+        // update the item within this cell, so that it represents the new value
+        updateItem(newValue, false);
+
+        if (table != null) {
+            // reset the editing cell on the TableView
+            table.edit(-1, null);
+
+            requestFocusOnControlOnlyIfCurrentFocusOwnerIsChild(table);
+        }
+    }
+
+    private static void requestFocusOnControlOnlyIfCurrentFocusOwnerIsChild(Control c) {
+        Scene scene = c.getScene();
+        final Node focusOwner = scene == null ? null : scene.getFocusOwner();
+        if (focusOwner == null) {
+            c.requestFocus();
+        } else if (! c.equals(focusOwner)) {
+            Parent p = focusOwner.getParent();
+            while (p != null) {
+                if (c.equals(p)) {
+                    c.requestFocus();
+                    break;
+                }
+                p = p.getParent();
+            }
+        }
+    }
 
     @Override
     public void updateItem(S item, boolean empty) {
@@ -51,6 +133,7 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
     }
 
 
+    @SuppressWarnings("unchecked")
     void createTextField() {
         _textField = new TextField(getItem() == null ? null : getItem().toString());
         _textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);

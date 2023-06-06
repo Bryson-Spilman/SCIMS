@@ -3,10 +3,7 @@ package scims.ui.fx;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
 import scims.model.data.Competitor;
-import scims.model.data.Event;
-import scims.model.data.scoring.CustomScore;
 import scims.model.data.scoring.EventScoring;
 
 import java.util.*;

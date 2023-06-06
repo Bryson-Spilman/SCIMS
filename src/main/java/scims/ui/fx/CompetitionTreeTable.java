@@ -1,6 +1,5 @@
 package scims.ui.fx;
 
-import com.sun.javafx.scene.control.skin.TableViewSkin;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -21,6 +20,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
     TreeItem<Object> _root;
     private CompetitionModelController _controller;
     private final List<EventColumn<?,?>> _eventsColumns = new ArrayList<>();
+
     public CompetitionTreeTable() {
         setRoot(new TreeItem<>());
         _root = getRoot();
@@ -39,7 +39,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                         if (item instanceof CompetitorRow) {
                             CompetitorRow cr = (CompetitorRow) item;
                             WeightClassRow wcr = (WeightClassRow) cr.getParentRow().getValue();
-                            int wcIndex = _competition.getWeightClasses().indexOf(wcr.getWeightClass());
+                            int wcIndex = _competition.getWeightClasses().indexOf((StrengthWeightClass) wcr.getWeightClass());
                             StrengthWeightClass wc = _competition.getWeightClasses().get(wcIndex);
                             int competitorIndex = wc.getCompetitors().indexOf(cr.getCompetitor());
                             int red = Coloring.FX_COMPETITOR_ROW_COLOR_ODD.getRed();

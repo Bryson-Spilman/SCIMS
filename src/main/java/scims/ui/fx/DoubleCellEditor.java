@@ -23,12 +23,6 @@ class DoubleCellEditor<T> extends TextCellEditor<T, String> {
                 event.consume();
             }
         });
-
-        _textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-            if (!isNowFocused && isEditing()) {
-                commitEdit(_textField.getText());
-            }
-        });
         setGraphic(_textField);
     }
 }

@@ -42,8 +42,6 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
     void updateEventPoints(CompetitorRow row) {
         T scoring = (T) _event.getScoring();
         Map<Competitor, S> competitorScoreMap = new LinkedHashMap<>();
-        //TODO figure out why this parent is null and fix it
-        //Try just setting the parent when created, or set custom parent method on competitor row to get weight class
         ObservableList<TreeItem<Object>> competitorRows = row.getParentRow().getChildren();
         Map<Competitor, CompetitorRow> competitorRowMap = new HashMap<>();
         for(TreeItem<Object> competitorTreeItem : competitorRows) {

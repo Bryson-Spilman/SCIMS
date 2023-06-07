@@ -42,6 +42,20 @@ public class ScoringFactory {
         EventScoring<?> scoring;
         if (scoringClass == null) {
             scoring = new CustomEventScoring<>();
+            String[] scoreSplit = scoreType.split("->");
+            if(scoreSplit.length > 1)
+            {
+                Class<? extends EventScoring<?>> primaryScoreType = SCORING_MAP.get(scoreSplit[0]);
+                Class<? extends EventScoring<?>> secondaryScoreType = SCORING_MAP.get(scoreSplit[1]);
+                try {
+                    EventScoring<?> primary = primaryScoreType.newInstance();
+                    EventScoring<?> secondary = secondaryScoreType.newInstance();
+                    CustomScore<?,?> customScore = new CustomScore<>(primary, secondary);
+                    ((CustomEventScoring)scoring).setScore(customScore);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    scoring = new CustomEventScoring<>();
+                }
+            }
         } else {
             try {
                 scoring = scoringClass.newInstance();

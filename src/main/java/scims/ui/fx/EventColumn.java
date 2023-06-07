@@ -62,13 +62,24 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
                 }
             }
         }
-        if(competitorScoreMap.values().stream().anyMatch(v -> v != null && !v.toString().trim().isEmpty())) {
+        if(competitorScoreMap.values().stream().anyMatch(v -> v != null && !isEmptyCustom(v) && !v.toString().trim().isEmpty())) {
             Map<Competitor, Double> competitorScores = scoring.sortCompetitorScores(competitorScoreMap);
             applyPointsForCompetitors(competitorScores, competitorRowMap);
         } else {
             resetPointsForCompetitors(competitorRowMap);
         }
         getTreeTableView().refresh();
+    }
+
+    private boolean isEmptyCustom(Object v) {
+        boolean isEmptyCustom = false;
+        if(v instanceof CustomScore)
+        {
+            CustomScore<?,?> custom = ((CustomScore<?,?>) v);
+            isEmptyCustom = (custom.getPrimaryScoring() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().toString().isEmpty()))
+                || (custom.getPrimaryScoring().getScore().toString().isEmpty() && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().toString().isEmpty()));
+        }
+        return isEmptyCustom;
     }
 
     private void resetPointsForCompetitors(Map<Competitor, CompetitorRow> competitorRowMap) {

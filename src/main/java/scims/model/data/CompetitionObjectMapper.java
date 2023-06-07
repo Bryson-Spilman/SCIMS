@@ -6,15 +6,14 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import scims.model.data.scoring.EventScoring;
-import scims.model.data.scoring.Scoring;
-import scims.model.data.scoring.ScoringFactory;
+import scims.model.data.scoring.*;
 import scims.ui.swing.DateTimeTextField;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 
 public class CompetitionObjectMapper {
     private static final ObjectMapper MAPPER = buildObjectMapper();
@@ -28,6 +27,7 @@ public class CompetitionObjectMapper {
         module.addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer());
         module.addSerializer(Duration.class, new DurationSerializer());
         module.addDeserializer(Duration.class, new DurationDeserializer());
+        module.addDeserializer(CompetitorEventScore.class, new CompetitorEventScoreDeserializer());
         objectMapper.registerModule(module);
         return objectMapper;
     }
@@ -65,6 +65,61 @@ public class CompetitionObjectMapper {
 
     }
 
+    private static class CompetitorEventScoreDeserializer extends JsonDeserializer<CompetitorEventScore>
+    {
+        @Override
+        public CompetitorEventScore deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
+        {
+            JsonNode node = p.getCodec().readTree(p);
+
+            String event = node.get("event").asText();
+            String scoreType = node.get("score-type").asText();
+            String scoreValue = node.get("score").asText();
+            StrengthEvent eventObj = new StrengthEventBuilder().withName(event)
+                    .withScoring(ScoringFactory.createScoring(scoreType))
+                    .withTimeLimit(null)
+                    .build();
+            Object convertedScoreValue = null;
+            if("Time".equalsIgnoreCase(scoreType) && isDuration(scoreValue)) {
+                convertedScoreValue = Duration.parse(scoreValue);
+            }
+            else if (isInteger(scoreValue)) {
+                convertedScoreValue = Integer.parseInt(scoreValue);
+            } else if (isDouble(scoreValue)) {
+                convertedScoreValue = Double.parseDouble(scoreValue);
+            }
+            return new CompetitorEventScore(eventObj, ScoringFactory.createScoring(scoreType), convertedScoreValue);
+        }
+
+        private boolean isInteger(String value) {
+            try {
+                Integer.parseInt(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        private boolean isDouble(String value) {
+            try {
+                Double.parseDouble(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        private boolean isDuration(String value) {
+            try {
+                Duration.parse(value);
+                return true;
+            } catch (DateTimeParseException e) {
+                return false;
+            }
+        }
+
+    }
+
     private static class ZonedDateTimeSerializer extends JsonSerializer<ZonedDateTime>
     {
         @Override
@@ -95,7 +150,21 @@ public class CompetitionObjectMapper {
         @Override
         public void serialize(Scoring value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             if(value instanceof EventScoring) {
-                gen.writeString(((EventScoring<?>)value).getScoreType());
+                String scoreType = ((EventScoring<?>) value).getScoreType();
+                if("Custom".equalsIgnoreCase(scoreType)) {
+                    EventScoring<?> primary = ((CustomEventScoring<?, ?>) value).getScore().getPrimaryScoring();
+                    EventScoring<?> secondary = ((CustomEventScoring<?, ?>) value).getScore().getSecondaryScoring();
+                    String type = primary.getScoreType();
+                    if(secondary != null)
+                    {
+                        type += "->" + secondary.getScoreType();
+                    }
+                    gen.writeString(type);
+                }
+                else {
+                    gen.writeString(((EventScoring<?>)value).getScoreType());
+                }
+
             } else {
                 gen.writeNull();
             }

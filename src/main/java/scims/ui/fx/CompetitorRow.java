@@ -9,9 +9,10 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
-import javafx.util.Callback;
 import scims.controllers.CompetitionModelController;
 import scims.model.data.Competitor;
+import scims.model.data.CompetitorEventScore;
+import scims.model.data.StrengthCompetitor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +48,13 @@ public class CompetitorRow extends TreeItem<Competitor> implements ContextMenuRo
             for(TreeTableColumn<Object,?> column : columns) {
                 if(column instanceof ScoringColumn) {
                     ScoringColumn<?,?> scoringColumn = (ScoringColumn<?,?>) column;
-                    _columnToValueMap.put(scoringColumn, scoringColumn.getInitialProperty());
+                    CompetitorEventScore score = ((StrengthCompetitor) _competitor).getEventScore(eventColumn.getEvent(), ((ScoringColumn<?, ?>) column).getScoring());
+                    SimpleObjectProperty<Object> initialProperty = new SimpleObjectProperty<>("");
+                    if(score != null && score.getScore() != null)
+                    {
+                        initialProperty = new SimpleObjectProperty<>(score.getScore());
+                    }
+                    _columnToValueMap.put(scoringColumn, initialProperty);
                 } else if(column instanceof EventPointsColumn) {
                     EventPointsColumn pointsColumn = (EventPointsColumn) column;
                     _columnToValueMap.put(pointsColumn, pointsColumn.getInitialProperty());

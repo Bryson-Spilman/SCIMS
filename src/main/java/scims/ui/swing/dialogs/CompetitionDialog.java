@@ -149,6 +149,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
             _weightClassTable.setSelectedEvents(events);
             _eventsTable.setSelectedEvents(events);
         }
+        _weightClassTable.setSelectedWeightClasses(weightClasses);
         if(competition.isSameNumberOfEventsForAllWeightClasses() && !weightClasses.isEmpty()) {
             _eventsTable.setEventOrderColumnEnabled(true);
             _eventsTable.setOrdersByListOrder(weightClasses.get(0).getEventsInOrder());

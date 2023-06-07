@@ -293,4 +293,33 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
             competitorRows.remove(competitorRow);
         });
     }
+
+    public void save() {
+        ObservableList<TreeItem<Object>> weightClasses = getRoot().getChildren();
+        ObservableList<TreeTableColumn<Object, ?>> columns = getColumns();
+        for(TreeItem<Object> wcRow : weightClasses)
+        {
+            for(TreeItem<Object> competitorRowWrapper : wcRow.getChildren())
+            {
+                CompetitorRow competitorRow = (CompetitorRow) competitorRowWrapper.getValue();
+                for(TreeTableColumn<Object, ?> col : columns)
+                {
+                    if(col instanceof EventColumn)
+                    {
+                        Event event = ((EventColumn<?,?>) col).getEvent();
+                        ObservableList<TreeTableColumn<Object, ?>> scoreCols = col.getColumns();
+                        for(TreeTableColumn<Object, ? > scoreCol : scoreCols)
+                        {
+                            if(scoreCol instanceof ScoringColumn)
+                            {
+                                SimpleObjectProperty<Object> value = competitorRow.getObservableValue(scoreCol);
+                                competitorRow.getCompetitor().setEventScore(event, ((ScoringColumn<?,?>)scoreCol).getScoring(), value.getValue());
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

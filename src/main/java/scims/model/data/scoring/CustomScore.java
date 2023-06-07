@@ -13,10 +13,18 @@ public class CustomScore<T,S> {
     }
 
     public void setPrimaryScore(T primaryScore) {
+        if(primaryScore != null && primaryScore.toString().isEmpty())
+        {
+            primaryScore = null;
+        }
         _primaryScoring.setScore(primaryScore);
     }
 
     public void setSecondaryScore(S secondaryScore) {
+        if(secondaryScore != null && secondaryScore.toString().isEmpty())
+        {
+            secondaryScore = null;
+        }
         _secondaryScoring.setScore(secondaryScore);
     }
 

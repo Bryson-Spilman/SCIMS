@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,19 +52,25 @@ public class CompetitionModelController {
                                 if(!_treeTableInView.isShowingCompetition(competition)) {
                                     _treeTableInView.refresh(competition);
                                 }
-                                _parentFrame.updateFxPanelTitle(competition.getName());
+                                if(competition != null) {
+                                    _parentFrame.updateFxPanelTitle(competition.getName());
+                                }
                             } else if (userObj instanceof WeightClass) {
                                 Competition competition = getParentCompetition((WeightClass) userObj);
-                                if(!_treeTableInView.isShowingCompetition(competition)) {
+                                if(competition != null && !_treeTableInView.isShowingCompetition(competition)) {
                                     _treeTableInView.refresh(competition);
                                 }
-                                _parentFrame.updateFxPanelTitle(competition.getName());
+                                if(competition != null) {
+                                    _parentFrame.updateFxPanelTitle(competition.getName());
+                                }
                             } else if(userObj instanceof Competitor) {
                                 Competition competition = getParentCompetition((Competitor) userObj);
-                                if(!_treeTableInView.isShowingCompetition(competition)) {
+                                if(competition != null && !_treeTableInView.isShowingCompetition(competition)) {
                                     _treeTableInView.refresh(competition);
                                 }
-                                _parentFrame.updateFxPanelTitle(competition.getName());
+                                if(competition != null) {
+                                    _parentFrame.updateFxPanelTitle(competition.getName());
+                                }
                             }
                         }
                     }
@@ -247,11 +254,26 @@ public class CompetitionModelController {
     }
 
     private void updateCompetition(Competition updatedCompetition, Competition originalCompetition) {
+        for(StrengthWeightClass wc : updatedCompetition.getWeightClasses())
+        {
+            int originalIndex = originalCompetition.getWeightClasses().indexOf(wc);
+            if(originalIndex >=0)
+            {
+                StrengthWeightClass originalWC = originalCompetition.getWeightClasses().get(originalIndex);
+                List<Competitor> competitors = originalWC.getCompetitors();
+                if(competitors != null)
+                {
+                    for(Competitor competitor : competitors)
+                    {
+                        wc.addCompetitor((StrengthCompetitor) competitor);
+                    }
+                }
+            }
+        }
         _competitionTree.updateCompetition(originalCompetition, updatedCompetition);
         _treeTableInView.refresh(updatedCompetition);
-        int index = _competitions.indexOf(originalCompetition);
-        _competitions.add(index, updatedCompetition);
-        _competitions.remove(originalCompetition);
+        _competitions.clear();
+        _competitions.add(updatedCompetition);
     }
 
     private void updateCompetitor(Competitor updatedCompetitor, Competitor oldCompetitor) {
@@ -318,5 +340,9 @@ public class CompetitionModelController {
 
     public Window getFrame() {
         return _parentFrame;
+    }
+
+    public void saveScores() throws IOException {
+        _treeTableInView.save();
     }
 }

@@ -4,7 +4,6 @@ import scims.controllers.CompetitionModelController;
 import scims.main.SCIMS;
 import scims.model.data.Competition;
 import scims.model.data.CompetitionObjectMapper;
-import scims.model.data.StrengthCompetitions;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -33,10 +32,11 @@ public class SaveCompetitionAction implements ActionListener {
         if(!competitions.isEmpty())
         {
             Competition competition = competitions.get(0);
-            Path file = SCIMS.getCompetitionsDirectory().resolve(competition.getName() + ".xml"); //TODO: need to specify a project dir when creating a new project
+            Path competitionStructureFile = SCIMS.getCompetitionsDirectory().resolve(competition.getName() + ".xml");
             try
             {
-                CompetitionObjectMapper.serializeCompetition(competition, file);
+                _controller.saveScores();
+                CompetitionObjectMapper.serializeCompetition(competition, competitionStructureFile);
             }
             catch (IOException e)
             {

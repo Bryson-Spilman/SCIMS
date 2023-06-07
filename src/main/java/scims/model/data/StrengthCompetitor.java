@@ -1,7 +1,11 @@
 package scims.model.data;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import scims.model.data.scoring.EventScoring;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class StrengthCompetitor implements Competitor {
@@ -12,6 +16,9 @@ public class StrengthCompetitor implements Competitor {
     private final Integer _age;
     @JacksonXmlProperty(isAttribute = true, localName = "weight")
     private final Double _weight;
+    @JacksonXmlProperty(localName = "score")
+    @JacksonXmlElementWrapper(localName = "scores")
+    private final List<CompetitorEventScore> _scores = new ArrayList<>();
 
     public StrengthCompetitor(String name, Integer age, Double weight)
     {
@@ -37,6 +44,30 @@ public class StrengthCompetitor implements Competitor {
     @Override
     public String getName() {
         return _name;
+    }
+
+    @Override
+    public void setEventScore(Event event, EventScoring<?> scoring, Object value) {
+        CompetitorEventScore score = getEventScore(event, scoring);
+        if(score != null) {
+            score.setScore(value);
+        } else {
+            score = new CompetitorEventScore(event, scoring, value);
+            _scores.add(score);
+        }
+    }
+
+    public CompetitorEventScore getEventScore(Event event, EventScoring<?> scoring) {
+        CompetitorEventScore retVal = null;
+        for(CompetitorEventScore score : _scores)
+        {
+            if(score.getEventName().equalsIgnoreCase(event.getName()) && scoring.getScoreType().equalsIgnoreCase(score.getScoreType()))
+            {
+                retVal = score;
+                break;
+            }
+        }
+        return retVal;
     }
 
     @Override

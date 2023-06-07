@@ -1,6 +1,5 @@
 package scims.ui.swing.tables;
 
-import scims.model.data.Event;
 import scims.model.data.StrengthEvent;
 import scims.model.data.StrengthWeightClass;
 import scims.model.data.WeightClass;
@@ -179,5 +178,16 @@ public class WeightClassTable extends SCIMSTable {
 
     public boolean containsWeightClass(WeightClass wc) {
         return _model.containsWeightClass(wc);
+    }
+
+    public void setSelectedWeightClasses(List<StrengthWeightClass> selectedWeightClasses) {
+        for(int row=0; row < _model.getRowCount(); row++)
+        {
+            StrengthWeightClass wc = _model.getRowData().get(row).getWeightClass();
+            if(selectedWeightClasses.contains(wc))
+            {
+                _model.setValueAt(true, row, 0);
+            }
+        }
     }
 }

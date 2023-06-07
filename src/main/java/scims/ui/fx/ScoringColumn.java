@@ -8,7 +8,7 @@ import scims.model.data.scoring.EventScoring;
 
 import java.util.*;
 
-class ScoringColumn<T extends EventScoring<S>, S> extends LinkedTreeTableColumn {
+public class ScoringColumn<T extends EventScoring<S>, S> extends LinkedTreeTableColumn {
     private final T _scoring;
     private final EventColumn<?, ?> _parent;
 
@@ -27,11 +27,6 @@ class ScoringColumn<T extends EventScoring<S>, S> extends LinkedTreeTableColumn 
             return new SimpleObjectProperty<>();
         });
         setCellFactory(col -> TableCellFactory.getTreeCell(col, scoring));
-    }
-
-    public SimpleObjectProperty<Object> getInitialProperty()
-    {
-        return new SimpleObjectProperty<>("");
     }
 
     public T getScoring()

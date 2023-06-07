@@ -122,7 +122,7 @@ public class SelectCompetitionDialog extends JDialog implements Modifiable {
         gbc.insets    = new Insets(5,5,0,5);
         add(_competitionComboBox, gbc);
 
-        _okCancelPanel = new OkCancelPanel("Create");
+        _okCancelPanel = new OkCancelPanel("Select");
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;

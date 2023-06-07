@@ -100,9 +100,10 @@ public class SCIMSFrame extends JFrame {
         IconTreeCellRenderer renderer = new IconTreeCellRenderer();
         _competitionTree.setCellRenderer(renderer);
         // Create the panels
-        JPanel leftPanel = new JPanel();
-        leftPanel.add(_competitionTree);
-        JPanel bottomPanel = new JPanel();
+        JSplitPane mainContentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.add(_competitionTree, BorderLayout.CENTER);
+        JPanel bottomPanel = new JPanel(new BorderLayout());
 
         // Create the menu bar
         JMenuBar menuBar = new JMenuBar();
@@ -117,10 +118,13 @@ public class SCIMSFrame extends JFrame {
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
 
+        mainContentPane.setLeftComponent(leftPanel);
+        mainContentPane.setRightComponent(fxPanel);
+        mainContentPane.setDividerLocation(250);
+
         // Add components to the content pane
         getContentPane().add(menuBar, BorderLayout.NORTH);
-        getContentPane().add(leftPanel, BorderLayout.WEST);
-        getContentPane().add(fxPanel, BorderLayout.CENTER);
+        getContentPane().add(mainContentPane, BorderLayout.CENTER);
         getContentPane().add(bottomPanel, BorderLayout.SOUTH);
     }
 

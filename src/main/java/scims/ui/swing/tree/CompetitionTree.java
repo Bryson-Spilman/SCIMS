@@ -190,6 +190,7 @@ public class CompetitionTree extends JTree {
                 weightClassNode.add(competitorNode);
             }
             competitionNode.add(weightClassNode);
+            ((DefaultTreeModel)getModel()).nodeStructureChanged(competitionNode);
         }
         expandPath(new TreePath(competitionNode.getPath()));
         setRootVisible(false);
@@ -206,12 +207,8 @@ public class CompetitionTree extends JTree {
     }
 
     public void updateCompetition(Competition originalCompetition, Competition updatedCompetition) {
-        IconMutableTreeNode oldCompetitionNode = getCompetitionNode(originalCompetition);
-        if(oldCompetitionNode != null) {
-            oldCompetitionNode.setUserObject(new IconNode(updatedCompetition, COMPETITION_IMG_URL));
-            oldCompetitionNode.setPopUpMenu(buildCompetitionPopUpMenu(updatedCompetition));
-            updateTree();
-        }
+        _root.remove(0);
+        addNewCompetition(updatedCompetition);
     }
 
     public void updateWeightClass(WeightClass oldWeightClass, WeightClass updatedWeightClass, Competition competition) {
@@ -230,9 +227,11 @@ public class CompetitionTree extends JTree {
         if (selectedPath != null) {
             setSelectionPath(selectedPath);
         }
-        while (expandedPaths.hasMoreElements()) {
-            TreePath path = expandedPaths.nextElement();
-            expandPath(path);
+        if(expandedPaths != null) {
+            while (expandedPaths.hasMoreElements()) {
+                TreePath path = expandedPaths.nextElement();
+                expandPath(path);
+            }
         }
     }
 

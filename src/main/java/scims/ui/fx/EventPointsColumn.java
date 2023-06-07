@@ -26,7 +26,7 @@ class EventPointsColumn extends TreeTableColumn<Object, Object> {
         setCellFactory(col -> new DoubleCellEditor(this) {
             @Override
             boolean isCellEditable(TreeTableRow row) {
-                return TableCellFactory.cellEditable(row);
+                return false;
             }
         });
     }

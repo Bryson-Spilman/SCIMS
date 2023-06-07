@@ -239,6 +239,7 @@ public class CompetitionModelController {
         _competitionTree.removeAllNodes();
         _competitionTree.addNewCompetition(competition);
         _treeTableInView.refresh(competition);
+        _parentFrame.updateFxPanelTitle(competition.getName());
     }
 
     public void editCompetitorAction(Competitor competitor) {

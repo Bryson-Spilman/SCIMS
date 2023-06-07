@@ -31,6 +31,10 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
     @Override
     @SuppressWarnings("unchecked")
     public void startEdit() {
+        if(!isCellEditable(getTreeTableRow()))
+        {
+            return;
+        }
         super.startEdit();
         if(_textField == null && isCellEditable(getTreeTableRow()))
         {
@@ -46,10 +50,18 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
             _textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
                 if (!isNowFocused) {
                     TreeTableColumn<T, S> col = getTableColumn();
-                    @SuppressWarnings("unchecked")
-                    TreeTablePosition<T,S> editingCell = (TreeTablePosition<T, S>) new TreeTablePosition<>(getTreeTableView(), _cancelledRow.getIndex(), _cancelledColumn);
-                    Platform.runLater(() -> {
+                    if(_cancelledRow != null && _cancelledColumn != null) {
+                        @SuppressWarnings("unchecked")
+                        TreeTablePosition<T,S> editingCell = (TreeTablePosition<T, S>) new TreeTablePosition<>(getTreeTableView(), _cancelledRow.getIndex(), _cancelledColumn);
                         manualCommitEdit((S)_textField.getText(), editingCell, col);
+                    }
+                }
+                else
+                {
+                    Platform.runLater(() -> {
+                        _cancelledRow = null;
+                        _textField.requestFocus();
+                        _textField.selectAll();
                     });
                 }
             });
@@ -60,12 +72,16 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
     public void cancelEdit() {
         _cancelledColumn = getTreeTableView().getFocusModel().getFocusedCell().getTableColumn();
         _cancelledRow = getTreeTableRow();
+        if(getItem() != null && _textField != null && getItem().toString().equalsIgnoreCase(_textField.getText()))
+        {
+            _cancelledRow = null;
+            _cancelledColumn = null;
+        }
         super.cancelEdit();
         if(_textField != null)
         {
             String text = _textField.getText();
             setText(text);
-            _cancelledColumn = null;
         }
         setGraphic(null);
     }

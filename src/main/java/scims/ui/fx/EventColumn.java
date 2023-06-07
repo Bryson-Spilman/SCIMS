@@ -76,8 +76,8 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
         if(v instanceof CustomScore)
         {
             CustomScore<?,?> custom = ((CustomScore<?,?>) v);
-            isEmptyCustom = (custom.getPrimaryScoring() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().toString().isEmpty()))
-                || (custom.getPrimaryScoring().getScore().toString().isEmpty() && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().toString().isEmpty()));
+            isEmptyCustom = (custom.getPrimaryScoring() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().getScore() == null))
+                || (custom.getPrimaryScoring().getScore() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().getScore() == null));
         }
         return isEmptyCustom;
     }

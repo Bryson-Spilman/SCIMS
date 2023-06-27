@@ -74,7 +74,11 @@ public class CompetitionObjectMapper {
 
             String event = node.get("event").asText();
             String scoreType = node.get("score-type").asText();
-            String scoreValue = node.get("score").asText();
+            JsonNode score = node.get("score");
+            String scoreValue = "";
+            if(score != null) {
+                scoreValue = score.asText();
+            }
             StrengthEvent eventObj = new StrengthEventBuilder().withName(event)
                     .withScoring(ScoringFactory.createScoring(scoreType))
                     .withTimeLimit(null)

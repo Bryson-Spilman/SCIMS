@@ -4,10 +4,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import scims.model.data.Competitor;
 import scims.model.data.Event;
-import scims.model.data.scoring.CustomEventScoring;
-import scims.model.data.scoring.CustomScore;
-import scims.model.data.scoring.EventScoring;
+import scims.model.data.scoring.*;
 
+import java.time.Duration;
 import java.util.*;
 
 
@@ -39,6 +38,7 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
         _event = event;
     }
 
+    @SuppressWarnings("unchecked")
     void updateEventPoints(CompetitorRow row) {
         T scoring = (T) _event.getScoring();
         Map<Competitor, S> competitorScoreMap = new LinkedHashMap<>();
@@ -52,10 +52,14 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
                 if(scoring instanceof CustomEventScoring) {
                     TreeTableColumn<Object, ?> secondaryScoreCol = getColumns().get(1);
                     CustomEventScoring<?,?> customScoring = (CustomEventScoring<?,?>) scoring;
-                    CustomScore customScore = customScoring.getScore();
-                    customScore.setPrimaryScore(row.getObservableValue(primaryScoreCol).getValue());
-                    customScore.setSecondaryScore(row.getObservableValue(secondaryScoreCol).getValue());
-                    competitorScoreMap.put(competitorRow.getCompetitor(),(S) customScore);
+                    CustomScore<?,?> customScore = customScoring.getScore();
+                    Object primaryScore = getScoreFromRow(competitorRow, primaryScoreCol, customScore.getPrimaryScoring());
+                    Object secondaryScore = getScoreFromRow(competitorRow, secondaryScoreCol, customScore.getSecondaryScoring());
+                    CustomScore changedVal = new CustomScore<>(ScoringFactory.createScoring(customScore.getPrimaryScoring().getScoreType()),
+                            ScoringFactory.createScoring(customScore.getSecondaryScoring().getScoreType()));
+                    changedVal.setPrimaryScore(primaryScore);
+                    changedVal.setSecondaryScore(secondaryScore);
+                    competitorScoreMap.put(competitorRow.getCompetitor(),(S) changedVal);
                 } else {
                     S changedVal = (S) competitorRow.getObservableValue(primaryScoreCol).getValue();
                     competitorScoreMap.put(competitorRow.getCompetitor(),changedVal);
@@ -69,6 +73,30 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
             resetPointsForCompetitors(competitorRowMap);
         }
         getTreeTableView().refresh();
+    }
+
+    private Object getScoreFromRow(CompetitorRow row, TreeTableColumn<Object, ?> scoreCol, EventScoring<?> customScore) {
+        Object retVal = row.getObservableValue(scoreCol).getValue();
+        if(retVal != null && retVal.toString().isEmpty())
+        {
+            retVal = null;
+        }
+        else if(retVal instanceof String)
+        {
+            if(customScore instanceof WeightScoring || customScore instanceof DistanceScoring)
+            {
+                retVal = Double.parseDouble(retVal.toString());
+            }
+            else if(customScore instanceof RepsScoring)
+            {
+                retVal = Integer.parseInt(retVal.toString());
+            }
+            else if(customScore instanceof TimeScoring)
+            {
+                retVal = Duration.ofSeconds((long)Double.parseDouble(retVal.toString()));
+            }
+        }
+        return retVal;
     }
 
     private boolean isEmptyCustom(Object v) {

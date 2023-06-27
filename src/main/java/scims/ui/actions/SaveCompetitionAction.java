@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static scims.ui.swing.SCIMSFrame.COMPETITION_FILE_TYPE;
+
 public class SaveCompetitionAction implements ActionListener {
     private static final Logger LOGGER = Logger.getLogger(SaveCompetitionAction.class.getName());
     private final CompetitionModelController _controller;
@@ -31,12 +33,10 @@ public class SaveCompetitionAction implements ActionListener {
         List<Competition> competitions = _controller.getCompetitions();
         if(!competitions.isEmpty())
         {
-            Competition competition = competitions.get(0);
-            Path competitionStructureFile = SCIMS.getCompetitionsDirectory().resolve(competition.getName() + ".xml");
             try
             {
                 _controller.saveScores();
-                CompetitionObjectMapper.serializeCompetition(competition, competitionStructureFile);
+                _controller.saveCompetition();
             }
             catch (IOException e)
             {

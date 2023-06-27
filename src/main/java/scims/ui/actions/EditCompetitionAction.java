@@ -1,5 +1,6 @@
 package scims.ui.actions;
 
+import scims.controllers.CompetitionModelController;
 import scims.model.data.Competition;
 import scims.ui.swing.dialogs.CompetitionDialog;
 

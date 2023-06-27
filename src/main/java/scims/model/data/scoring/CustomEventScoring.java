@@ -10,6 +10,28 @@ public class CustomEventScoring<T,S> implements EventScoring<CustomScore<T,S>>{
 
     private CustomScore<T,S> _score;
 
+    public CustomEventScoring<T,S> withPrimaryScoring(EventScoring<T> primaryScoring)
+    {
+        EventScoring<S> secondaryScoring = null;
+        if(_score != null)
+        {
+            secondaryScoring = _score.getSecondaryScoring();
+        }
+        _score = new CustomScore<>(primaryScoring,secondaryScoring);
+        return this;
+    }
+
+    public CustomEventScoring<T,S> withSecondaryScoring(EventScoring<S> secondaryScoring)
+    {
+        EventScoring<T> primaryScoring = null;
+        if(_score != null)
+        {
+            primaryScoring = _score.getPrimaryScoring();
+        }
+        _score = new CustomScore<>(primaryScoring, secondaryScoring);
+        return this;
+    }
+
     @Override
     public void setScore(CustomScore<T,S> score) {
         _score = score;

@@ -50,7 +50,7 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
             _textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
                 if (!isNowFocused) {
                     TreeTableColumn<T, S> col = getTableColumn();
-                    if(_cancelledRow != null && _cancelledColumn != null) {
+                    if(_cancelledRow != null && _cancelledColumn != null && col == _cancelledColumn) {
                         @SuppressWarnings("unchecked")
                         TreeTablePosition<T,S> editingCell = (TreeTablePosition<T, S>) new TreeTablePosition<>(getTreeTableView(), _cancelledRow.getIndex(), _cancelledColumn);
                         manualCommitEdit((S)_textField.getText(), editingCell, col);

@@ -1,11 +1,8 @@
 package scims.ui.swing.dialogs;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import scims.main.SCIMS;
 import scims.model.data.Competition;
 import scims.model.data.CompetitionObjectMapper;
-import scims.model.data.StrengthCompetition;
-import scims.model.data.StrengthCompetitions;
 import scims.ui.Modifiable;
 import scims.ui.swing.OkCancelPanel;
 
@@ -19,6 +16,8 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static scims.ui.swing.SCIMSFrame.COMPETITION_FILE_TYPE;
 
 public class SelectCompetitionDialog extends JDialog implements Modifiable {
 
@@ -75,7 +74,7 @@ public class SelectCompetitionDialog extends JDialog implements Modifiable {
         Competition competition = null;
         Object selected = _competitionComboBox.getSelectedItem();
         if(selected != null) {
-            Path competitionXml = SCIMS.getCompetitionsDirectory().resolve(selected + ".xml");
+            Path competitionXml = SCIMS.getCompetitionsDirectory().resolve(selected + "." + COMPETITION_FILE_TYPE);
             try {
                 competition = CompetitionObjectMapper.deSerializeCompetition(competitionXml);
             } catch (IOException e) {
@@ -95,7 +94,10 @@ public class SelectCompetitionDialog extends JDialog implements Modifiable {
         {
             for(File competitionFile : compFiles)
             {
-                model.addElement(competitionFile.getName().replace(".xml", ""));
+                if(competitionFile.toString().endsWith(COMPETITION_FILE_TYPE))
+                {
+                    model.addElement(competitionFile.getName().replace("." + COMPETITION_FILE_TYPE, ""));
+                }
             }
         }
         _competitionComboBox.setModel(model);

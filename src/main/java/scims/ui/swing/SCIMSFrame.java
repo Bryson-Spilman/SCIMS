@@ -9,20 +9,39 @@ import scims.controllers.CompetitionModelController;
 import scims.main.CustomEventClassRegistry;
 import scims.model.data.Event;
 import scims.model.data.StrengthEventBuilder;
-import scims.model.data.scoring.*;
+import scims.model.data.scoring.DistanceScoring;
+import scims.model.data.scoring.EventScoring;
+import scims.model.data.scoring.LastManStandingEliminationScoring;
+import scims.model.data.scoring.LastManStandingWithPointsScoring;
+import scims.model.data.scoring.RepsScoring;
+import scims.model.data.scoring.TimeScoring;
 import scims.ui.actions.OpenCompetitionAction;
 import scims.ui.actions.SaveCompetitionAction;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.tree.CompetitionTree;
+import scims.ui.swing.tree.IconMutableTreeNode;
 import scims.ui.swing.tree.IconTreeCellRenderer;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.event.TreeModelEvent;
+import java.awt.BorderLayout;
+import java.awt.Image;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class SCIMSFrame extends JFrame {
+
+    public static final String COMPETITION_FILE_TYPE = "comp";
     private CompetitionTree _competitionTree;
     private JMenuItem _newCompetitionMenuItem;
     private final CompetitionModelController _controller;
@@ -30,6 +49,7 @@ public class SCIMSFrame extends JFrame {
     private TitledPane _titledPane;
     private JMenuItem _saveProjectMenuItem;
     private JMenuItem _openCompetitionMenuItem;
+    private JMenuItem _editCompetitionMenuItem;
 
     public SCIMSFrame() {
         super("SCIMS");
@@ -51,9 +71,6 @@ public class SCIMSFrame extends JFrame {
         addListeners();
         setVisible(true);
         setLocationRelativeTo(null);
-        for(Event event : buildTestEvents()) {
-            CustomEventClassRegistry.getInstance().registerEvent(event);
-        }
     }
 
     private List<Event> buildTestEvents() {
@@ -80,6 +97,18 @@ public class SCIMSFrame extends JFrame {
         _newCompetitionMenuItem.addActionListener(e -> _controller.addNewCompetitionAction());
         _saveProjectMenuItem.addActionListener(new SaveCompetitionAction(_controller));
         _openCompetitionMenuItem.addActionListener(new OpenCompetitionAction(_controller));
+        _editCompetitionMenuItem.addActionListener(e -> _controller.editCompetitionAction());
+        _competitionTree.getModel().addTreeModelListener(new TreeModelAdapter() {
+            @Override
+            public void treeStructureChanged(TreeModelEvent e) {
+                treeUpdated();
+            }
+        });
+    }
+
+    private void treeUpdated() {
+        IconMutableTreeNode rootNode = (IconMutableTreeNode) _competitionTree.getModel().getRoot();
+        _editCompetitionMenuItem.setEnabled(rootNode != null && rootNode.getChildCount() > 0);
     }
 
     private void buildComponents() {
@@ -109,8 +138,11 @@ public class SCIMSFrame extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");
+        _editCompetitionMenuItem = new JMenuItem("Edit Competition...");
+        _editCompetitionMenuItem.setEnabled(false);
+        editMenu.add(_editCompetitionMenuItem);
         _newCompetitionMenuItem = new JMenuItem("New Competition...");
-        editMenu.add(_newCompetitionMenuItem);
+        fileMenu.add(_newCompetitionMenuItem);
         _openCompetitionMenuItem = new JMenuItem("Open Competition...");
         _saveProjectMenuItem = new JMenuItem("Save Competition");
         fileMenu.add(_saveProjectMenuItem);
@@ -135,4 +167,5 @@ public class SCIMSFrame extends JFrame {
         });
 
     }
+
 }

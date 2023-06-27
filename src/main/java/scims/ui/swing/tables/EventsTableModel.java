@@ -208,9 +208,12 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     public void setSelectedEvents(List<StrengthEvent> events) {
         for(EventsRowData rowData : getRowData()) {
-            if(events.stream().anyMatch(event -> event.getName().equalsIgnoreCase(rowData.getName()))) {
-                rowData.setChecked(true);
-            }
+            events.stream().filter(event -> event.getName().equalsIgnoreCase(rowData.getName()))
+                    .findFirst()
+                    .ifPresent(event -> {
+                        rowData.setChecked(true);
+                        rowData.setTimeLimit(event.getTimeLimit());
+                    });
         }
         fireTableDataChanged();
     }
@@ -230,5 +233,12 @@ class EventsTableModel extends SCIMSTableModel<EventsRowData> {
             rowData.setChecked(false);
         }
         fireTableDataChanged();
+    }
+
+    public void setEvents(List<StrengthEvent> events) {
+        for(StrengthEvent event : events) {
+            EventsRowData rowData = new EventsRowData(false, event.getName(), (EventScoring<?>) event.getScoring(), event.getTimeLimit(), null);
+            addRow(rowData);
+        }
     }
 }

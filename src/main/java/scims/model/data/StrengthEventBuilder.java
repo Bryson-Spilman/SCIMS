@@ -39,6 +39,12 @@ public class StrengthEventBuilder implements FluentWithEventName, FluentFromExis
             _timeLimit = timeLimit;
             return new EventBuilder();
         }
+
+        @Override
+        public FluentEventBuilder withNoTimeLimit() {
+            _timeLimit = null;
+            return new EventBuilder();
+        }
     }
 
     private class EventBuilder implements FluentEventBuilder {

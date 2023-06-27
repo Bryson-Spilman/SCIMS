@@ -4,10 +4,7 @@ import scims.main.CustomEventClassRegistry;
 import scims.main.CustomWeightClassRegistry;
 import scims.model.data.*;
 import scims.model.data.Event;
-import scims.model.enums.DistanceUnitSystem;
-import scims.model.enums.StrongmanCorpWeightClasses;
-import scims.model.enums.USSWeightClasses;
-import scims.model.enums.WeightUnitSystem;
+import scims.model.enums.*;
 import scims.ui.Modifiable;
 import scims.ui.swing.DateTimeTextField;
 import scims.ui.swing.MissingRequiredValueException;
@@ -16,6 +13,8 @@ import scims.ui.swing.tables.EventsTable;
 import scims.ui.swing.tables.WeightClassTable;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.ZonedDateTime;
@@ -114,6 +113,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         _otherRadioButton.addActionListener(e -> sanctionRadioButtonChanged());
         _sameEventsForAllWeightsClassesCheckbox.addActionListener(e -> useSameEventsForAllCheckBoxClicked());
         _eventsTable.addNewEventSelectedAction(this::updatedEvents);
+        _eventsTable.getModel().addTableModelListener(e -> updatedEvents());
         _eventsTable.addOrderChangedAction(this::orderChanged);
         _okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
@@ -439,6 +439,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         _createButton = new JButton("Create");
         _cancelButton = new JButton("Cancel");
         _eventsTable = new EventsTable();
+        _eventsTable.setEvents(CommonStrongmanEvents.getValues());
         _weightClassTable = new WeightClassTable();
         _weightClassTable.setWeightClasses(StrongmanCorpWeightClasses.getValues());
 

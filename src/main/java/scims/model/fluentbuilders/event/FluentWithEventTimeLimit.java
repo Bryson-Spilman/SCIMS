@@ -4,4 +4,5 @@ import java.time.Duration;
 
 public interface FluentWithEventTimeLimit {
     FluentEventBuilder withTimeLimit(Duration timeLimit);
+    FluentEventBuilder withNoTimeLimit();
 }

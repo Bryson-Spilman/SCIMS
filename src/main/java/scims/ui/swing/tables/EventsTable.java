@@ -180,4 +180,8 @@ public class EventsTable extends SCIMSTable {
     public void deselectAll() {
         _model.deselectAll();
     }
+
+    public void setEvents(List<StrengthEvent> events) {
+        _model.setEvents(events);
+    }
 }

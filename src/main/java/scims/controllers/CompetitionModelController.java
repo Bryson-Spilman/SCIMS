@@ -1,24 +1,45 @@
 package scims.controllers;
 
-import scims.model.data.*;
-import scims.ui.actions.*;
+import scims.main.SCIMS;
+import scims.model.data.Competition;
+import scims.model.data.CompetitionObjectMapper;
+import scims.model.data.Competitor;
+import scims.model.data.StrengthCompetition;
+import scims.model.data.StrengthCompetitionBuilder;
+import scims.model.data.StrengthCompetitor;
+import scims.model.data.StrengthWeightClass;
+import scims.model.data.WeightClass;
+import scims.ui.actions.EditCompetitionAction;
+import scims.ui.actions.EditCompetitorAction;
+import scims.ui.actions.EditWeightClassAction;
+import scims.ui.actions.NewCompetitionAction;
+import scims.ui.actions.NewCompetitorAction;
+import scims.ui.actions.NewWeightClassAction;
+import scims.ui.actions.SaveCompetitionAction;
 import scims.ui.fx.CompetitionTreeTable;
 import scims.ui.swing.SCIMSFrame;
 import scims.ui.swing.tree.CompetitionTree;
 import scims.ui.swing.tree.IconNode;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import java.awt.*;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static scims.ui.swing.SCIMSFrame.COMPETITION_FILE_TYPE;
 
 public class CompetitionModelController {
+    private static final Logger LOGGER = Logger.getLogger(CompetitionModelController.class.getName());
     private final CompetitionTree _competitionTree;
     private final SCIMSFrame _parentFrame;
     private final CompetitionTreeTable _treeTableInView;
@@ -275,6 +296,21 @@ public class CompetitionModelController {
         _treeTableInView.refresh(updatedCompetition);
         _competitions.clear();
         _competitions.add(updatedCompetition);
+        saveCompetition();
+    }
+
+    public void saveCompetition() {
+        try
+        {
+            Competition competition = _competitions.get(0);
+            Path competitionStructureFile = SCIMS.getCompetitionsDirectory().resolve(competition.getName() + "." + COMPETITION_FILE_TYPE);
+            CompetitionObjectMapper.serializeCompetition(competition, competitionStructureFile);
+        }
+        catch (IOException e)
+        {
+            LOGGER.log(Level.SEVERE, e, ()-> "Save failed: " + e.getMessage());
+            JOptionPane.showMessageDialog(SwingUtilities.windowForComponent(JOptionPane.getRootFrame()), "Save failed! " + e.getMessage(), "Save Failure", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void updateCompetitor(Competitor updatedCompetitor, Competitor oldCompetitor) {
@@ -345,5 +381,9 @@ public class CompetitionModelController {
 
     public void saveScores() throws IOException {
         _treeTableInView.save();
+    }
+
+    public void editCompetitionAction() {
+        editCompetitionAction(_competitions.get(0));
     }
 }

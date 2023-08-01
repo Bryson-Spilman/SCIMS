@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.StackPane;
 import scims.controllers.CompetitionModelController;
-import scims.main.CustomEventClassRegistry;
 import scims.model.data.Event;
 import scims.model.data.StrengthEventBuilder;
 import scims.model.data.scoring.DistanceScoring;

@@ -36,11 +36,4 @@ class EventPointsColumn extends TreeTableColumn<Object, Object> {
         return new SimpleObjectProperty<>("");
     }
 
-    public void updateScore(CompetitorRow row) {
-        int numberOfCompetitors = row.getParent().getChildren().size();
-        EventScoring<?> scoring = _scoringColumns.get(0).getScoring();
-        for(ScoringColumn<?, ?> scoringColumn : _scoringColumns) {
-            scoringColumn.sortCompetitorsByScore(row.getParent().getChildren());
-        }
-    }
 }

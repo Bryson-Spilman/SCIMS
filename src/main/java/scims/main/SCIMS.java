@@ -15,6 +15,12 @@ public class SCIMS {
     private static final String PREF_KEY_DIRECTORY = "scims_directory";
     private static final String DEFAULT_DIRECTORY = "";
     private static final AtomicReference<Path> COMPETITIONS_DIRECTORY = new AtomicReference<>();
+    private static final AtomicReference<Path> WEIGHT_CLASSES_FILE = new AtomicReference<>();
+    private static final AtomicReference<Path> EVENTS_FILE = new AtomicReference<>();
+    public static final String WEIGHT_CLASSES_XML = "Weight-Classes.xml";
+    private static final String EVENTS_FILE_XML = "Events.xml";
+    private static SCIMSFrame FRAME;
+
     public static void main(String[] args) {
         Preferences prefs = Preferences.userNodeForPackage(SCIMS.class);
         String selectedDir = prefs.get(PREF_KEY_DIRECTORY, DEFAULT_DIRECTORY);
@@ -47,11 +53,47 @@ public class SCIMS {
             }
         }
         COMPETITIONS_DIRECTORY.set(compDirectory);
-        SwingUtilities.invokeLater(SCIMSFrame::new);
+        WEIGHT_CLASSES_FILE.set(compDirectory.resolve(WEIGHT_CLASSES_XML));
+        if(!Files.exists(WEIGHT_CLASSES_FILE.get()))
+        {
+            try
+            {
+                Files.createFile(WEIGHT_CLASSES_FILE.get());
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+        EVENTS_FILE.set(compDirectory.resolve(EVENTS_FILE_XML));
+        if(!Files.exists(EVENTS_FILE.get()))
+        {
+            try
+            {
+                Files.createFile(EVENTS_FILE.get());
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+        SwingUtilities.invokeLater(() -> FRAME = new SCIMSFrame());
     }
 
     public static Path getCompetitionsDirectory()
     {
         return COMPETITIONS_DIRECTORY.get();
+    }
+
+    public static Path getWeightClassesFile() {
+        return WEIGHT_CLASSES_FILE.get();
+    }
+
+    public static Path getEventsFile() {
+        return EVENTS_FILE.get();
+    }
+
+    public static SCIMSFrame getFrame() {
+        return FRAME;
     }
 }

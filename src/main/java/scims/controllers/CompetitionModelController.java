@@ -137,6 +137,7 @@ public class CompetitionModelController {
             _treeTableInView.removeCompetition(competition);
             _competitions.remove(competition);
         }
+        _parentFrame.setModified(true);
     }
 
     public void removeWeightClass(WeightClass weightClass) {
@@ -164,6 +165,7 @@ public class CompetitionModelController {
                 _competitions.remove(oldCompetition);
             }
         }
+        _parentFrame.setModified(true);
     }
 
     public void removeCompetitor(Competitor competitor) {
@@ -193,6 +195,7 @@ public class CompetitionModelController {
                 _competitions.remove(oldCompetition);
             }
         }
+        _parentFrame.setModified(true);
     }
 
     public void addNewCompetitionAction() {
@@ -222,7 +225,7 @@ public class CompetitionModelController {
                 _competitions.remove(competition);
             }
         }
-
+        _parentFrame.setModified(true);
     }
 
     private void addCompetitor(Competitor competitor, WeightClass weightClass) {
@@ -251,6 +254,7 @@ public class CompetitionModelController {
             _competitions.add(index, updatedCompetition);
             _competitions.remove(oldCompetition);
         }
+        _parentFrame.setModified(true);
     }
 
     public void setCompetition(Competition competition)
@@ -261,6 +265,7 @@ public class CompetitionModelController {
         _competitionTree.addNewCompetition(competition);
         _treeTableInView.refresh(competition);
         _parentFrame.updateFxPanelTitle(competition.getName());
+        _parentFrame.setModified(false);
     }
 
     public void editCompetitorAction(Competitor competitor) {
@@ -297,6 +302,7 @@ public class CompetitionModelController {
         _competitions.clear();
         _competitions.add(updatedCompetition);
         saveCompetition();
+        _parentFrame.setModified(true);
     }
 
     public void saveCompetition() {
@@ -305,6 +311,7 @@ public class CompetitionModelController {
             Competition competition = _competitions.get(0);
             Path competitionStructureFile = SCIMS.getCompetitionsDirectory().resolve(competition.getName() + "." + COMPETITION_FILE_TYPE);
             CompetitionObjectMapper.serializeCompetition(competition, competitionStructureFile);
+            _parentFrame.setModified(false);
         }
         catch (IOException e)
         {
@@ -344,6 +351,7 @@ public class CompetitionModelController {
             _competitions.add(index, updatedCompetition);
             _competitions.remove(oldCompetition);
         }
+        _parentFrame.setModified(true);
     }
 
     private void updateWeightClass(WeightClass weightClass, WeightClass oldWeightClass) {
@@ -369,6 +377,7 @@ public class CompetitionModelController {
             _competitions.add(index, updatedCompetition);
             _competitions.remove(oldCompetition);
         }
+        _parentFrame.setModified(true);
     }
 
     public List<Competition> getCompetitions() {
@@ -385,5 +394,9 @@ public class CompetitionModelController {
 
     public void editCompetitionAction() {
         editCompetitionAction(_competitions.get(0));
+    }
+
+    public void fireUpdated() {
+        _parentFrame.setModified(true);
     }
 }

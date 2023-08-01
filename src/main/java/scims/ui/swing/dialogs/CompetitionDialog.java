@@ -2,9 +2,20 @@ package scims.ui.swing.dialogs;
 
 import scims.main.CustomEventClassRegistry;
 import scims.main.CustomWeightClassRegistry;
-import scims.model.data.*;
+import scims.main.SCIMS;
+import scims.model.data.Competition;
+import scims.model.data.CompetitionObjectMapper;
 import scims.model.data.Event;
-import scims.model.enums.*;
+import scims.model.data.StrengthCompetitionBuilder;
+import scims.model.data.StrengthEvent;
+import scims.model.data.StrengthWeightClass;
+import scims.model.data.StrengthWeightClassBuilder;
+import scims.model.data.WeightClass;
+import scims.model.enums.CommonStrongmanEvents;
+import scims.model.enums.DistanceUnitSystem;
+import scims.model.enums.StrongmanCorpWeightClasses;
+import scims.model.enums.USSWeightClasses;
+import scims.model.enums.WeightUnitSystem;
 import scims.ui.Modifiable;
 import scims.ui.swing.DateTimeTextField;
 import scims.ui.swing.MissingRequiredValueException;
@@ -12,17 +23,48 @@ import scims.ui.swing.OkCancelPanel;
 import scims.ui.swing.tables.EventsTable;
 import scims.ui.swing.tables.WeightClassTable;
 
-import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CompetitionDialog extends JDialog implements Modifiable {
+
+    private static final Logger LOGGER = Logger.getLogger(CompetitionDialog.class.getName());
     private final Consumer<Competition> _createAction;
     private JRadioButton _prevSelectedUnitSystem;
     private JTextField _nameTextField;
@@ -58,7 +100,6 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(parentFrame);
         _createAction = createAction;
-        // Initialize components
         buildComponents();
         _createNewWeightClassButton.setEnabled(false);
         initializeTables();
@@ -156,7 +197,9 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         }
         _strongmanCorpRadioButton.setSelected(containsOnlyStrongmanCorpWeightClasses(weightClasses));
         _ussRadioButton.setSelected(containsOnlyUSSWeightClasses(weightClasses));
+        _ignoreRadioChange = true;
         sanctionRadioButtonChanged();
+        _ignoreRadioChange = false;
     }
 
     private void orderChanged() {
@@ -189,6 +232,14 @@ public class CompetitionDialog extends JDialog implements Modifiable {
             JViewport scrollViewPort = _eventsTableScrollPane.getViewport();
             scrollViewPort.setViewPosition(new Point(0, scrollViewPort.getViewSize().height));
         });
+        String name = event.getName();
+        try {
+            CompetitionObjectMapper.serializeEvent((StrengthEvent) event);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to save event " + name);
+            JOptionPane.showMessageDialog(this, "Failed to save event " + name,
+                    "Save Failed", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void newWeightClassButtonAction() {
@@ -208,6 +259,14 @@ public class CompetitionDialog extends JDialog implements Modifiable {
             JViewport scrollViewPort = _weightClassScrollPane.getViewport();
             scrollViewPort.setViewPosition(new Point(0, scrollViewPort.getViewSize().height));
         });
+        String name = weightClass.getName();
+        try {
+            CompetitionObjectMapper.serializeWeightClass((StrengthWeightClass) weightClass);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to save weight class " + name);
+            JOptionPane.showMessageDialog(this, "Failed to save weight class " + name,
+                    "Save Failed", JOptionPane.ERROR_MESSAGE);
+        }
 
     }
 
@@ -314,7 +373,8 @@ public class CompetitionDialog extends JDialog implements Modifiable {
             }
             else {
                 _prevRadioButton = _otherRadioButton;
-                for(WeightClass wc : CustomWeightClassRegistry.getInstance().getWeightClasses()) {
+
+                for(WeightClass wc : loadWeightClasses()) {
                     if(!_weightClassTable.containsWeightClass(wc)) {
                         _weightClassTable.addWeightClass(wc);
                     }
@@ -323,6 +383,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
             _ignoreRadioChange = false;
         }
         _createNewWeightClassButton.setEnabled(_otherRadioButton.isSelected());
+        updatedEvents();
     }
 
     private boolean emptyOrOnlyContainsStrongmanCorpWeightClasses() {
@@ -439,9 +500,9 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         _createButton = new JButton("Create");
         _cancelButton = new JButton("Cancel");
         _eventsTable = new EventsTable();
-        _eventsTable.setEvents(CommonStrongmanEvents.getValues());
+        _eventsTable.setEvents(loadEvents());
         _weightClassTable = new WeightClassTable();
-        _weightClassTable.setWeightClasses(StrongmanCorpWeightClasses.getValues());
+        _weightClassTable.setWeightClasses(loadWeightClasses());
 
         JPanel attributesPanel = new JPanel(new GridBagLayout());
 
@@ -620,6 +681,41 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         gbc.insets    = new Insets(5,0,0,5);
         add(_okCancelPanel, gbc);
 
+    }
+
+    private List<WeightClass> loadWeightClasses() {
+        List<WeightClass> retVal = new ArrayList<>(StrongmanCorpWeightClasses.getValues());
+        if(!isFileEmpty(SCIMS.getWeightClassesFile().toFile()))
+        {
+            List<StrengthWeightClass> weightClassesFromFile = CompetitionObjectMapper.deserializeIntoList(SCIMS.getWeightClassesFile(), StrengthWeightClass.class);
+            retVal.addAll(weightClassesFromFile);
+        }
+        return retVal;
+    }
+
+    private List<StrengthEvent> loadEvents() {
+        List<StrengthEvent> retVal = new ArrayList<>(CommonStrongmanEvents.getValues());
+        if(!isFileEmpty(SCIMS.getEventsFile().toFile()))
+        {
+            List<StrengthEvent> eventsFromFile = CompetitionObjectMapper.deserializeIntoList(SCIMS.getEventsFile(), StrengthEvent.class);
+            retVal.addAll(eventsFromFile);
+        }
+        return retVal;
+    }
+
+    private static boolean isFileEmpty(File file) {
+        // Check if the file exists
+        if (!file.exists()) {
+            return true;
+        }
+
+        // Use FileInputStream to read the file
+        try (FileInputStream fis = new FileInputStream(file)) {
+            // Return true if the file has no content (i.e., empty)
+            return fis.available() == 0;
+        } catch (IOException e) {
+            return true;
+        }
     }
 
     private void addComponent(Container parentComponent, JComponent componentToAdd)

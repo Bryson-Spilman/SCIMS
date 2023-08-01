@@ -5,6 +5,7 @@ import javafx.scene.control.*;
 import scims.model.data.Competitor;
 import scims.model.data.Event;
 import scims.model.data.scoring.*;
+import scims.ui.swing.SCIMSFrame;
 
 import java.time.Duration;
 import java.util.*;

@@ -3,17 +3,27 @@ package scims.model.data;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import scims.main.SCIMS;
 import scims.model.data.scoring.*;
 import scims.ui.swing.DateTimeTextField;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CompetitionObjectMapper {
     private static final ObjectMapper MAPPER = buildObjectMapper();
@@ -38,6 +48,36 @@ public class CompetitionObjectMapper {
 
     public static Competition deSerializeCompetition(Path file) throws IOException {
         return MAPPER.readValue(file.toFile(), StrengthCompetition.class);
+    }
+
+    public static void serializeData(Object data, Path file) throws IOException {
+        MAPPER.writeValue(file.toFile(), data);
+    }
+
+    public static <T> List<T> deserializeIntoList(Path file, Class<T> classType)
+    {
+        try
+        {
+            byte[] fileData = Files.readAllBytes(file);
+            return MAPPER.readValue(fileData, MAPPER.getTypeFactory().constructCollectionType(List.class, classType));
+        }
+        catch (IOException e)
+        {
+            Logger.getLogger(CompetitionObjectMapper.class.getName()).log(Level.SEVERE, e, () -> "Failed to load data from xml file " + file);
+        }
+        return new ArrayList<>();
+    }
+
+    public static void serializeWeightClass(StrengthWeightClass weightClass) throws IOException {
+        List<StrengthWeightClass> existingWeightClasses = deserializeIntoList(SCIMS.getWeightClassesFile(), StrengthWeightClass.class);
+        existingWeightClasses.add(weightClass);
+        serializeData(existingWeightClasses, SCIMS.getWeightClassesFile());
+    }
+
+    public static void serializeEvent(StrengthEvent event) throws IOException {
+        List<StrengthEvent> existingEvents = deserializeIntoList(SCIMS.getEventsFile(), StrengthEvent.class);
+        existingEvents.add(event);
+        serializeData(existingEvents, SCIMS.getEventsFile());
     }
 
     private static class DurationSerializer extends JsonSerializer<Duration>

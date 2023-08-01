@@ -5,8 +5,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import scims.controllers.CompetitionModelController;
+import scims.main.SCIMS;
 import scims.model.data.*;
 import scims.model.data.Event;
+import scims.ui.swing.SCIMSFrame;
 import scims.ui.swing.tables.Coloring;
 
 import java.awt.*;
@@ -110,6 +112,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
     }
 
     public void refresh(Competition competition) {
+        boolean parentModified = SCIMS.getFrame().isModified();
         Platform.runLater(() -> {
             _eventsColumns.clear();
             _competition = competition;
@@ -129,6 +132,8 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
             }
             getColumns().add(new TotalPointsColumn());
         });
+        SCIMS.getFrame().setModified(parentModified);
+
     }
 
     private void addWeightClassRow(WeightClass weightClass, List<EventColumn<?,?>> eventColumns) {
@@ -321,5 +326,9 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                 }
             }
         }
+    }
+
+    public void fireUpdated() {
+        _controller.fireUpdated();
     }
 }

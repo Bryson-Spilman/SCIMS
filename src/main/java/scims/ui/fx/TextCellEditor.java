@@ -6,6 +6,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import scims.main.SCIMS;
+import scims.ui.swing.SCIMSFrame;
 
 class TextCellEditor<T, S> extends TreeTableCell<T, S> {
 
@@ -13,6 +15,7 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
     protected TextField _textField;
     protected TreeTableColumn<T, ?> _cancelledColumn;
     protected TreeTableRow<T> _cancelledRow;
+    private String _previousVal = "";
 
     @SuppressWarnings("unchecked")
     public TextCellEditor(TreeTableColumn<Object, Object> col) {
@@ -40,6 +43,7 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
         {
             createTextField();
         }
+        _previousVal = _textField.getText();
         setText(null);
         setGraphic(_textField);
         if(_textField != null)
@@ -82,6 +86,8 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
         {
             String text = _textField.getText();
             setText(text);
+            SCIMS.getFrame().setModified(SCIMS.getFrame().isModified() || !_previousVal.equals(_textField.getText()));
+            _previousVal = _textField.getText();
         }
         setGraphic(null);
     }
@@ -110,7 +116,6 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
 
         // update the item within this cell, so that it represents the new value
         updateItem(newValue, false);
-
         if (table != null) {
             // reset the editing cell on the TableView
             table.edit(-1, null);
@@ -144,6 +149,10 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
             setGraphic(null);
         } else {
             setText(item.toString());
+            if(_previousVal != null && _textField != null && !_previousVal.equals(_textField.getText()))
+            {
+                SCIMS.getFrame().setModified(true);
+            }
             setGraphic(null);
         }
     }

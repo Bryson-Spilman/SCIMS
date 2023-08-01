@@ -50,6 +50,7 @@ public class SCIMSFrame extends JFrame {
     private JMenuItem _saveProjectMenuItem;
     private JMenuItem _openCompetitionMenuItem;
     private JMenuItem _editCompetitionMenuItem;
+    private boolean _modified;
 
     public SCIMSFrame() {
         super("SCIMS");
@@ -145,6 +146,7 @@ public class SCIMSFrame extends JFrame {
         fileMenu.add(_newCompetitionMenuItem);
         _openCompetitionMenuItem = new JMenuItem("Open Competition...");
         _saveProjectMenuItem = new JMenuItem("Save Competition");
+        _saveProjectMenuItem.setEnabled(false);
         fileMenu.add(_saveProjectMenuItem);
         fileMenu.add(_openCompetitionMenuItem);
         menuBar.add(fileMenu);
@@ -168,4 +170,12 @@ public class SCIMSFrame extends JFrame {
 
     }
 
+    public void setModified(boolean modified) {
+        _modified = modified;
+        _saveProjectMenuItem.setEnabled(modified);
+    }
+
+    public boolean isModified() {
+        return _modified;
+    }
 }

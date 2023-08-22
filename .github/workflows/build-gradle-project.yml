@@ -12,11 +12,29 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Cache JavaFX dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.javafx
+          key: ${{ runner.os }}-javafx
+          restore-keys: |
+            ${{ runner.os }}-javafx
+
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
           java-version: '8'  # Change to Java 8
           distribution: 'adopt'  # Add the 'distribution' input with 'adopt' as the value
+
       - name: Check Gradle Version
         run: ./gradlew --version
 

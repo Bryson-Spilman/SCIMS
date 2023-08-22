@@ -47,10 +47,20 @@ public class ScoringFactory {
             {
                 Class<? extends EventScoring<?>> primaryScoreType = SCORING_MAP.get(scoreSplit[0]);
                 Class<? extends EventScoring<?>> secondaryScoreType = SCORING_MAP.get(scoreSplit[1]);
+                Class<? extends EventScoring<?>> thirdScoreType = null;
+                EventScoring<?> third = null;
+                if(scoreSplit.length > 2)
+                {
+                    thirdScoreType = SCORING_MAP.get(scoreSplit[2]);
+                }
                 try {
                     EventScoring<?> primary = primaryScoreType.newInstance();
                     EventScoring<?> secondary = secondaryScoreType.newInstance();
-                    CustomScore<?,?> customScore = new CustomScore<>(primary, secondary);
+                    if(thirdScoreType != null)
+                    {
+                        third = thirdScoreType.newInstance();
+                    }
+                    CustomScore<?,?,?> customScore = new CustomScore<>(primary, secondary, third);
                     ((CustomEventScoring)scoring).setScore(customScore);
                 } catch (InstantiationException | IllegalAccessException e) {
                     scoring = new CustomEventScoring<>();

@@ -2,14 +2,17 @@ package scims.model.data.scoring;
 
 import java.util.Objects;
 
-public class CustomScore<T,S> {
+public class CustomScore<T,S, L> {
 
     private final EventScoring<T> _primaryScoring;
     private final EventScoring<S> _secondaryScoring;
+
+    private final EventScoring<L> _thirdScoring;
     
-    public CustomScore(EventScoring<T> primaryScoring, EventScoring<S> secondaryScoring) {
+    public CustomScore(EventScoring<T> primaryScoring, EventScoring<S> secondaryScoring, EventScoring<L> thirdScoring) {
         _primaryScoring = primaryScoring;
         _secondaryScoring = secondaryScoring;
+        _thirdScoring = thirdScoring;
     }
 
     public void setPrimaryScore(T primaryScore) {
@@ -28,12 +31,24 @@ public class CustomScore<T,S> {
         _secondaryScoring.setScore(secondaryScore);
     }
 
+    public void setThirdScoring(L thirdScoring) {
+        if(thirdScoring != null && thirdScoring.toString().isEmpty())
+        {
+            thirdScoring = null;
+        }
+        _thirdScoring.setScore(thirdScoring);
+    }
+
     public EventScoring<T> getPrimaryScoring() {
         return _primaryScoring;
     }
 
     public EventScoring<S> getSecondaryScoring() {
         return _secondaryScoring;
+    }
+
+    public EventScoring<L> getThirdScoring() {
+        return _thirdScoring;
     }
 
     @Override
@@ -44,12 +59,14 @@ public class CustomScore<T,S> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        CustomScore<?, ?> that = (CustomScore<?, ?>) o;
-        return Objects.equals(_primaryScoring.getScore(), that._primaryScoring.getScore()) && Objects.equals(_secondaryScoring.getScore(), that._secondaryScoring.getScore());
+        CustomScore<?, ?, ?> that = (CustomScore<?, ?, ?>) o;
+        return Objects.equals(_primaryScoring.getScore(), that._primaryScoring.getScore())
+                && Objects.equals(_secondaryScoring.getScore(), that._secondaryScoring.getScore())
+                && Objects.equals(_thirdScoring.getScore(), that._thirdScoring.getScore());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_primaryScoring.getScore(), _secondaryScoring.getScore());
+        return Objects.hash(_primaryScoring.getScore(), _secondaryScoring.getScore(), _thirdScoring.getScore());
     }
 }

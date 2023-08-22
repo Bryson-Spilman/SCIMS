@@ -23,21 +23,26 @@ public class EventDialog extends JDialog implements Modifiable {
 
     private static final String NO_TIE_BREAKER = "NO_TIE_BREAKER";
     private static final String HAS_TIE_BREAKER = "HAS_TIE_BREAKER";
+    private static final String NO_SECOND_TIE_BREAKER = "NO_SECOND_TIE_BREAKER";
+    private static final String HAS_SECOND_TIE_BREAKER = "HAS_SECOND_TIE_BREAKER";
     private final Consumer<Event> _createAction;
     private boolean _isModified;
     private JTextField _nameTextField;
     private JTextField _timeLimitTextField;
     private  JComboBox<EventScoring<?>> _primaryScoringComboBox;
     private JComboBox<EventScoring<?>> _secondaryScoringComboBox;
+    private JComboBox<EventScoring<?>> _thirdScoringComboBox;
     private JCheckBox _hasTieBreakerScoring;
     private OkCancelPanel _okCancelPanel;
     private JPanel _secondaryScoringCardPanel;
+    private JCheckBox _hasSecondTieBreakerScoring;
+    private JPanel _thirdScoringComboPanel;
 
     public EventDialog(Window parent, Consumer<Event> createAction) {
         super(parent, "New Event");
         setModal(true);
         setLayout(new GridBagLayout());
-        setSize(400,250);
+        setSize(400,300);
         setMinimumSize(new Dimension(Integer.MIN_VALUE, 175));
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(parent);
@@ -53,6 +58,7 @@ public class EventDialog extends JDialog implements Modifiable {
         _secondaryScoringComboBox.addActionListener(e -> setModified(true));
         _timeLimitTextField.addKeyListener(getModifiedKeyListener());
         _hasTieBreakerScoring.addActionListener(e -> tieBreakerCheckBoxClicked());
+        _hasSecondTieBreakerScoring.addActionListener(e -> secondTieBreakerCheckBoxClicked());
         _okCancelPanel.addOkActionListener(e -> createClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
         addWindowListener( new WindowAdapter() {
@@ -76,8 +82,25 @@ public class EventDialog extends JDialog implements Modifiable {
         CardLayout cardLayout = (CardLayout) _secondaryScoringCardPanel.getLayout();
         if(_hasTieBreakerScoring.isSelected()) {
             cardLayout.show(_secondaryScoringCardPanel, HAS_TIE_BREAKER);
+            _hasSecondTieBreakerScoring.setEnabled(true);
         } else {
             cardLayout.show(_secondaryScoringCardPanel, NO_TIE_BREAKER);
+            _hasSecondTieBreakerScoring.setEnabled(false);
+        }
+        secondTieBreakerCheckBoxClicked();
+        setModified(true);
+    }
+
+    private void secondTieBreakerCheckBoxClicked() {
+        CardLayout cardLayout = (CardLayout) _thirdScoringComboPanel.getLayout();
+        if(_hasSecondTieBreakerScoring.isSelected()) {
+            cardLayout.show(_thirdScoringComboPanel, HAS_SECOND_TIE_BREAKER);
+        } else {
+            cardLayout.show(_thirdScoringComboPanel, NO_SECOND_TIE_BREAKER);
+        }
+        if(!_hasSecondTieBreakerScoring.isEnabled())
+        {
+            cardLayout.show(_thirdScoringComboPanel, NO_SECOND_TIE_BREAKER);
         }
         setModified(true);
     }
@@ -118,10 +141,14 @@ public class EventDialog extends JDialog implements Modifiable {
         if(_hasTieBreakerScoring.isSelected() && (_secondaryScoringComboBox.getSelectedItem() == null || _secondaryScoringComboBox.getSelectedIndex() < 0)) {
             throw new MissingRequiredValueException("Secondary Score Type", "Has Tie Breaker");
         }
+        if(_hasSecondTieBreakerScoring.isSelected() && (_thirdScoringComboBox.getSelectedItem() == null || _thirdScoringComboBox.getSelectedIndex() < 0)) {
+            throw new MissingRequiredValueException("Third Score Type", "Has Second Tie Breaker");
+        }
         EventScoring<?> scoring = (EventScoring<?>) _primaryScoringComboBox.getSelectedItem();
         if(_hasTieBreakerScoring.isSelected()) {
             EventScoring<CustomScore> customScoring = new CustomEventScoring();
-            CustomScore customScore = new CustomScore(scoring, (EventScoring<?>) _secondaryScoringComboBox.getSelectedItem());
+            CustomScore customScore = new CustomScore(scoring, (EventScoring<?>) _secondaryScoringComboBox.getSelectedItem(),
+                ((EventScoring<?>) _thirdScoringComboBox.getSelectedItem()));
             customScoring.setScore(customScore);
             scoring = customScoring;
         }
@@ -145,9 +172,12 @@ public class EventDialog extends JDialog implements Modifiable {
         ((AbstractDocument)_timeLimitTextField.getDocument()).setDocumentFilter(new DoubleDocumentFilter());
         JLabel scoreTypeLabel = new JLabel("Score Type:");
         _primaryScoringComboBox = new JComboBox<>();
-        _hasTieBreakerScoring = new JCheckBox("Has tie-breaker scoring");
+        _hasTieBreakerScoring = new JCheckBox("Has tie-breaker");
         JLabel secondaryScoreTypeLabel = new JLabel("Secondary Score Type:");
         _secondaryScoringComboBox = new JComboBox<>();
+        _hasSecondTieBreakerScoring = new JCheckBox("Has second tie-breaker");
+        JLabel thirdScoreTypeLabel = new JLabel("Third Score Type:");
+        _thirdScoringComboBox = new JComboBox<>();
         DefaultComboBoxModel<EventScoring<?>> primaryModel = (DefaultComboBoxModel<EventScoring<?>>) _primaryScoringComboBox.getModel();
         for(EventScoring<?> scoring : ScoringFactory.createAllScorings()) {
             if(!(scoring instanceof CustomEventScoring)) {
@@ -158,6 +188,12 @@ public class EventDialog extends JDialog implements Modifiable {
         for(EventScoring<?> scoring : ScoringFactory.createAllScorings()) {
             if(!(scoring instanceof CustomEventScoring)) {
                 secondaryModel.addElement(scoring);
+            }
+        }
+        DefaultComboBoxModel<EventScoring<?>> thirdScoringModel = (DefaultComboBoxModel<EventScoring<?>>) _thirdScoringComboBox.getModel();
+        for(EventScoring<?> scoring : ScoringFactory.createAllScorings()) {
+            if(!(scoring instanceof CustomEventScoring)) {
+                thirdScoringModel.addElement(scoring);
             }
         }
         _okCancelPanel = new OkCancelPanel("Create");
@@ -191,6 +227,33 @@ public class EventDialog extends JDialog implements Modifiable {
         gbc.fill      = GridBagConstraints.HORIZONTAL;
         gbc.insets    = new Insets(0,0,0,5);
         add(_secondaryScoringCardPanel, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 0.0;
+        gbc.weighty   = 0.0;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = GridBagConstraints.NONE;
+        gbc.insets    = new Insets(5,2,0,5);
+        add(_hasSecondTieBreakerScoring, gbc);
+
+        JPanel thirdComboPanel = new JPanel(new GridBagLayout());
+        addLabeledComponentOnOwnLine(thirdComboPanel, thirdScoreTypeLabel, _thirdScoringComboBox, 0.001);
+        _thirdScoringComboPanel = new JPanel(new CardLayout());
+        _thirdScoringComboPanel.add(NO_SECOND_TIE_BREAKER, new JPanel());
+        _thirdScoringComboPanel.add(HAS_SECOND_TIE_BREAKER, thirdComboPanel);
+        gbc = new GridBagConstraints();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 0.0;
+        gbc.weighty   = 0.001;
+        gbc.anchor    = GridBagConstraints.NORTHWEST;
+        gbc.fill      = GridBagConstraints.HORIZONTAL;
+        gbc.insets    = new Insets(0,0,0,5);
+        add(_thirdScoringComboPanel, gbc);
 
         gbc = new GridBagConstraints();
         gbc.gridx     = GridBagConstraints.RELATIVE;

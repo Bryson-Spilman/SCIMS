@@ -25,13 +25,19 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
             _scoringColumns.add(scoreCol);
             getColumns().add(scoreCol);
         } else {
-            CustomScore<?,?> customScore = ((CustomEventScoring<?,?>) event.getScoring()).getScore();
+            CustomScore<?,?,?> customScore = ((CustomEventScoring<?,?,?>) event.getScoring()).getScore();
             ScoringColumn<? extends EventScoring<?>, ?> primaryScoreCol = ScoringColumnFactory.buildScoringColumn(this, customScore.getPrimaryScoring());
             ScoringColumn<? extends EventScoring<?>, ?> secondaryScoreCol = ScoringColumnFactory.buildScoringColumn(this, customScore.getSecondaryScoring());
             _scoringColumns.add(primaryScoreCol);
             _scoringColumns.add(secondaryScoreCol);
             getColumns().add(primaryScoreCol);
             getColumns().add(secondaryScoreCol);
+            if(customScore.getThirdScoring() != null)
+            {
+                ScoringColumn<? extends EventScoring<?>, ?> thirdScoringCol = ScoringColumnFactory.buildScoringColumn(this, customScore.getThirdScoring());
+                _scoringColumns.add(thirdScoringCol);
+                getColumns().add(thirdScoringCol);
+            }
         }
         _pointsColumn = new EventPointsColumn(_scoringColumns);
         getColumns().add(_pointsColumn);
@@ -52,14 +58,22 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
                 TreeTableColumn<Object, ?> primaryScoreCol = getColumns().get(0);
                 if(scoring instanceof CustomEventScoring) {
                     TreeTableColumn<Object, ?> secondaryScoreCol = getColumns().get(1);
-                    CustomEventScoring<?,?> customScoring = (CustomEventScoring<?,?>) scoring;
-                    CustomScore<?,?> customScore = customScoring.getScore();
+                    CustomEventScoring<?,?,?> customScoring = (CustomEventScoring<?,?,?>) scoring;
+                    CustomScore<?,?,?> customScore = customScoring.getScore();
                     Object primaryScore = getScoreFromRow(competitorRow, primaryScoreCol, customScore.getPrimaryScoring());
                     Object secondaryScore = getScoreFromRow(competitorRow, secondaryScoreCol, customScore.getSecondaryScoring());
+                    Object thirdScore = null;
+                    if(((CustomEventScoring)scoring).getScore().getThirdScoring() != null)
+                    {
+                        TreeTableColumn<Object, ?> thirdScoreCol = getColumns().get(2);
+                        thirdScore = getScoreFromRow(competitorRow, thirdScoreCol, customScore.getThirdScoring());
+                    }
                     CustomScore changedVal = new CustomScore<>(ScoringFactory.createScoring(customScore.getPrimaryScoring().getScoreType()),
-                            ScoringFactory.createScoring(customScore.getSecondaryScoring().getScoreType()));
+                            ScoringFactory.createScoring(customScore.getSecondaryScoring().getScoreType()),
+                            ScoringFactory.createScoring(customScore.getThirdScoring().getScoreType()));
                     changedVal.setPrimaryScore(primaryScore);
                     changedVal.setSecondaryScore(secondaryScore);
+                    changedVal.setThirdScoring(thirdScore);
                     competitorScoreMap.put(competitorRow.getCompetitor(),(S) changedVal);
                 } else {
                     S changedVal = (S) competitorRow.getObservableValue(primaryScoreCol).getValue();
@@ -104,9 +118,11 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
         boolean isEmptyCustom = false;
         if(v instanceof CustomScore)
         {
-            CustomScore<?,?> custom = ((CustomScore<?,?>) v);
-            isEmptyCustom = (custom.getPrimaryScoring() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().getScore() == null))
-                || (custom.getPrimaryScoring().getScore() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().getScore() == null));
+            CustomScore<?,?,?> custom = ((CustomScore<?,?,?>) v);
+            isEmptyCustom = (custom.getPrimaryScoring() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().getScore() == null)
+                    && (custom.getThirdScoring() == null || custom.getThirdScoring().getScore() == null))
+                || (custom.getPrimaryScoring().getScore() == null && (custom.getSecondaryScoring() == null || custom.getSecondaryScoring().getScore() == null)
+                    && (custom.getThirdScoring() == null || custom.getThirdScoring().getScore() == null));
         }
         return isEmptyCustom;
     }

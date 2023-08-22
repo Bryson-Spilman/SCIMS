@@ -1,4 +1,4 @@
-name: Build with Java 11
+name: Build with Java 8
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
-          java-version: '11'
+          java-version: '8'  # Change to Java 8
           distribution: 'adopt'  # Add the 'distribution' input with 'adopt' as the value
       - name: Check Gradle Version
         run: ./gradlew --version

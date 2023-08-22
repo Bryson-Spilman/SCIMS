@@ -23,16 +23,16 @@ public enum CommonStrongmanEvents {
     MAX_DISTANCE_YOKE(new StrengthEventBuilder().withName("Max Distance Yoke Carry").withScoring(new DistanceScoring()).withTimeLimit(Duration.ofSeconds(60)).build()),
     MAX_HEIGHT_KEG_TOSS(new StrengthEventBuilder().withName("Max Height Keg Toss").withScoring(new DistanceScoring()).withNoTimeLimit().build()),
     MAX_HEIGHT_SANDBAG_TOSS(new StrengthEventBuilder().withName("Max Height Sandbag Toss").withScoring(new DistanceScoring()).withNoTimeLimit().build()),
-    TRUCK_PULL(new StrengthEventBuilder().withName("Truck Pull").withScoring(new CustomEventScoring<Duration, Double>().withPrimaryScoring(new TimeScoring()).withSecondaryScoring(new DistanceScoring())).withTimeLimit(Duration.ofSeconds(60)).build()),
+    TRUCK_PULL(new StrengthEventBuilder().withName("Truck Pull").withScoring(new CustomEventScoring<Duration, Double, None>().withPrimaryScoring(new TimeScoring()).withSecondaryScoring(new DistanceScoring())).withTimeLimit(Duration.ofSeconds(60)).build()),
     DEADLIFT_FOR_REPS(new StrengthEventBuilder().withName("Barbell Deadlift for reps").withScoring(new RepsScoring()).withTimeLimit(Duration.ofSeconds(60)).build()),
     ZERCHER_DEADLIFT_FOR_REPS(new StrengthEventBuilder().withName("Zercher Deadlift for reps").withScoring(new RepsScoring()).withTimeLimit(Duration.ofSeconds(60)).build()),
     AXLE_PRESS_FOR_REPS(new StrengthEventBuilder().withName("Axel Press for reps").withScoring(new RepsScoring()).withTimeLimit(Duration.ofSeconds(60)).build()),
     LOG_PRESS_FOR_REPS(new StrengthEventBuilder().withName("Log Press for reps").withScoring(new RepsScoring()).withTimeLimit(Duration.ofSeconds(60)).build()),
     CIRCUS_DUMBBELL_FOR_REPS(new StrengthEventBuilder().withName("Circus Dumbbell for reps").withScoring(new RepsScoring()).withTimeLimit(Duration.ofSeconds(60)).build()),
-    LOADING_RACE(new StrengthEventBuilder().withName("Loading Race").withScoring(new CustomEventScoring<Integer, Duration>()).withTimeLimit(Duration.ofSeconds(90)).build()),
+    LOADING_RACE(new StrengthEventBuilder().withName("Loading Race").withScoring(new CustomEventScoring<Integer, Duration, None>()).withTimeLimit(Duration.ofSeconds(90)).build()),
     HERCULES_HOLD(new StrengthEventBuilder().withName("Hercules Hold").withScoring(new TimeScoring()).withNoTimeLimit().build()),
-    LOG_LADDER(new StrengthEventBuilder().withName("Log Press Ladder").withScoring(new CustomEventScoring<Double, Duration>().withPrimaryScoring(new WeightScoring()).withSecondaryScoring(new TimeScoring())).withTimeLimit(Duration.ofSeconds(90)).build()),
-    AXEL_LADDER(new StrengthEventBuilder().withName("Axel Press Ladder").withScoring(new CustomEventScoring<Double, Duration>().withPrimaryScoring(new WeightScoring()).withSecondaryScoring(new TimeScoring())).withTimeLimit(Duration.ofSeconds(90)).build());
+    LOG_LADDER(new StrengthEventBuilder().withName("Log Press Ladder").withScoring(new CustomEventScoring<Double, Duration, None>().withPrimaryScoring(new WeightScoring()).withSecondaryScoring(new TimeScoring())).withTimeLimit(Duration.ofSeconds(90)).build()),
+    AXEL_LADDER(new StrengthEventBuilder().withName("Axel Press Ladder").withScoring(new CustomEventScoring<Double, Duration, None>().withPrimaryScoring(new WeightScoring()).withSecondaryScoring(new TimeScoring())).withTimeLimit(Duration.ofSeconds(90)).build());
     private final StrengthEvent _event;
 
     CommonStrongmanEvents(StrengthEvent event) {

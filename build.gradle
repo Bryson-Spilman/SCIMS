@@ -1,10 +1,6 @@
 plugins {
     id 'java'
-    id 'org.openjfx.javafxplugin' version '0.0.10'
 }
-
-sourceCompatibility = 11
-targetCompatibility = 11
 
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -17,24 +13,7 @@ test {
     useJUnitPlatform()
 }
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'scims.main.SCIMS'
-    }
-}
-
-javafx {
-    version = "11.0.2"
-    modules = [ 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.swing' ]
-    // Add other JavaFX modules here if you need them
-}
-
 dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'
-
-    implementation 'org.openjfx:javafx-base:11.0.2'
-    implementation 'org.openjfx:javafx-controls:11.0.2'
-    implementation 'org.openjfx:javafx-graphics:11.0.2'
-    implementation 'org.openjfx:javafx-fxml:11.0.2'
 }

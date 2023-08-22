@@ -196,12 +196,17 @@ public class CompetitionObjectMapper {
             if(value instanceof EventScoring) {
                 String scoreType = ((EventScoring<?>) value).getScoreType();
                 if("Custom".equalsIgnoreCase(scoreType)) {
-                    EventScoring<?> primary = ((CustomEventScoring<?, ?>) value).getScore().getPrimaryScoring();
-                    EventScoring<?> secondary = ((CustomEventScoring<?, ?>) value).getScore().getSecondaryScoring();
+                    EventScoring<?> primary = ((CustomEventScoring<?, ?, ?>) value).getScore().getPrimaryScoring();
+                    EventScoring<?> secondary = ((CustomEventScoring<?, ?, ?>) value).getScore().getSecondaryScoring();
+                    EventScoring<?> third = ((CustomEventScoring<?,?,?>) value).getScore().getThirdScoring();
                     String type = primary.getScoreType();
                     if(secondary != null)
                     {
                         type += "->" + secondary.getScoreType();
+                    }
+                    if(third != null)
+                    {
+                        type += "->" + third.getScoreType();
                     }
                     gen.writeString(type);
                 }

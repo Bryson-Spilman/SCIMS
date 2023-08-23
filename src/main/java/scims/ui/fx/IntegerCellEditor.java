@@ -1,7 +1,7 @@
 package scims.ui.fx;
 
-import javafx.scene.control.TextField;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTablePosition;
 
 class IntegerCellEditor<T> extends TextCellEditor<T, String> {
 
@@ -24,7 +24,9 @@ class IntegerCellEditor<T> extends TextCellEditor<T, String> {
         _textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal) {
                 try {
-                    commitEdit(_textField.getText());
+                    TreeTableColumn<T, String> col = getTableColumn();
+                    TreeTablePosition<T,String> editingCell = new TreeTablePosition<>(getTreeTableView(), getIndex(), getTableColumn());
+                    manualCommitEdit(_textField.getText(), editingCell, col);
                 } catch (NumberFormatException e) {
                     cancelEdit();
                 }

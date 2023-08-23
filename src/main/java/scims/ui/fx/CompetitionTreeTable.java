@@ -170,7 +170,7 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
                         if(pos != null)
                         {
                             TreeItem<Object> treeItem = getTreeItem(pos.getRow());
-                            if(treeItem.getValue() instanceof CompetitorRow)
+                            if(treeItem != null && treeItem.getValue() instanceof CompetitorRow)
                             {
                                 CompetitorRow competitorRow = (CompetitorRow) treeItem.getValue();
                                 SimpleObjectProperty<Object> obsValue = competitorRow.getObservableValue(score.getTableColumn());
@@ -331,4 +331,24 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
     public void fireUpdated() {
         _controller.fireUpdated();
     }
+
+    public void commitEdit() {
+        ObservableList<TreeTableColumn<Object, ?>> columns = getColumns();
+        for (TreeTableColumn<Object, ?> column : columns) {
+            TreeTableColumn<Object, Object> col = (TreeTableColumn<Object, Object>) column;
+            for (TreeItem<Object> item : getRoot().getChildren()) {
+                TreeTableCell<Object, Object> cell = col.getCellFactory().call(col);
+                int row = getRow(item);
+                cell.updateIndex(row);
+                cell.commitEdit(cell.getItem());
+            }
+        }
+
+    }
+
+
+
+
+
+
 }

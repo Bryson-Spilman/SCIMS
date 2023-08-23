@@ -40,6 +40,7 @@ class TextCellEditor<T, S> extends TreeTableCell<T, S> {
     @Override
     @SuppressWarnings("unchecked")
     public void startEdit() {
+        ((CompetitionTreeTable)getTreeTableView()).commitEdit();
         if(!isCellEditable(getTreeTableRow()))
         {
             return;

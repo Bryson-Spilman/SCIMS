@@ -1,6 +1,7 @@
 package scims.ui.fx;
 
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTablePosition;
 import javafx.scene.input.KeyCode;
 
 class DoubleCellEditor<T> extends TextCellEditor<T, String> {
@@ -14,15 +15,27 @@ class DoubleCellEditor<T> extends TextCellEditor<T, String> {
         _textField = new DoubleTextField();
         _textField.setText(getItem() == null ? "" : String.valueOf(getItem()));
         _textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2 - 5);
-        _textField.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
+        _textField.setOnAction(evt -> {
+            try {
                 commitEdit(_textField.getText());
-                event.consume();
-            } else if (event.getCode() == KeyCode.ESCAPE) {
+            } catch (NumberFormatException e) {
                 cancelEdit();
-                event.consume();
+            }
+        });
+        _textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal) {
+                try {
+                    TreeTableColumn<T, String> col = getTableColumn();
+                    TreeTablePosition<T,String> editingCell = new TreeTablePosition<>(getTreeTableView(), getIndex(), getTableColumn());
+                    manualCommitEdit(_textField.getText(), editingCell, col);
+                } catch (NumberFormatException e) {
+                    cancelEdit();
+                }
             }
         });
         setGraphic(_textField);
+        _textField.selectAll();
+        _textField.requestFocus();
+        _textField.setEditable(isCellEditable(getTreeTableRow()));
     }
 }

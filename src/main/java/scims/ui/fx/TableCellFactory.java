@@ -11,7 +11,7 @@ class TableCellFactory {
 
     static TreeTableCell<Object, Object> getTreeCell(TreeTableColumn<Object, Object> col, EventScoring<?> scoring) {
         TreeTableCell<Object, Object> retVal = new TextCellEditor<>(col);
-        if(scoring instanceof RepsScoring || scoring instanceof LastManStandingWithPointsScoring) {
+        if(scoring instanceof RepsScoring) {
             retVal = new IntegerCellEditor(col) {
                 @Override
                 boolean isCellEditable(TreeTableRow row) {

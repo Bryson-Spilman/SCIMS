@@ -4,6 +4,7 @@ import scims.model.data.Competitor;
 
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 
 public class CustomEventScoring<T,S,L> implements EventScoring<CustomScore<T,S,L>>{
 
@@ -166,5 +167,17 @@ public class CustomEventScoring<T,S,L> implements EventScoring<CustomScore<T,S,L
             return  _score.getPrimaryScoring().toString() + " > " + _score.getSecondaryScoring().toString();
         }
         return getScoreType();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        return Objects.equals(this.toString(), o.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_score);
     }
 }

@@ -109,8 +109,11 @@ public class CompetitionDialog extends JDialog implements Modifiable {
 
     private void initializeTables() {
         for(Event event : CustomEventClassRegistry.getInstance().getEvents()) {
-            _eventsTable.addEvent(event);
-            _eventsTable.deselectAll();
+            if(!_eventsTable.containsEvent(event))
+            {
+                _eventsTable.addEvent(event);
+                _eventsTable.deselectAll();
+            }
         }
     }
 
@@ -226,6 +229,10 @@ public class CompetitionDialog extends JDialog implements Modifiable {
     }
 
     private void addEvent(Event event) {
+        if(_eventsTable.containsEvent(event))
+        {
+            return;
+        }
         _eventsTable.addEvent(event);
         updatedEvents();
         SwingUtilities.invokeLater(() -> {

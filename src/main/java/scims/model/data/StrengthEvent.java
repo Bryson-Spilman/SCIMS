@@ -1,9 +1,11 @@
 package scims.model.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import scims.model.data.scoring.Scoring;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public class StrengthEvent implements Event {
     @JacksonXmlProperty(isAttribute = true, localName = "name")
@@ -42,5 +44,20 @@ public class StrengthEvent implements Event {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StrengthEvent that = (StrengthEvent) o;
+        return Objects.equals(_name, that._name) && Objects.equals(_scoring, that._scoring) && Objects.equals(_timeLimit, that._timeLimit);
+    }
+
+    @Override
+    @JsonIgnore
+    public int hashCode() {
+        return Objects.hash(_name, _scoring, _timeLimit);
     }
 }

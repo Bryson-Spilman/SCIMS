@@ -21,6 +21,7 @@ public class EventsTable extends SCIMSTable {
     private final EventsTableModel _model;
     private JComboBox<Object> _eventOrderComboBox;
     private final List<Runnable> _actionOnEventsSelectionUpdate = new ArrayList<>();
+    private List<StrengthEvent> _events;
 
     public EventsTable() {
         _model = new EventsTableModel();
@@ -188,6 +189,21 @@ public class EventsTable extends SCIMSTable {
     }
 
     public void setEvents(List<StrengthEvent> events) {
+        _events = events;
         _model.setEvents(events);
+    }
+
+    public boolean containsEvent(Event event) {
+        boolean retVal = false;
+        for(int row = 0; row < _events.size(); row++)
+        {
+            Event eventInRow = _events.get(row);
+            if(event.equals(eventInRow))
+            {
+                retVal = true;
+                break;
+            }
+        }
+        return retVal;
     }
 }

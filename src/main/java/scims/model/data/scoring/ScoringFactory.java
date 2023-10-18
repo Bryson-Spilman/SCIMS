@@ -36,6 +36,10 @@ public class ScoringFactory {
     }
 
     public static EventScoring<?> createScoring(String scoreType) {
+        if(scoreType == null)
+        {
+            return null;
+        }
         scoreType = scoreType.replace(" ", "");
         Class<? extends EventScoring<?>> scoringClass = SCORING_MAP.get(scoreType);
 

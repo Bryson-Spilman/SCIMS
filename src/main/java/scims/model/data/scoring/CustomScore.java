@@ -24,19 +24,25 @@ public class CustomScore<T,S, L> {
     }
 
     public void setSecondaryScore(S secondaryScore) {
-        if(secondaryScore != null && secondaryScore.toString().isEmpty())
+        if(_secondaryScoring != null)
         {
-            secondaryScore = null;
+            if(secondaryScore != null && secondaryScore.toString().isEmpty())
+            {
+                secondaryScore = null;
+            }
+            _secondaryScoring.setScore(secondaryScore);
         }
-        _secondaryScoring.setScore(secondaryScore);
     }
 
     public void setThirdScoring(L thirdScoring) {
-        if(thirdScoring != null && thirdScoring.toString().isEmpty())
+        if(_thirdScoring != null)
         {
-            thirdScoring = null;
+            if(thirdScoring != null && thirdScoring.toString().isEmpty())
+            {
+                thirdScoring = null;
+            }
+            _thirdScoring.setScore(thirdScoring);
         }
-        _thirdScoring.setScore(thirdScoring);
     }
 
     public EventScoring<T> getPrimaryScoring() {
@@ -61,12 +67,16 @@ public class CustomScore<T,S, L> {
         }
         CustomScore<?, ?, ?> that = (CustomScore<?, ?, ?>) o;
         return Objects.equals(_primaryScoring.getScore(), that._primaryScoring.getScore())
-                && Objects.equals(_secondaryScoring.getScore(), that._secondaryScoring.getScore())
-                && Objects.equals(_thirdScoring.getScore(), that._thirdScoring.getScore());
+                && Objects.equals(_secondaryScoring == null ? null : _secondaryScoring.getScore(),
+                                that._secondaryScoring == null ? null :that._secondaryScoring.getScore())
+                && Objects.equals(_thirdScoring == null ? null : _thirdScoring.getScore(),
+                                that._thirdScoring == null ? null :that._thirdScoring.getScore());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_primaryScoring.getScore(), _secondaryScoring.getScore(), _thirdScoring.getScore());
+        return Objects.hash(_primaryScoring.getScore(),
+                _secondaryScoring == null ? null : _secondaryScoring.getScore(),
+                _thirdScoring == null ? null : _thirdScoring.getScore());
     }
 }

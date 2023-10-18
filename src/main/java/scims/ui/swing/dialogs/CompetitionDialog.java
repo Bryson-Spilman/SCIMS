@@ -1,7 +1,6 @@
 package scims.ui.swing.dialogs;
 
 import scims.main.CustomEventClassRegistry;
-import scims.main.CustomWeightClassRegistry;
 import scims.main.SCIMS;
 import scims.model.data.Competition;
 import scims.model.data.CompetitionObjectMapper;
@@ -11,6 +10,7 @@ import scims.model.data.StrengthEvent;
 import scims.model.data.StrengthWeightClass;
 import scims.model.data.StrengthWeightClassBuilder;
 import scims.model.data.WeightClass;
+import scims.model.data.scoring.EventScoring;
 import scims.model.enums.CommonStrongmanEvents;
 import scims.model.enums.DistanceUnitSystem;
 import scims.model.enums.StrongmanCorpWeightClasses;
@@ -20,8 +20,7 @@ import scims.ui.Modifiable;
 import scims.ui.swing.DateTimeTextField;
 import scims.ui.swing.MissingRequiredValueException;
 import scims.ui.swing.OkCancelPanel;
-import scims.ui.swing.tables.EventsTable;
-import scims.ui.swing.tables.WeightClassTable;
+import scims.ui.swing.tables.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -45,14 +44,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -159,6 +153,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         _eventsTable.addNewEventSelectedAction(this::updatedEvents);
         _eventsTable.getModel().addTableModelListener(e -> updatedEvents());
         _eventsTable.addOrderChangedAction(this::orderChanged);
+        _eventsTable.setEditMenuItemAction(this::editEventAction);
         _okCancelPanel.addOkActionListener(e -> createCompetitionClicked());
         _okCancelPanel.addCancelActionListener(e -> closeDialogClicked());
         _poundsRadioButton.addActionListener(this::weightUnitSystemChanged);
@@ -228,6 +223,29 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         dlg.setVisible(true);
     }
 
+    private void editEventAction(Point triggerPoint) {
+        EventsRowData rowData = ((EventsTableModel) _eventsTable.getModel()).getRowData().get(_eventsTable.rowAtPoint(triggerPoint));
+        String previousName = rowData.getName();
+        EventDialog dlg = new EventDialog(this, event -> updateEvent(event, rowData, previousName));
+        dlg.setToUpdateMode();
+        dlg.fill(rowData);
+        dlg.setVisible(true);
+    }
+
+    private void updateEvent(Event event, EventsRowData rowData, String previousName) {
+        rowData.setName(event.getName());
+        rowData.setTimeLimit(event.getTimeLimit());
+        rowData.setEventScoring((EventScoring<?>) event.getScoring());
+        ((SCIMSTableModel<?>)_eventsTable.getModel()).fireTableDataChanged();
+        try {
+            CompetitionObjectMapper.serializeEvent((StrengthEvent) event, previousName);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to save event " + event.getName());
+            JOptionPane.showMessageDialog(this, "Failed to save event " + event.getName(),
+                    "Save Failed", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void addEvent(Event event) {
         if(_eventsTable.containsEvent(event))
         {
@@ -241,7 +259,7 @@ public class CompetitionDialog extends JDialog implements Modifiable {
         });
         String name = event.getName();
         try {
-            CompetitionObjectMapper.serializeEvent((StrengthEvent) event);
+            CompetitionObjectMapper.serializeEvent((StrengthEvent) event, null);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, e, () -> "Failed to save event " + name);
             JOptionPane.showMessageDialog(this, "Failed to save event " + name,

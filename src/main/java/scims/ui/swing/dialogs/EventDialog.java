@@ -1,7 +1,11 @@
 package scims.ui.swing.dialogs;
 
+import jdk.nashorn.internal.scripts.JO;
 import scims.main.CustomEventClassRegistry;
+import scims.main.SCIMS;
+import scims.model.data.CompetitionObjectMapper;
 import scims.model.data.Event;
+import scims.model.data.StrengthEvent;
 import scims.model.data.StrengthEventBuilder;
 import scims.model.data.scoring.CustomEventScoring;
 import scims.model.data.scoring.CustomScore;
@@ -11,13 +15,16 @@ import scims.ui.Modifiable;
 import scims.ui.swing.MissingRequiredValueException;
 import scims.ui.swing.OkCancelPanel;
 import scims.ui.swing.tablecells.DoubleDocumentFilter;
+import scims.ui.swing.tables.EventsRowData;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Duration;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class EventDialog extends JDialog implements Modifiable {
 
@@ -26,6 +33,7 @@ public class EventDialog extends JDialog implements Modifiable {
     private static final String NO_SECOND_TIE_BREAKER = "NO_SECOND_TIE_BREAKER";
     private static final String HAS_SECOND_TIE_BREAKER = "HAS_SECOND_TIE_BREAKER";
     private final Consumer<Event> _createAction;
+    private final List<StrengthEvent> _existingEvents;
     private boolean _isModified;
     private JTextField _nameTextField;
     private JTextField _timeLimitTextField;
@@ -37,9 +45,11 @@ public class EventDialog extends JDialog implements Modifiable {
     private JPanel _secondaryScoringCardPanel;
     private JCheckBox _hasSecondTieBreakerScoring;
     private JPanel _thirdScoringComboPanel;
+    private String _cancelType;
 
     public EventDialog(Window parent, Consumer<Event> createAction) {
         super(parent, "New Event");
+        _cancelType = "creation";
         setModal(true);
         setLayout(new GridBagLayout());
         setSize(400,300);
@@ -47,6 +57,7 @@ public class EventDialog extends JDialog implements Modifiable {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(parent);
         _createAction = createAction;
+        _existingEvents = CompetitionObjectMapper.deserializeIntoList(SCIMS.getEventsFile(), StrengthEvent.class);
         // Initialize components
         buildComponents();
         addListeners();
@@ -109,7 +120,7 @@ public class EventDialog extends JDialog implements Modifiable {
         int opt = JOptionPane.YES_OPTION;
         if(_isModified)
         {
-            opt = JOptionPane.showConfirmDialog(this, "Cancel creation of event?", "Confirm Cancel",
+            opt = JOptionPane.showConfirmDialog(this, "Cancel " + _cancelType + " of event?", "Confirm Cancel",
                     JOptionPane.YES_NO_OPTION);
         }
         if(opt == JOptionPane.YES_OPTION)
@@ -121,9 +132,19 @@ public class EventDialog extends JDialog implements Modifiable {
     private void createClicked() {
         try {
             Event event = buildEvent();
-            CustomEventClassRegistry.getInstance().registerEvent(event);
-            _createAction.accept(event);
-            dispose();
+            List<String> existingNames = _existingEvents.stream().map(StrengthEvent::getName)
+                    .collect(Collectors.toList());
+            if(existingNames.contains(event.getName()))
+            {
+                JOptionPane.showMessageDialog(this, event.getName() + " is already a name of an existing event! Please choose another name,",
+                        "Invalid Event Name", JOptionPane.ERROR_MESSAGE);
+            }
+            else
+            {
+                CustomEventClassRegistry.getInstance().registerEvent(event);
+                _createAction.accept(event);
+                dispose();
+            }
         } catch (MissingRequiredValueException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Event",
                     JOptionPane.ERROR_MESSAGE);
@@ -299,5 +320,46 @@ public class EventDialog extends JDialog implements Modifiable {
     @Override
     public boolean isModified() {
         return _isModified;
+    }
+
+    public void fill(EventsRowData rowData) {
+        _nameTextField.setText(rowData.getName());
+        _timeLimitTextField.setText(rowData.getTimeLimit() == null ? "" : rowData.getTimeLimit().toString());
+        String eventScoringString = rowData.getEventScoring().toString();
+        String[] split = eventScoringString.split(">");
+        if(split.length > 1)
+        {
+            _hasTieBreakerScoring.setSelected(true);
+            tieBreakerCheckBoxClicked();
+            for(int i=0; i < _secondaryScoringComboBox.getModel().getSize(); i++)
+            {
+                Object scoring = ((DefaultComboBoxModel<?>) _secondaryScoringComboBox.getModel()).getElementAt(i);
+                if(scoring != null && scoring.toString().equalsIgnoreCase(split[1].trim()))
+                {
+                    _secondaryScoringComboBox.setSelectedItem(scoring);
+                    break;
+                }
+            }
+            if(split.length > 2)
+            {
+                _hasSecondTieBreakerScoring.setSelected(true);
+                secondTieBreakerCheckBoxClicked();
+                for(int i=0; i < _thirdScoringComboBox.getModel().getSize(); i++)
+                {
+                    Object scoring = ((DefaultComboBoxModel<?>) _thirdScoringComboBox.getModel()).getElementAt(i);
+                    if(scoring != null && scoring.toString().equalsIgnoreCase(split[2].trim()))
+                    {
+                        _thirdScoringComboBox.setSelectedItem(scoring);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void setToUpdateMode() {
+        _okCancelPanel.setOkText("Update");
+        _cancelType = "update";
+        setTitle("Edit Event");
     }
 }

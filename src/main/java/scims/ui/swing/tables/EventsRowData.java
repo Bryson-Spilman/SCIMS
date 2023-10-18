@@ -4,11 +4,11 @@ import scims.model.data.scoring.EventScoring;
 
 import java.time.Duration;
 
-class EventsRowData {
+public class EventsRowData {
     private Duration _timeLimit;
     private String _name;
     private boolean _checked;
-    private final EventScoring<?> _eventScoring;
+    private EventScoring<?> _eventScoring;
     private Integer _eventOrder;
 
     public EventsRowData(boolean checked, String name, EventScoring<?> eventScoring, Duration timeLimit, Integer eventOrder) {
@@ -53,5 +53,9 @@ class EventsRowData {
 
     public void setTimeLimit(Duration timeLimit) {
         _timeLimit = timeLimit;
+    }
+
+    public void setEventScoring(EventScoring<?> scoring) {
+        _eventScoring = scoring;
     }
 }

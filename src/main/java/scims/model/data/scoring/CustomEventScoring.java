@@ -62,8 +62,10 @@ public class CustomEventScoring<T,S,L> implements EventScoring<CustomScore<T,S,L
     @Override
     public Comparator<Map.Entry<Competitor, CustomScore<T,S,L>>> getComparator() {
         Comparator<Map.Entry<Competitor, T>> primaryComparator = _score.getPrimaryScoring().getComparator();
-        Comparator<Map.Entry<Competitor, S>> secondaryComparator = _score.getSecondaryScoring().getComparator();
-        Comparator<Map.Entry<Competitor, L>> thirdComparator = _score.getThirdScoring().getComparator();
+        EventScoring<S> secondaryScoring = _score.getSecondaryScoring();
+        EventScoring<L> thirdScoring = _score.getThirdScoring();
+        Comparator<Map.Entry<Competitor, S>> secondaryComparator = secondaryScoring == null ? null : secondaryScoring.getComparator();
+        Comparator<Map.Entry<Competitor, L>> thirdComparator = thirdScoring == null ? null : thirdScoring.getComparator();
 
         return (e1, e2) -> {
             Map.Entry<Competitor, T> primaryEntry1 = buildPrimaryEntry(e1);
@@ -73,18 +75,25 @@ public class CustomEventScoring<T,S,L> implements EventScoring<CustomScore<T,S,L
             if (primaryCompare != 0) {
                 return primaryCompare;
             } else {
-                Map.Entry<Competitor, S> secondaryEntry1 = buildSecondaryEntry(e1);
-                Map.Entry<Competitor, S> secondaryEntry2 = buildSecondaryEntry(e2);
-                int secondaryCompare = secondaryComparator.compare(secondaryEntry1, secondaryEntry2);
+                if(secondaryComparator != null)
+                {
+                    Map.Entry<Competitor, S> secondaryEntry1 = buildSecondaryEntry(e1);
+                    Map.Entry<Competitor, S> secondaryEntry2 = buildSecondaryEntry(e2);
+                    int secondaryCompare = secondaryComparator.compare(secondaryEntry1, secondaryEntry2);
 
-                if (secondaryCompare != 0) {
-                    return secondaryCompare;
-                } else {
-                    Map.Entry<Competitor, L> thirdEntry1 = buildThirdEntry(e1);
-                    Map.Entry<Competitor, L> thirdEntry2 = buildThirdEntry(e2);
-                    return thirdComparator.compare(thirdEntry1, thirdEntry2);
+                    if (secondaryCompare != 0) {
+                        return secondaryCompare;
+                    } else {
+                        if(thirdComparator != null)
+                        {
+                            Map.Entry<Competitor, L> thirdEntry1 = buildThirdEntry(e1);
+                            Map.Entry<Competitor, L> thirdEntry2 = buildThirdEntry(e2);
+                            return thirdComparator.compare(thirdEntry1, thirdEntry2);
+                        }
+                    }
                 }
             }
+            return 0;
         };
     }
 

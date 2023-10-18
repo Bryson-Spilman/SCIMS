@@ -3,11 +3,8 @@ package scims.model.data;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import scims.main.SCIMS;
 import scims.model.data.scoring.*;
@@ -20,7 +17,6 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,9 +70,13 @@ public class CompetitionObjectMapper {
         serializeData(existingWeightClasses, SCIMS.getWeightClassesFile());
     }
 
-    public static void serializeEvent(StrengthEvent event) throws IOException {
+    public static void serializeEvent(StrengthEvent event, String previousNameToDelete) throws IOException {
         List<StrengthEvent> existingEvents = deserializeIntoList(SCIMS.getEventsFile(), StrengthEvent.class);
         existingEvents.add(event);
+        if(previousNameToDelete != null)
+        {
+            existingEvents.removeIf(e -> e.getName().equalsIgnoreCase(previousNameToDelete));
+        }
         serializeData(existingEvents, SCIMS.getEventsFile());
     }
 

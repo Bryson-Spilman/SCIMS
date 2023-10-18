@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-class EventsTableModel extends SCIMSTableModel<EventsRowData> {
+public class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     static final int CHECK_BOX_COL = 0;
     static final int NAME_COL = 1;

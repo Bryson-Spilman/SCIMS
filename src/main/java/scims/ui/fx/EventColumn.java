@@ -69,8 +69,8 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
                         thirdScore = getScoreFromRow(competitorRow, thirdScoreCol, customScore.getThirdScoring());
                     }
                     CustomScore changedVal = new CustomScore<>(ScoringFactory.createScoring(customScore.getPrimaryScoring().getScoreType()),
-                            ScoringFactory.createScoring(customScore.getSecondaryScoring().getScoreType()),
-                            ScoringFactory.createScoring(customScore.getThirdScoring().getScoreType()));
+                            ScoringFactory.createScoring(customScore.getSecondaryScoring() == null ? null : customScore.getSecondaryScoring().getScoreType()),
+                            ScoringFactory.createScoring(customScore.getThirdScoring() == null ? null : customScore.getThirdScoring().getScoreType()));
                     changedVal.setPrimaryScore(primaryScore);
                     changedVal.setSecondaryScore(secondaryScore);
                     changedVal.setThirdScoring(thirdScore);
@@ -96,7 +96,7 @@ public class EventColumn<T extends EventScoring<S>, S> extends LinkedTreeTableCo
         {
             retVal = null;
         }
-        else if(retVal instanceof String)
+        else if(retVal != null)
         {
             if(customScore instanceof WeightScoring || customScore instanceof DistanceScoring)
             {

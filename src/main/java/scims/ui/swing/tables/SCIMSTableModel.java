@@ -39,6 +39,11 @@ public abstract class SCIMSTableModel<T> extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public void removeRow(T rowData) {
+        _data.remove(rowData);
+        fireTableDataChanged();
+    }
+
     protected boolean isCorrectType(Object aValue, int columnIndex) {
         return aValue == null || getColumnClass(columnIndex).isInstance(aValue)
                 || (getColumnClass(columnIndex).equals(Integer.class) && canConvertToInteger(aValue))

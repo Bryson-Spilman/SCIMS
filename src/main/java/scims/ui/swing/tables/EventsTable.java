@@ -9,12 +9,16 @@ import scims.model.enums.WeightUnitSystem;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 public class EventsTable extends SCIMSTable {
 
@@ -22,6 +26,7 @@ public class EventsTable extends SCIMSTable {
     private JComboBox<Object> _eventOrderComboBox;
     private final List<Runnable> _actionOnEventsSelectionUpdate = new ArrayList<>();
     private List<StrengthEvent> _events;
+    private Consumer<Point> _editEventAction;
 
     public EventsTable() {
         _model = new EventsTableModel();
@@ -47,6 +52,35 @@ public class EventsTable extends SCIMSTable {
                 }
             }
         });
+        addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                // Check if right-clicked
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    int selectedRow = rowAtPoint(e.getPoint());
+                    EventsRowData rowData = _model.getRowData().get(selectedRow);
+                    if(rowData != null)
+                    {
+                        JMenuItem editEventMenuItem = new JMenuItem("Edit " + rowData.getName() + "...");
+                        JMenuItem deleteMenuItem = new JMenuItem("Delete " + rowData.getName() + "...");
+                        JPopupMenu popupMenu = new JPopupMenu();
+                        editEventMenuItem.addActionListener(event -> _editEventAction.accept(e.getPoint()));
+                        deleteMenuItem.addActionListener(event -> deleteRow(rowData));
+                        popupMenu.add(editEventMenuItem);
+                        //popupMenu.add(deleteMenuItem);
+                        popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            }
+        });
+    }
+
+    private void deleteRow(EventsRowData rowData) {
+        int opt = JOptionPane.showConfirmDialog(this, "This will permanently delete this event. Confirm deletion of " + rowData.getName(),
+                "Confirm Delete", JOptionPane.YES_NO_CANCEL_OPTION);
+        if(opt == JOptionPane.YES_OPTION)
+        {
+            _model.removeRow(rowData);
+        }
     }
 
     private void checkedAction(int row) {
@@ -91,6 +125,11 @@ public class EventsTable extends SCIMSTable {
         DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<>();
         _eventOrderComboBox.setModel(model);
         getColumnModel().getColumn(EventsTableModel.CHECK_BOX_COL).setMaxWidth(30);
+    }
+
+    public void setEditMenuItemAction(Consumer<Point> editEventAction)
+    {
+        _editEventAction = editEventAction;
     }
 
     @Override
@@ -195,11 +234,8 @@ public class EventsTable extends SCIMSTable {
 
     public boolean containsEvent(Event event) {
         boolean retVal = false;
-        for(int row = 0; row < _events.size(); row++)
-        {
-            Event eventInRow = _events.get(row);
-            if(event.equals(eventInRow))
-            {
+        for (Event eventInRow : _events) {
+            if (event.equals(eventInRow)) {
                 retVal = true;
                 break;
             }

@@ -1,20 +1,24 @@
 package scims.ui.fx;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 class TotalPointsColumn extends TreeTableColumn<Object, Object> {
+
+    private boolean _skipUpdate;
+    private int _weightClassUpdateTracker = 0;
     TotalPointsColumn() {
         super("Total Points");
         setEditable(true);
         setCellValueFactory(param -> {
             Object value = param.getValue().getValue();
             if (value instanceof CompetitorRow) {
+                _weightClassUpdateTracker++;
                 // Retrieve the score for the corresponding event
                 CompetitorRow competitor = (CompetitorRow) value;
                 List<EventPointsColumn> eventPointsColumns = getEventPointColumns();
@@ -27,6 +31,16 @@ class TotalPointsColumn extends TreeTableColumn<Object, Object> {
                     }
                     totalPoints += pointsToAdd;
                 }
+                if(!_skipUpdate && _weightClassUpdateTracker >= competitor.getParentRow().getChildren().size())
+                {
+                    _skipUpdate = true;
+                    Platform.runLater(() ->
+                    {
+                        ((CompetitionTreeTable)getTreeTableView()).getPlaceColumn().updateValues();
+                        _weightClassUpdateTracker = 0;
+                        Platform.runLater(() -> _skipUpdate = false);
+                    });
+                }
                 return new SimpleObjectProperty<>(totalPoints);
             }
             return new SimpleObjectProperty<>();
@@ -37,6 +51,11 @@ class TotalPointsColumn extends TreeTableColumn<Object, Object> {
                 return TableCellFactory.cellEditable(row);
             }
         });
+    }
+
+    boolean getWeightClassFinishedUpdating()
+    {
+        return _weightClassUpdateTracker == 0;
     }
 
     private List<EventPointsColumn> getEventPointColumns() {

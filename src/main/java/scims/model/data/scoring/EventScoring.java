@@ -2,6 +2,7 @@ package scims.model.data.scoring;
 
 import scims.model.data.Competitor;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,11 +49,48 @@ public interface EventScoring<T> extends Scoring{
                 localPointsPossible --;
             }
             double points = totalPointsForPlacing / numWithThisScore;
+            if(score == null || score.toString() == null || score.toString().isEmpty()
+                || !(score instanceof CustomScore) && isZeroed(score)) {
+                points = 0.0;
+            }
+            else if(score instanceof CustomScore) {
+                CustomScore<?,?,?> customScore = (CustomScore<?,?,?>) score;
+                if(customScore.getPrimaryScoring() == null || customScore.getPrimaryScoring().getScore() == null
+                        || customScore.getPrimaryScoring().getScore().toString().isEmpty()
+                        || isZeroed(customScore.getPrimaryScoring().getScore())) {
+                    points = 0.0;
+                }
+            }
             retVal.put(competitor, points);
             for(int j=i+1; j < numWithThisScore; j++) {
                 retVal.put(sortedList.get(j), points);
             }
             pointsPossible -= numWithThisScore;
+        }
+        return retVal;
+    }
+
+    default boolean isZeroed(Object score)
+    {
+        boolean retVal = false;
+        if(score != null)
+        {
+            if(score instanceof Double)
+            {
+                retVal = ((Double)score) == 0.0;
+            }
+            else if(score instanceof Duration)
+            {
+                retVal = ((Duration)score).isZero();
+            }
+            else if(score instanceof Integer)
+            {
+                retVal = ((Integer)score) == 0;
+            }
+            else if(score.toString().replace("0", "").isEmpty())
+            {
+                retVal = true;
+            }
         }
         return retVal;
     }

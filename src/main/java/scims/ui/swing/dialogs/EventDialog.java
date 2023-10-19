@@ -46,6 +46,7 @@ public class EventDialog extends JDialog implements Modifiable {
     private JCheckBox _hasSecondTieBreakerScoring;
     private JPanel _thirdScoringComboPanel;
     private String _cancelType;
+    private String _previousName;
 
     public EventDialog(Window parent, Consumer<Event> createAction) {
         super(parent, "New Event");
@@ -134,7 +135,7 @@ public class EventDialog extends JDialog implements Modifiable {
             Event event = buildEvent();
             List<String> existingNames = _existingEvents.stream().map(StrengthEvent::getName)
                     .collect(Collectors.toList());
-            if(existingNames.contains(event.getName()))
+            if(!event.getName().equalsIgnoreCase(_previousName) && existingNames.contains(event.getName()))
             {
                 JOptionPane.showMessageDialog(this, event.getName() + " is already a name of an existing event! Please choose another name,",
                         "Invalid Event Name", JOptionPane.ERROR_MESSAGE);
@@ -168,8 +169,12 @@ public class EventDialog extends JDialog implements Modifiable {
         EventScoring<?> scoring = (EventScoring<?>) _primaryScoringComboBox.getSelectedItem();
         if(_hasTieBreakerScoring.isSelected()) {
             EventScoring<CustomScore> customScoring = new CustomEventScoring();
-            CustomScore customScore = new CustomScore(scoring, (EventScoring<?>) _secondaryScoringComboBox.getSelectedItem(),
-                ((EventScoring<?>) _thirdScoringComboBox.getSelectedItem()));
+            EventScoring<?> thirdScoring = null;
+            if(_hasSecondTieBreakerScoring.isSelected())
+            {
+                thirdScoring = (EventScoring<?>) _thirdScoringComboBox.getSelectedItem();
+            }
+            CustomScore customScore = new CustomScore(scoring, (EventScoring<?>) _secondaryScoringComboBox.getSelectedItem(), thirdScoring);
             customScoring.setScore(customScore);
             scoring = customScoring;
         }
@@ -323,6 +328,7 @@ public class EventDialog extends JDialog implements Modifiable {
     }
 
     public void fill(EventsRowData rowData) {
+        _previousName = rowData.getName();
         _nameTextField.setText(rowData.getName());
         _timeLimitTextField.setText(rowData.getTimeLimit() == null ? "" : rowData.getTimeLimit().toString());
         String eventScoringString = rowData.getEventScoring().toString();

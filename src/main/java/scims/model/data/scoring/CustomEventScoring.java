@@ -172,10 +172,19 @@ public class CustomEventScoring<T,S,L> implements EventScoring<CustomScore<T,S,L
     }
     @Override
     public String toString() {
+        String retVal = getScoreType();
         if(_score != null) {
-            return  _score.getPrimaryScoring().toString() + " > " + _score.getSecondaryScoring().toString();
+            retVal = _score.getPrimaryScoring().toString();
+            if(_score.getSecondaryScoring() != null)
+            {
+                retVal += " > " + _score.getSecondaryScoring();
+            }
+            if(_score.getThirdScoring() != null)
+            {
+                retVal += " > " + _score.getThirdScoring();
+            }
         }
-        return getScoreType();
+        return retVal;
     }
 
     @Override

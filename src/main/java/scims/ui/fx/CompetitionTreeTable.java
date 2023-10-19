@@ -22,6 +22,8 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
     TreeItem<Object> _root;
     private CompetitionModelController _controller;
     private final List<EventColumn<?,?>> _eventsColumns = new ArrayList<>();
+    private TotalPointsColumn _totalPointsColumn;
+    private PlaceColumn _placeColumn;
 
     public CompetitionTreeTable() {
         setRoot(new TreeItem<>());
@@ -130,10 +132,23 @@ public class CompetitionTreeTable extends TreeTableView<Object> {
             {
                 addWeightClassRow(weightClass, _eventsColumns);
             }
-            getColumns().add(new TotalPointsColumn());
+            _totalPointsColumn = new TotalPointsColumn();
+            getColumns().add(_totalPointsColumn);
+            _placeColumn = new PlaceColumn();
+            getColumns().add(_placeColumn);
         });
         SCIMS.getFrame().setModified(parentModified);
 
+    }
+
+    public TotalPointsColumn getTotalPointsColumn()
+    {
+        return _totalPointsColumn;
+    }
+
+    public PlaceColumn getPlaceColumn()
+    {
+        return _placeColumn;
     }
 
     private void addWeightClassRow(WeightClass weightClass, List<EventColumn<?,?>> eventColumns) {

@@ -3,12 +3,15 @@ package scims.main;
 import scims.ui.swing.SCIMSFrame;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.prefs.Preferences;
 
 public class SCIMS {
@@ -25,6 +28,21 @@ public class SCIMS {
         Preferences prefs = Preferences.userNodeForPackage(SCIMS.class);
         String selectedDir = prefs.get(PREF_KEY_DIRECTORY, DEFAULT_DIRECTORY);
         Path compDirectory = Paths.get(selectedDir).resolve("scims/competitions");
+        Handler fileHandler= null;
+        try {
+            PrintStream fileStream = new PrintStream(Files.newOutputStream(Paths.get(selectedDir).resolve("scims").toFile().toPath()));
+            System.setOut(fileStream);
+            System.setErr(fileStream);
+            fileHandler = new FileHandler(Paths.get(selectedDir).resolve("scims\\output.log").toString());
+            fileHandler.setFormatter(new SimpleFormatter());
+            Logger.getLogger("").addHandler(fileHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(fileHandler != null) {
+                fileHandler.close();
+            }
+        }
         // Check if the stored directory is valid
         boolean isValidDirectory = !selectedDir.isEmpty() && new File(selectedDir).isDirectory()
                 && compDirectory.toFile().isDirectory();

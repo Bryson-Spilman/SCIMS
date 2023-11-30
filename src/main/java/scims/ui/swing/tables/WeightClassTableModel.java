@@ -100,6 +100,10 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
             return;
         }
         WeightClassRowData rowData = getRowData().get(rowIndex);
+        if(aValue != null && aValue.toString().isEmpty())
+        {
+            aValue = null;
+        }
         switch (columnIndex)
         {
             case CHECK_BOX_COL:
@@ -109,10 +113,10 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
                 rowData.setName(aValue.toString());
                 break;
             case MAX_COMPETITOR_WEIGHT_COL:
-                rowData.setMaxCompetitorWeight(aValue == null ? Double.MAX_VALUE : Double.parseDouble(aValue.toString()));
+                rowData.setMaxCompetitorWeight(aValue == null ? null : Double.parseDouble(aValue.toString()));
                 break;
             case MAX_NUM_COMPETITORS_COL:
-                rowData.setMaxNumberCompetitors(aValue == null ? Integer.MAX_VALUE : Integer.parseInt(aValue.toString()));
+                rowData.setMaxNumberCompetitors(aValue == null ? null : Integer.parseInt(aValue.toString()));
                 break;
             case EVENTS_COL:
                 rowData.setEvents(aValue == null ? new ArrayList<>() : (List<StrengthEvent>) aValue);

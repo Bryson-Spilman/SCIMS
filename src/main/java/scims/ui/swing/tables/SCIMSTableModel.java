@@ -45,7 +45,7 @@ public abstract class SCIMSTableModel<T> extends AbstractTableModel {
     }
 
     protected boolean isCorrectType(Object aValue, int columnIndex) {
-        return aValue == null || getColumnClass(columnIndex).isInstance(aValue)
+        return aValue == null || aValue.toString().isEmpty() || getColumnClass(columnIndex).isInstance(aValue)
                 || (getColumnClass(columnIndex).equals(Integer.class) && canConvertToInteger(aValue))
                 || (getColumnClass(columnIndex).equals(Double.class) && canConvertToDouble(aValue));
     }

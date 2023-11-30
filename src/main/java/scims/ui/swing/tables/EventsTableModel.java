@@ -111,24 +111,30 @@ public class EventsTableModel extends SCIMSTableModel<EventsRowData> {
             return;
         }
         EventsRowData rowData = getRowData().get(row);
+        if(value != null && value.toString().isEmpty())
+        {
+            value = null;
+        }
         switch (col)
         {
             case CHECK_BOX_COL:
-                 rowData.setChecked(value != null && (boolean) value);
+                 rowData.setChecked(value != null && Boolean.parseBoolean(value.toString()));
                 break;
             case NAME_COL:
                 rowData.setName(String.valueOf(value));
                 break;
             case EVENT_ORDER_COL:
-                if(value != null) {
+                if(value != null && !value.toString().isEmpty()) {
                     Integer order = Integer.parseInt(value.toString());
                     switchOrdersWithOneAlreadyUsed(order, row);
                     rowData.setEventOrder(order);
+                } else {
+                    rowData.setEventOrder(null);
                 }
                 break;
             case TIME_LIMIT_COL:
                 Duration duration = null;
-                if(value != null) {
+                if(value != null && !value.toString().isEmpty()) {
                     double seconds = Double.parseDouble(value.toString());
                     long wholeSeconds = (long) seconds;
                     int millis = (int) ((seconds - wholeSeconds) * 1000);

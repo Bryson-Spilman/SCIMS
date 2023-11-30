@@ -30,9 +30,6 @@ public class SCIMS {
         Path compDirectory = Paths.get(selectedDir).resolve("scims/competitions");
         Handler fileHandler= null;
         try {
-            PrintStream fileStream = new PrintStream(Files.newOutputStream(Paths.get(selectedDir).resolve("scims").toFile().toPath()));
-            System.setOut(fileStream);
-            System.setErr(fileStream);
             fileHandler = new FileHandler(Paths.get(selectedDir).resolve("scims\\output.log").toString());
             fileHandler.setFormatter(new SimpleFormatter());
             Logger.getLogger("").addHandler(fileHandler);

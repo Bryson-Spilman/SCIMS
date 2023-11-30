@@ -1,5 +1,6 @@
 package scims.model.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import scims.model.data.scoring.EventScoring;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StrengthCompetitor implements Competitor {
 
     @JacksonXmlProperty(isAttribute = true, localName = "name")

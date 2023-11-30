@@ -1,6 +1,7 @@
 package scims.model.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StrengthWeightClass implements WeightClass {
 
     @JacksonXmlProperty(isAttribute = true, localName = "name")

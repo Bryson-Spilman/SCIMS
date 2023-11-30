@@ -96,6 +96,10 @@ class WeightClassTableModel extends SCIMSTableModel<WeightClassRowData> {
     @SuppressWarnings("unchecked")
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if(aValue != null && aValue.toString().isEmpty() &&
+                (columnIndex == MAX_COMPETITOR_WEIGHT_COL || columnIndex == MAX_NUM_COMPETITORS_COL)) {
+            aValue = null;
+        }
         if(rowIndex < 0 || columnIndex < 0 || !isCorrectType(aValue, columnIndex)) {
             return;
         }

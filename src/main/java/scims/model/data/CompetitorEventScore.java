@@ -1,9 +1,11 @@
 package scims.model.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import scims.model.data.scoring.EventScoring;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class CompetitorEventScore {
 
     @JacksonXmlProperty(isAttribute = true, localName = "event")

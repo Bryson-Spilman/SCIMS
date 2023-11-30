@@ -1,5 +1,6 @@
 package scims.controllers;
 
+import javafx.application.Platform;
 import scims.main.SCIMS;
 import scims.model.data.Competition;
 import scims.model.data.CompetitionObjectMapper;
@@ -310,7 +311,7 @@ public class CompetitionModelController {
         {
             Competition competition = _competitions.get(0);
             Path competitionStructureFile = SCIMS.getCompetitionsDirectory().resolve(competition.getName() + "." + COMPETITION_FILE_TYPE);
-            CompetitionObjectMapper.serializeCompetition(competition, competitionStructureFile);
+            CompetitionObjectMapper.serializeCompetition((StrengthCompetition) competition, competitionStructureFile);
             _parentFrame.setModified(false);
         }
         catch (IOException e)

@@ -107,14 +107,13 @@ public class EventsTableModel extends SCIMSTableModel<EventsRowData> {
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        if(row < 0 || col < 0 || !isCorrectType(value, col)) {
-            return;
-        }
-        EventsRowData rowData = getRowData().get(row);
-        if(value != null && value.toString().isEmpty())
-        {
+        if(col == TIME_LIMIT_COL && value != null && value.toString().isEmpty()) {
             value = null;
         }
+        if(row < 0 || col < 0 || !isCorrectType(value, col)) {
+                return;
+        }
+        EventsRowData rowData = getRowData().get(row);
         switch (col)
         {
             case CHECK_BOX_COL:
@@ -124,12 +123,10 @@ public class EventsTableModel extends SCIMSTableModel<EventsRowData> {
                 rowData.setName(String.valueOf(value));
                 break;
             case EVENT_ORDER_COL:
-                if(value != null && !value.toString().isEmpty()) {
+                if(value != null) {
                     Integer order = Integer.parseInt(value.toString());
                     switchOrdersWithOneAlreadyUsed(order, row);
                     rowData.setEventOrder(order);
-                } else {
-                    rowData.setEventOrder(null);
                 }
                 break;
             case TIME_LIMIT_COL:

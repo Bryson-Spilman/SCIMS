@@ -38,7 +38,7 @@ public class CompetitionObjectMapper {
         return objectMapper;
     }
 
-    public static void serializeCompetition(Competition competition, Path file) throws IOException {
+    public static void serializeCompetition(StrengthCompetition competition, Path file) throws IOException {
         MAPPER.writeValue(file.toFile(), competition);
     }
 

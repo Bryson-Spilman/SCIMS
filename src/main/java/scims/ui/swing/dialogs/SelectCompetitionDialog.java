@@ -77,7 +77,7 @@ public class SelectCompetitionDialog extends JDialog implements Modifiable {
             Path competitionXml = SCIMS.getCompetitionsDirectory().resolve(selected + "." + COMPETITION_FILE_TYPE);
             try {
                 competition = CompetitionObjectMapper.deSerializeCompetition(competitionXml);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, e, () -> "Failed to parse competition");
                 JOptionPane.showMessageDialog(this, "Failed to open " + selected, "Failed To Open",JOptionPane.ERROR_MESSAGE);
             }

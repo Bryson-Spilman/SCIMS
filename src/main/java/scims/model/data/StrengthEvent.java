@@ -44,6 +44,7 @@ public class StrengthEvent implements Event {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return getName();
     }
